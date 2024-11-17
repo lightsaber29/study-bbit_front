@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from '../components/Button';
 import ProfileModal from '../components/ProfileModal';
 import { useSelector } from 'react-redux';
+import { selectToken } from 'store/memberSlice';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -28,7 +29,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const token = useSelector(state => state.member?.token);
+  const token = useSelector(selectToken);
   
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);

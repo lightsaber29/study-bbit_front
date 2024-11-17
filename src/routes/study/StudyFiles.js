@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectNickName } from 'store/memberSlice';
 
 const StudyFiles = () => {
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const nickName = useSelector(selectNickName);
+  const fileInputRef = React.useRef(null);
   const [files, setFiles] = useState([
     {
       id: 1,
@@ -19,29 +22,28 @@ const StudyFiles = () => {
     }
   ]);
 
+  const handleClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileUpload = (event) => {
+    const uploadedFile = event.target.files[0];
+    if (uploadedFile) {
+      const newFile = {
+        id: files.length + 1,
+        name: uploadedFile.name,
+        author: nickName,
+        uploadDate: new Date().toISOString().split('T')[0],
+        size: `${(uploadedFile.size / (1024 * 1024)).toFixed(1)}MB`
+      };
+      
+      setFiles([...files, newFile]);
+      // TODO: 파일 업로드 API 호출
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">
-      {/* 상단 헤더 */}
-      {/* <div className="flex items-center justify-between mb-6">
-        <button 
-          className="p-2 hover:bg-gray-100 rounded-lg"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <h1 className="text-xl font-bold">첨부파일</h1>
-        <div className="w-8"></div>
-      </div> */}
-
-      {/* 사이드바*/}
-      {/* <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        컨텐츠
-      </div> */}
-
       {/* 검색바와 버튼들 */}
       <div className="flex gap-4 mb-6">
         <div className="flex-1">
@@ -50,11 +52,20 @@ const StudyFiles = () => {
             placeholder="파일명, 작성자 검색"
             className="w-full p-3 border rounded-lg"
           />
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
         </div>
         <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 whitespace-nowrap">
           검색
         </button>
-        <button className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 whitespace-nowrap">
+        <button 
+          onClick={handleClick}
+          className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 whitespace-nowrap"
+        >
           파일 업로드
         </button>
       </div>

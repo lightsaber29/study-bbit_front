@@ -1,48 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import UploadImage from 'components/UploadImage';
+import useFormInput from 'hooks/useFormInput';
 
 const StudySettings = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+
+  const { values, handleChange, setValues } = useFormInput({
     password: '',
-    description: '직장인 공부팟입니다.',
+    description: '',
     image: null
-  });
-  const [previewImage, setPreviewImage] = useState(null);
+  })
+
+  const { password, description, image } = values;
+
   const [showPassword, setShowPassword] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+  const handleImageChange = (file) => {
+    setValues(prev => ({
       ...prev,
-      [name]: value
+      image: file
     }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({
-        ...prev,
-        image: file
-      }));
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: API 연동
-    console.log('설정 변경:', formData);
+    // TODO: 설정 변경 API 연동
+    console.log('설정 변경:', values);
   };
 
   const handleLeaveStudy = () => {
     if (window.confirm('정말로 스터디룸을 나가시겠습니까?')) {
-      // TODO: API 연동
+      // TODO: 스터디룸 탈퇴 API 연동
       navigate('/');
     }
   };
@@ -55,26 +45,11 @@ const StudySettings = () => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* 스터디룸 이미지 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              스터디룸 이미지
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
-              <div className="flex flex-col items-center justify-center text-gray-400">
-                <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                </svg>
-                <span>이미지를 업로드하세요</span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </div>
-            </div>
-          </div>
+          <UploadImage 
+            onImageChange={handleImageChange}
+            previewImage={previewImage}
+            setPreviewImage={setPreviewImage}
+          />
 
           {/* 비밀번호 변경 */}
           <div>
@@ -85,7 +60,7 @@ const StudySettings = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                value={formData.password}
+                value={password}
                 onChange={handleChange}
                 placeholder="새 비밀번호 입력"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg pr-10"
@@ -118,7 +93,7 @@ const StudySettings = () => {
             </label>
             <textarea
               name="description"
-              value={formData.description}
+              value={description}
               onChange={handleChange}
               rows="4"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"

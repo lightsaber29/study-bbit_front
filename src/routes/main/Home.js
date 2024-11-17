@@ -4,34 +4,28 @@ import Card from '../../components/Card';
 import MyStudyCard from '../../components/MyStudyCard';
 import Modal from '../../components/Modal';
 import { useSelector } from 'react-redux';
+import { selectToken } from 'store/memberSlice';
+import axios from 'axios';
 
 const Home = () => {
   const [studyList, setStudyList] = useState([]);
   const [selectedStudy, setSelectedStudy] = useState(null);
 
-  const token = useSelector(state => state.member?.token);
+  const token = useSelector(selectToken);
+
+  const getStudyList = async () => {
+    const response = await axios.get('/api/room');
+    console.log('response.data :: ', response.data);  
+    setStudyList(response.data);
+  };
 
   useEffect(() => {
-    setStudyList([
-      {
-        index: 0,
-        title: '공무원 자율 스터디 1',
-        memberCount: '16',
-        photoUrl: '/images/aespa_ningning.jpeg',
-        description: '공무원 자율 스터디입니다.\n누구나 함께 공부하며 스터디 친구를 사귈 수 있습니다.\n해당 스터디룸은 구루미에서 개설한 스터디룸으로,\n입장한 지 3일 이상 경과된 상황에서 카메라 송출이 되고 있지 않는다면 발견되는 즉시 무료보강 강제 퇴장 조치를 진행할 수 있습니다.'
-      },
-      { 
-        index: 1,
-        title: '공무원 자율 스터디 2',
-        memberCount: '4',
-        photoUrl: '/images/aespa_giselle.jpeg',
-        description: '공무원 자율 스터디입니다.\n누구나 함께 공부하며 스터디 친구를 사귈 수 있습니다.\n해당 스터디룸은 구루미에서 개설한 스터디룸으로,\n입장한 지 3일 이상 경과된 상황에서 카메라 송출이 되고 있지 않는다면 발견되는 즉시 무료보강 강제 퇴장 조치를 진행할 수 있습니다.'
-      },
-    ]);
+    getStudyList();
   }, []);
 
   const handleCardClick = (study) => {
     setSelectedStudy(study);
+    console.log('study :: ', study);
   };
 
   return (
@@ -80,11 +74,14 @@ const Home = () => {
       {/* 스터디 카드 리스트 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {studyList.map((study) => (
-          <div key={study.index} onClick={() => handleCardClick(study)}>
+          <div key={study.id} onClick={() => handleCardClick(study)}>
             <Card
-              title={study.title}
-              memberCount={study.memberCount}
-              photoUrl={study.photoUrl}
+              name={study.name}
+              roomId={study.id}
+              participants={study.participants}
+              maxParticipants={study.maxParticipants}
+              profileImageUrl={study.profileImageUrl}
+              detail={study.detail}
             />
           </div>
         ))}
@@ -94,10 +91,11 @@ const Home = () => {
       <Modal
         isOpen={selectedStudy !== null}
         onClose={() => setSelectedStudy(null)}
-        title={selectedStudy?.title}
-        memberCount={selectedStudy?.memberCount}
+        name={selectedStudy?.name}
+        participants={selectedStudy?.participants}
         period={selectedStudy?.period}
-        description={selectedStudy?.description}
+        detail={selectedStudy?.detail}
+        profileImageUrl={selectedStudy?.profileImageUrl}
       />
 
       {/* 더보기 버튼 */}

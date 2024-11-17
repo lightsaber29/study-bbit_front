@@ -30,4 +30,9 @@ const memberSlice = createSlice({
 });
 
 export const { setMember, clearMember } = memberSlice.actions;
+export const selectMember = (state) => state.member;
+export const selectToken = (state) => state.member.token;
+export const selectRole = (state) => state.member.role;
+export const selectNickName = (state) => state.member.nickName;
+export const selectEmail = (state) => state.member.email;
 export default memberSlice.reducer;

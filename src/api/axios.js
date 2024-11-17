@@ -1,5 +1,5 @@
 import axios from 'axios';
-import store from 'store/store';
+import store from 'store/index';
 
 const instance = axios.create({
   baseURL: process.env.NODE_ENV === 'production' 

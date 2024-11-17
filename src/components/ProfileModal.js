@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearMember } from 'store/memberSlice';
+import { clearMember, selectMember } from 'store/memberSlice';
 
 const ProfileModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const member = useSelector(state => state.member);
+  const member = useSelector(selectMember);
 
   if (!isOpen) return null;
 
@@ -58,12 +58,12 @@ const ProfileModal = ({ isOpen, onClose }) => {
       </div> */}
 
       {/* 메뉴 항목들 */}
-      <div className="py-2">
+      <div className="p-2">
         {menuItems.map((item, index) => (
           <button
             key={index}
             onClick={item.onClick}
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors"
+            className="w-full px-4 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors"
           >
             {item.label}
           </button>
@@ -72,15 +72,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
       {/* 로그아웃 */}
       <div className="p-2 border-t">
-        <button 
-          onClick={() => {
-            // 로그아웃 처리
-            // console.log('로그아웃');
-            // onClose();
-            handleLogout();
-          }}
-          className="w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-        >
+        <button onClick={() => { handleLogout(); }} className="w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100 rounded-lg transition-colors">
           로그아웃
         </button>
       </div>

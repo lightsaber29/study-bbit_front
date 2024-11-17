@@ -1,17 +1,24 @@
 import React from 'react';
 
 const Card = ({
-  title,
-  memberCount,
-  photoUrl
+  roomId,
+  name,
+  participants,
+  maxParticipants,
+  profileImageUrl
 }) => {
+  // onclick 으로 roomid 로 이동하게끔 작성
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
       <div className="bg-gray-300 h-32 rounded-lg mb-4">
-        <img src={photoUrl} alt="photoUrl" className="w-full h-full object-cover rounded-t-lg" />
+        <img
+          src={`${process.env.PUBLIC_URL}/images/${profileImageUrl}`}
+          alt="photoUrl"
+          className="w-full h-full object-cover rounded-t-lg"
+        />
       </div>
-      <h3 className="text-md font-semibold">{title}</h3>
-      <div className="text-sm text-gray-600">{memberCount} / 16</div>
+      <h3 className="text-md font-semibold">{name}</h3>
+      <div className="text-sm text-gray-600">{participants} / {maxParticipants}</div>
       {/* <div className="text-sm text-gray-500">공무원 자율 스터디 1</div> */}
     </div>
   );
