@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes,
     useNavigate 
 } from 'react-router-dom';
 import { isVideoCodec } from './lib/types.ts';
+import '@livekit/components-styles'
 
 function VideoTest() {
   // URL을 통해 전달된 query parameters를 가져오는 부분이 없으므로, 임시로 하드코딩합니다.

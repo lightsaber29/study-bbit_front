@@ -9,6 +9,7 @@ import {
   useIsRecording,
 } from '@livekit/components-react';
 import { useKrispNoiseFilter } from '@livekit/components-react/krisp';
+import styles from '../styles/SettingsMenu.module.css';
 
 /**
  * @alpha
@@ -22,34 +23,6 @@ export function SettingsMenu(props: SettingsMenuProps) {
   const layoutContext = useMaybeLayoutContext();
   const room = useRoomContext();
   const recordingEndpoint = process.env.REACT_APP_LK_RECORD_ENDPOINT;
-
-    // 인라인 스타일 정의
-    const styles = {
-      settingsMenu: {
-        width: '100%',
-        position: 'relative' as const,
-      },
-      settingsCloseButton: {
-        position: 'absolute' as const,
-        right: 'var(--lk-grid-gap)',
-        bottom: 'var(--lk-grid-gap)',
-      },
-      tabs: {
-        position: 'relative' as const,
-        display: 'flex',
-        alignContent: 'space-between',
-      },
-      tab: {
-        padding: '0.5rem',
-        borderRadius: 0,
-        paddingBottom: '0.5rem',
-        borderBottom: '3px solid',
-        borderColor: 'var(--bg5)',
-      },
-      tabActive: {
-        borderColor: 'var(--lk-accent-bg)',
-      },
-    };
 
   const settings = React.useMemo(() => {
     return {

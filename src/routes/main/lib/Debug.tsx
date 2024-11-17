@@ -5,6 +5,8 @@ import { setLogLevel, LogLevel, RemoteTrackPublication, setLogExtension } from '
 import { tinykeys } from 'tinykeys';
 import { datadogLogs } from '@datadog/browser-logs';
 
+import styles from '../styles/Debug.module.css';
+
 export const useDebugMode = ({ logLevel }: { logLevel?: LogLevel }) => {
   const room = useRoomContext();
 
@@ -55,24 +57,6 @@ export const DebugMode = ({ logLevel }: { logLevel?: LogLevel }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [, setRender] = React.useState({});
   const [roomSid, setRoomSid] = React.useState('');
-
-    // 인라인 스타일 정의
-    const styles = {
-      overlay: {
-        position: 'absolute' as const,
-        top: 0,
-        background: 'rgba(0, 0, 0, 0.6)',
-        padding: '1rem',
-        maxHeight: 'min(100%, 100vh)',
-        overflowY: 'auto' as const,
-      },
-      detailsSection: {
-        paddingLeft: '1rem',
-      },
-      detailsSectionInner: {
-        paddingLeft: '1rem',
-      },
-    };
 
   React.useEffect(() => {
     room.getSid().then(setRoomSid);

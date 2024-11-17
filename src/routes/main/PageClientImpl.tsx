@@ -23,6 +23,7 @@ import {
   // DeviceUnsupportedError,
   RoomConnectOptions,
 } from 'livekit-client';
+import '@livekit/components-styles'
 
 const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/connection-details';
 const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
@@ -45,7 +46,12 @@ export function PageClientImpl(props: {
 
   const handlePreJoinSubmit = useCallback(async (values: LocalUserChoices) => {
     setPreJoinChoices(values);
-    const url = new URL(CONN_DETAILS_ENDPOINT, "http://localhost:6080");
+    // @@로컬용
+    const url = new URL(CONN_DETAILS_ENDPOINT, "http://localhost:6081");
+
+    // @@배포용
+    //const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
+    
     url.searchParams.append('roomName', props.roomName);
     url.searchParams.append('participantName', values.username);
     if (props.region) {
