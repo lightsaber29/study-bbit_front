@@ -14,10 +14,10 @@ RUN npm install
 COPY . .
 
 # React 개발 서버의 기본 포트 변경
-ENV PORT=3001
+ENV PORT=3000
 
 # 앱 실행 포트 노출
-EXPOSE 3001
+EXPOSE 3000
 
 # 컨테이너 시작 시 npm start 실행
 CMD ["npm", "start"]

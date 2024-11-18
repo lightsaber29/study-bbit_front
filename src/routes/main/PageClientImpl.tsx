@@ -47,12 +47,14 @@ export function PageClientImpl(props: {
   const handlePreJoinSubmit = useCallback(async (values: LocalUserChoices) => {
     setPreJoinChoices(values);
     // @@로컬용
-    const url = new URL(CONN_DETAILS_ENDPOINT, "http://localhost:6081");
+    //const url = new URL(CONN_DETAILS_ENDPOINT, "http://localhost:6081");
 
     // @@배포용
-    //const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
+    const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
     
     url.searchParams.append('roomName', props.roomName);
+    
+    // @@ roomName 가져올때 props에서 유저 닉네임도 같이 가져오게끔 한다.
     url.searchParams.append('participantName', values.username);
     if (props.region) {
       url.searchParams.append('region', props.region);
