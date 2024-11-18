@@ -92,15 +92,15 @@ const Header = () => {
           Study-bbit🐰
         </Link>
         
-        <div className="flex-1 mx-5">
+        <div className="flex-1 mx-5 relative">
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="스터디, 페이지, 게시글 검색"
-              className={`w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-md transition-all duration-300 ${
-                showSearch ? 'opacity-100 visible' : 'opacity-0 invisible absolute'
+              className={`absolute top-1/2 -translate-y-1/2 w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-md transition-all duration-300 ${
+                showSearch ? 'opacity-100 visible' : 'opacity-0 invisible'
               }`}
             />
           </form>
