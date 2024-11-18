@@ -11,6 +11,7 @@ const QuestionWrite = lazy(() => import('./QuestionWrite'));
 const Profile = lazy(() => import('./Profile'));
 const SearchResults = lazy(() => import('./SearchResults'));
 const CreateStudyRoom = lazy(() => import('./CreateStudyRoom'));
+const VideoTest = lazy(() => import('./VideoTest.tsx'));
 // const MyPage = lazy(() => import('./MyPage'));
 // const Settings = lazy(() => import('./Settings'));
 
@@ -54,7 +55,11 @@ const mainRoutes = [
   {
     path: '/create',
     element: <CreateStudyRoom />
-  },
+  },  
+  {
+    path: '/videotest',
+    element: <VideoTest />
+  }  
   // {
   //   path: '/mypage',
   //   element: <MyPage />
