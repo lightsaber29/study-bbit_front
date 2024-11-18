@@ -5,9 +5,9 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const StudyHome = () => {
+  const [roomInfo, setRoomInfo] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [date, setDate] = useState(new Date());
-  // const navigate = useNavigate();
   const { roomId } = useParams();
 
   const eventDates = [
@@ -42,16 +42,35 @@ const StudyHome = () => {
   };
 
   const getRoomInfo = async () => {
-    const response = await axios.get(`/api/room/${roomId}`);
-    console.log('response.data :: ', response.data);
+    try {
+      const response = await axios.get(`/api/room/${roomId}`);
+      // console.log('response.data :: ', response.data);
+      setRoomInfo(response.data);
+    } catch (error) {
+      console.error('스터디룸 상세 정보 조회 실패: ', error);
+      const errorMessage = error.response?.data?.message || '스터디룸 상세 정보 조회 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
   };
 
   useEffect(() => {
     getRoomInfo();
   }, []);
 
+  useEffect(() => {
+    console.log('roomInfo :: ', roomInfo);
+  }, [roomInfo]);
+
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">
+      {/* 사이드바 오버레이 추가 */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* 햄버거 메뉴 버튼 - 위치 조정 */}
       <div className="flex items-center justify-between mb-6">
         <button 
@@ -62,12 +81,12 @@ const StudyHome = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <h1 className="text-xl font-bold">화목한 OPIc</h1>
+        <h1 className="text-xl font-bold">{roomInfo?.name || ''}</h1>
         <div className="w-8"></div> {/* 우측 여백 균형용 */}
       </div>
 
-      {/* 사이드바 */}
-      <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+      {/* 사이드바 z-index 수정 */}
+      <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="p-4">
@@ -82,16 +101,24 @@ const StudyHome = () => {
           {/* 이미지 섹션 */}
           <div className="mt-8 text-center">
             <div className="bg-gray-100 w-full aspect-square mb-4">
-              <p className="py-20">이미지</p>
+              {roomInfo?.profileImageUrl ? (
+                <img 
+                  src={`${process.env.PUBLIC_URL}/images/${roomInfo?.profileImageUrl}`}
+                  alt="스터디룸 이미지" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <p>이미지 없음</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* OPIc 정보 섹션 */}
           <div className="mt-4">
-            <h2 className="text-xl font-bold mb-2">화목한 OPIc</h2>
-            <p className="text-gray-600">오픽 AL / IH 등급</p>
-            <p className="text-gray-600">화, 목 8-10PM</p>
-            <p className="text-gray-600">직장인 공부팟입니다.</p>
+            <h2 className="text-xl font-bold mb-2">{roomInfo?.name || ''}</h2>
+            <p className="text-gray-600">{roomInfo?.detail || ''}</p>
           </div>
 
           {/* 초대 버튼 */}

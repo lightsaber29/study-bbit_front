@@ -14,9 +14,15 @@ const Home = () => {
   const token = useSelector(selectToken);
 
   const getStudyList = async () => {
-    const response = await axios.get('/api/room');
-    console.log('response.data :: ', response.data);  
-    setStudyList(response.data);
+    try {
+      const response = await axios.get('/api/room');
+      // console.log('response.data :: ', response.data);
+      setStudyList(response.data);
+    } catch (error) {
+      console.error('전체 방 목록 조회 실패: ', error);
+      const errorMessage = error.response?.data?.message || '전체 방 목록 조회 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
   };
 
   useEffect(() => {
