@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
+import EventDetailModal from '../../components/EventDetailModal';
+import CreateEventModal from '../../components/CreateEventModal';
 
 const StudySchedule = () => {
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // 일정 클릭 핸들러
+  const handleEventClick = (event) => {
+    setSelectedEvent(event);
+  };
+
+  // 모달 닫기 핸들러
+  const handleCloseModal = () => {
+    setSelectedEvent(null);
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">
@@ -72,7 +85,10 @@ const StudySchedule = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               </svg>
             </button>
-            <button className="px-4 py-2 bg-emerald-400 text-white rounded-lg hover:bg-emerald-500">
+            <button 
+              className="px-4 py-2 bg-emerald-400 text-white rounded-lg hover:bg-emerald-500"
+              onClick={() => setShowCreateModal(true)}
+            >
               일정 만들기
             </button>
           </div>
@@ -122,26 +138,47 @@ const StudySchedule = () => {
           </div>
         </div>
 
-        {/* 일정 상세 */}
+        {/* 일정 상세 - 클릭 이벤트 추가 */}
         <div className="p-4 border-t">
           <div className="flex items-baseline space-x-4">
             <div className="text-3xl">11</div>
             <div className="text-gray-500">월요일</div>
           </div>
           <div className="mt-4">
-            <div className="text-lg">테스트</div>
+            <div 
+              className="text-lg cursor-pointer hover:text-emerald-600"
+              onClick={() => handleEventClick({
+                title: '테스트',
+                date: '2024년 11월 11일 오후 2:46',
+                calendar: '기본 캘린더',
+                owner: '최수빈'
+              })}
+            >
+              테스트
+            </div>
             <div className="text-gray-500">오후 2:46</div>
             <div className="mt-2 flex items-center text-gray-500">
               <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
               <span>기본 캘린더 · 최수빈</span>
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-lg">밴드개설</div>
-            <div className="text-gray-500">축하글을 남겨주세요.</div>
-          </div>
         </div>
+
+        {/* 이벤트 상세 모달 */}
+        {selectedEvent && (
+          <EventDetailModal 
+            event={selectedEvent}
+            onClose={handleCloseModal}
+          />
+        )}
       </div>
+
+      {/* 일정 만들기 모달 */}
+      {showCreateModal && (
+        <CreateEventModal 
+          onClose={() => setShowCreateModal(false)}
+        />
+      )}
     </div>
   );
 };

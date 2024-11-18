@@ -2,7 +2,7 @@ import { lazy } from 'react';
 
 // 상대경로로 작성할 것
 const Login = lazy(() => import('./Login'));
-// const Signup = lazy(() => import('./Signup'));
+const Signup = lazy(() => import('./Signup'));
 // const ForgotPassword = lazy(() => import('./ForgotPassword'));
 
 const authRoutes = [
@@ -10,10 +10,10 @@ const authRoutes = [
     path: '/login',
     element: <Login />
   },
-  // {
-  //   path: '/signup',
-  //   element: <Signup />
-  // },
+  {
+    path: '/signup',
+    element: <Signup />
+  },
   // {
   //   path: '/forgot-password',
   //   element: <ForgotPassword />

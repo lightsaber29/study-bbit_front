@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es5",                 // ES5로 컴파일
+    "lib": ["dom", "dom.iterable", "esnext"], // 사용할 라이브러리 설정
+    "baseUrl": "src",               // 기존 설정 유지 (src 폴더 기준 경로 설정)
+    "jsx": "react-jsx",             // React JSX 지원
+    "allowJs": true,                // JavaScript 파일 허용
+    "skipLibCheck": true,           // 라이브러리 타입 검사 건너뜀
+    "strict": true,                 // 엄격한 타입 검사
+    "forceConsistentCasingInFileNames": true, // 파일 대소문자 일관성 검사
+    "noEmit": true,                 // 실제 파일 생성 방지
+    "esModuleInterop": true,        // CommonJS 모듈 호환
+    "module": "esnext",             // 최신 ES 모듈 사용
+    "moduleResolution": "node",     // Node.js 방식으로 모듈 해석
+    "resolveJsonModule": true,      // JSON 파일 import 가능
+    "isolatedModules": true,        // 각 파일을 개별적으로 트랜스파일
+    "allowImportingTsExtensions": true // .tsx 확장자 import 허용
+  },
+  "include": ["src"],               // src 폴더의 모든 파일 포함
+  "exclude": ["node_modules"]       // node_modules 폴더 제외
+}

@@ -1,8 +1,16 @@
 import React from 'react';
 import Button from './Button.js';
+import { useNavigate } from 'react-router-dom';
 
-const Modal = ({ isOpen, onClose, title, memberCount, period, description }) => {
+const Modal = ({ isOpen, onClose, name, participants, period, detail, profileImageUrl, roomId }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  const handleEnter = () => {
+    onClose();
+    navigate(`/study/${roomId}`);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -17,23 +25,31 @@ const Modal = ({ isOpen, onClose, title, memberCount, period, description }) => 
 
         {/* Modal content */}
         <div className="mb-4">
-          <h2 className="text-2xl font-bold mb-4">{title}</h2>
+          <h2 className="text-2xl font-bold mb-4">{name}</h2>
           
+          <div className="w-full h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden">
+            <img 
+              src={`${process.env.PUBLIC_URL}/images/${profileImageUrl}`} 
+              alt="Study thumbnail" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+
           <div className="space-y-4">
             <div>
               <h3 className="text-lg text-gray-700 font-semibold">스터디 정원</h3>
-              <p className="font-semibold">{memberCount} 명</p>
+              <p className="font-semibold">{participants} 명</p>
             </div>
 
             <div>
               <h3 className="text-lg text-gray-700 font-semibold">스터디 설명</h3>
-              <p className="text-gray-600">{description}</p>
+              <p className="text-gray-600">{detail}</p>
             </div>
 
-            <div>
+            {/* <div>
               <h3 className="text-lg text-gray-700 font-semibold">스터디 비밀번호</h3>
               <input type="text" placeholder="비밀번호를 입력해주세요." className="w-full p-2 border rounded-lg" />
-            </div>
+            </div> */}
 
             {/* Warning box */}
             {/* <div className="bg-gray-100 p-4 rounded-lg">
@@ -52,7 +68,7 @@ const Modal = ({ isOpen, onClose, title, memberCount, period, description }) => 
 
         {/* Confirm button */}
         <Button
-          onClick={onClose}
+          onClick={handleEnter}
           variant="primary"
           className="w-full py-3"
         >
