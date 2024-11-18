@@ -16,8 +16,8 @@ const Home = () => {
   const getStudyList = async () => {
     try {
       const response = await axios.get('/api/room');
-      // console.log('response.data :: ', response.data);
-      setStudyList(response.data);
+      console.log('response.data :: ', response);
+      setStudyList(response.data.content);
     } catch (error) {
       console.error('전체 방 목록 조회 실패: ', error);
       const errorMessage = error.response?.data?.message || '전체 방 목록 조회 중 오류가 발생했습니다.';
