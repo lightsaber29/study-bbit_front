@@ -21,6 +21,7 @@ import {
   RoomConnectOptions,
 } from 'livekit-client';
 import '@livekit/components-styles'
+import MeetingMinutes from './MeetingMinutes.js';
 
 const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/connection-details';
 const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
@@ -133,26 +134,28 @@ export function PageClientImpl(props: {
           />
         </div>
       ) : (
-        <LiveKitRoom
-          connect={e2eeSetupComplete}
-          room={room}
-          token={connectionDetails.participantToken}
-          serverUrl={connectionDetails.serverUrl}
-          connectOptions={connectOptions}
-          video={preJoinChoices.videoEnabled}
-          audio={preJoinChoices.audioEnabled}
-          onDisconnected={handleOnLeave}
-          onEncryptionError={handleEncryptionError}
-          onError={handleError}
-        >
-          <VideoConference
-            chatMessageFormatter={formatChatMessageLinks}
-            SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
-          />
-          {/* <DebugMode /> */}
-          <RecordingIndicator />
-        </LiveKitRoom>
-        
+        <div>
+          <LiveKitRoom
+            connect={e2eeSetupComplete}
+            room={room}
+            token={connectionDetails.participantToken}
+            serverUrl={connectionDetails.serverUrl}
+            connectOptions={connectOptions}
+            video={preJoinChoices.videoEnabled}
+            audio={preJoinChoices.audioEnabled}
+            onDisconnected={handleOnLeave}
+            onEncryptionError={handleEncryptionError}
+            onError={handleError}
+          >
+            <VideoConference
+              chatMessageFormatter={formatChatMessageLinks}
+              SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
+            />
+            {/* <DebugMode /> */}
+            <RecordingIndicator />
+          </LiveKitRoom>
+          <MeetingMinutes />
+        </div>
       )}
     </main>
   );

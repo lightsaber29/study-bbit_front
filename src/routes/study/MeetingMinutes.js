@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import MeetingTranscription from '../../components/MeetingTranscription';
 
-function MainBoard() {
+function MeetingMinutes() {
   const [showTranscription, setShowTranscription] = useState(false);
   const [meetings, setMeetings] = useState([]);
 
@@ -78,4 +78,4 @@ function MainBoard() {
   );
 }
 
-export default MainBoard;
+export default MeetingMinutes;
