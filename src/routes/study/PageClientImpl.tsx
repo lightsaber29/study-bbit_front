@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { decodePassphrase } from '../main/lib/client-utils.ts';
+import { decodePassphrase } from '../../lib/client-utils.ts';
 //import { DebugMode } from './lib/Debug.tsx';
-import { RecordingIndicator } from '../main/lib/RecordingIndicator.tsx';
-import { SettingsMenu } from '../main/lib/SettingsMenu.tsx';
-import { ConnectionDetails } from '../main/lib/types.ts';
+import { RecordingIndicator } from '../../components/RecordingIndicator.tsx';
+import { SettingsMenu } from '../../components/SettingsMenu.tsx';
+import { ConnectionDetails } from '../../types/types.ts';
 import {
   formatChatMessageLinks,
   LiveKitRoom,
@@ -152,6 +152,7 @@ export function PageClientImpl(props: {
           {/* <DebugMode /> */}
           <RecordingIndicator />
         </LiveKitRoom>
+        
       )}
     </main>
   );

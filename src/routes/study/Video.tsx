@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageClientImpl } from './PageClientImpl.tsx';
-import { isVideoCodec } from '../main/lib/types.ts';
+import { isVideoCodec } from '../../types/types.ts';
 import '@livekit/components-styles'
 import { useParams } from 'react-router-dom';
 import { selectNickName } from 'store/memberSlice.js';
@@ -19,7 +19,6 @@ function VideoTest() {
 
   return (
     <div>
-      roomId :: {roomId} nickname :: {nickname}
       <PageClientImpl
         roomName={roomId}
         nickname={nickname}
