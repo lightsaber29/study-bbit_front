@@ -1,12 +1,9 @@
-// PageClientImpl.tsx
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { decodePassphrase } from './lib/client-utils.ts';
+import { decodePassphrase } from '../main/lib/client-utils.ts';
 //import { DebugMode } from './lib/Debug.tsx';
-import { RecordingIndicator } from './lib/RecordingIndicator.tsx';
-import { SettingsMenu } from './lib/SettingsMenu.tsx';
-import { ConnectionDetails } from './lib/types.ts';
+import { RecordingIndicator } from '../main/lib/RecordingIndicator.tsx';
+import { SettingsMenu } from '../main/lib/SettingsMenu.tsx';
+import { ConnectionDetails } from '../main/lib/types.ts';
 import {
   formatChatMessageLinks,
   LiveKitRoom,
@@ -33,15 +30,16 @@ export function PageClientImpl(props: {
   region?: string;
   hq: boolean;
   codec: VideoCodec;
+  nickname: string;
 }) {
   const [preJoinChoices, setPreJoinChoices] = useState<LocalUserChoices | undefined>(undefined);
   const preJoinDefaults = useMemo(() => {
     return {
-      username: '',
+      username: props.nickname,
       videoEnabled: true,
       audioEnabled: true,
     };
-  }, []);
+  }, [props.nickname]);
   const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | undefined>(undefined);
 
   const handlePreJoinSubmit = useCallback(async (values: LocalUserChoices) => {
@@ -53,8 +51,6 @@ export function PageClientImpl(props: {
     const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
     
     url.searchParams.append('roomName', props.roomName);
-    
-    // @@ roomName 가져올때 props에서 유저 닉네임도 같이 가져오게끔 한다.
     url.searchParams.append('participantName', values.username);
     if (props.region) {
       url.searchParams.append('region', props.region);
@@ -65,8 +61,9 @@ export function PageClientImpl(props: {
     setConnectionDetails(connectionDetailsData);
   }, [props.roomName, props.region]);
 
-  const navigate = useNavigate();
-  const handleOnLeave = useCallback(() => navigate('/'), [navigate]);
+  const handleOnLeave = useCallback(() => {
+    window.close();
+  }, []);
   const handleError = useCallback((error: Error) => {
     console.error(error);
     alert(`Error: ${error.message}`);

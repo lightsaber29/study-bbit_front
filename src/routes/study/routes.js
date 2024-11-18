@@ -7,6 +7,7 @@ const StudyFiles = lazy(() => import('./StudyFiles'));
 const StudySchedule = lazy(() => import('./StudySchedule'));
 const StudyMeeting = lazy(() => import('./StudyMeeting'));
 const StudySettings = lazy(() => import('./StudySettings'));
+const StudyVideo = lazy(() => import('./Video.tsx'));
 
 const studyRoutes = [
   {
@@ -32,6 +33,10 @@ const studyRoutes = [
   {
     path: '/study/:roomId/settings',
     element: <StudySettings />
+  },
+  {
+    path: '/study/:roomId/video',
+    element: <StudyVideo />
   }
 ];
 

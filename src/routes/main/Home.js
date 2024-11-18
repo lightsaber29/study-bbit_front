@@ -89,6 +89,7 @@ const Home = () => {
 
       {/* Modal */}
       <Modal
+        roomId={selectedStudy?.id}
         isOpen={selectedStudy !== null}
         onClose={() => setSelectedStudy(null)}
         name={selectedStudy?.name}

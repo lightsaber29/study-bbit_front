@@ -1,8 +1,16 @@
 import React from 'react';
 import Button from './Button.js';
+import { useNavigate } from 'react-router-dom';
 
-const Modal = ({ isOpen, onClose, name, participants, period, detail, profileImageUrl }) => {
+const Modal = ({ isOpen, onClose, name, participants, period, detail, profileImageUrl, roomId }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  const handleEnter = () => {
+    onClose();
+    navigate(`/study/${roomId}`);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -60,7 +68,7 @@ const Modal = ({ isOpen, onClose, name, participants, period, detail, profileIma
 
         {/* Confirm button */}
         <Button
-          onClick={onClose}
+          onClick={handleEnter}
           variant="primary"
           className="w-full py-3"
         >

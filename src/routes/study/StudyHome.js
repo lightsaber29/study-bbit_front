@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const StudyHome = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [date, setDate] = useState(new Date());
+  // const navigate = useNavigate();
+  const { roomId } = useParams();
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -36,6 +40,15 @@ const StudyHome = () => {
       }
     }
   };
+
+  const getRoomInfo = async () => {
+    const response = await axios.get(`/api/room/${roomId}`);
+    console.log('response.data :: ', response.data);
+  };
+
+  useEffect(() => {
+    getRoomInfo();
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">
@@ -135,7 +148,12 @@ const StudyHome = () => {
         {/* 기존 회의 버튼 섹션 */}
         <div className="flex flex-col items-center space-y-3 flex-1">
           <div className="text-gray-500">회의 없음</div>
-          <button className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors">
+          <button
+            className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors"
+            onClick={() => {
+              window.open(`/study/${roomId}/video?hideLayout=true`, '_blank', 'width=1200,height=700');
+            }}
+          >
             화상 회의 시작하기
           </button>
           <button className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors">
