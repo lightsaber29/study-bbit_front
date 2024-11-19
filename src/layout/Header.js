@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import ProfileModal from '../components/ProfileModal';
 import { useSelector } from 'react-redux';
 import { selectToken } from 'store/memberSlice';
+import { useRef } from 'react';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -30,7 +31,8 @@ const Header = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const token = useSelector(selectToken);
-  
+  const searchInputRef = useRef(null);
+
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const roomId = pathSegments[0] === 'study' ? pathSegments[1] : null;
@@ -78,12 +80,22 @@ const Header = () => {
   };
 
   const handleSearchButtonClick = () => {
-    if (showSearch && searchQuery.trim()) {
-      handleSearch({ preventDefault: () => {} });
-    } else {
-      setShowSearch(!showSearch);
+    const newShowSearch = !showSearch;
+    setShowSearch(newShowSearch);
+    
+    if (newShowSearch) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
     }
   };
+
+  // showSearch 상태가 변경될 때마다 실행되는 useEffect 추가
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
 
   return (
     <div className="flex flex-col border-b shadow-sm">
@@ -100,8 +112,11 @@ const Header = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="스터디, 페이지, 게시글 검색"
               className={`absolute top-1/2 -translate-y-1/2 w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-md transition-all duration-300 ${
-                showSearch ? 'opacity-100 visible' : 'opacity-0 invisible'
+                showSearch 
+                  ? 'opacity-100 visible pointer-events-auto' 
+                  : 'opacity-0 invisible pointer-events-none'
               }`}
+              ref={searchInputRef}
             />
           </form>
         </div>
