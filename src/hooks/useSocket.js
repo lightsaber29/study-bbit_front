@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord }) => {
+export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord }) => {
   const socketRef = useRef(null);
 
-  // const domain = 'http://localhost:6080'; // local
-  const domain = 'https://node.studybbit.site'; // dev
+  const domain = 'http://localhost:6080'; // local
+  // const domain = 'https://node.studybbit.site'; // dev
 
   useEffect(() => {
       socketRef.current = io(domain, {
@@ -16,7 +16,7 @@ export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts
     });
 
     socketRef.current.emit('joinMeeting', meetingId);
-    
+    socketRef.current.on('startRecord', onStartRecord);
     socketRef.current.on('previousTranscripts', onPreviousTranscripts);
     socketRef.current.on('transcriptUpdate', onTranscriptUpdate);
     socketRef.current.on('meetingEnded', onMeetingEnd);

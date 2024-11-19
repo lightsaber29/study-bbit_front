@@ -35,6 +35,17 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
     return false;
   }, [meetingId, userId]);
 
+  useEffect(() => {
+  console.log('isRecording changed to:', isRecording);
+  
+  // isRecording이 true로 변경되었을 때만 음성 인식 세션 시작
+  if (isRecording) {
+    startRecognitionSession();
+  } else {
+    stopRecognition();
+  }
+}, [isRecording]);
+
   const socketRef = useSocket({
     meetingId,
     onTranscriptUpdate: (newTranscript) => {
@@ -58,7 +69,12 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
       setIsRecording(false);
     },
     onStopRecord: () => setIsRecording(false),
-    onResumeRecord: () => setIsRecording(true)
+    onResumeRecord: () => setIsRecording(true),
+    onStartRecord: () => {
+      setIsRecording(true);
+      // startRecognitionSession();
+      console.log('start ::', isRecording);
+    }
   });
 
   const { startRecognitionSession, stopRecognition, recognitionStatus } = useSpeechRecognition({
@@ -100,8 +116,8 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
 
   const startRecording = useCallback(() => {
     console.log('녹음 시작');
-    setIsRecording(true);
-    startRecognitionSession();
+    socketRef.current.emit('startRecord', {meetingId});
+    // startRecognitionSession();
     addTranscript("회의를 시작하겠습니다.");
   }, [startRecognitionSession, addTranscript]);
 
@@ -152,16 +168,16 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
     socketRef.current.emit('endMeeting', { meetingId });
   };
 
-  useEffect(() => {
-    const statusCheckInterval = setInterval(() => {
-      if (isRecording && recognitionStatus === 'failed') {
-        console.log('상태 체크: 음성 인식 실패 상태, 재시작 시도');
-        startRecognitionSession();
-      }
-    }, 5000);
+  // useEffect(() => {
+  //   const statusCheckInterval = setInterval(() => {
+  //     if (isRecording && recognitionStatus === 'failed') {
+  //       console.log('상태 체크: 음성 인식 실패 상태, 재시작 시도');
+  //       startRecognitionSession();
+  //     }
+  //   }, 5000);
 
-    return () => clearInterval(statusCheckInterval);
-  }, [isRecording, recognitionStatus, startRecognitionSession]);
+  //   return () => clearInterval(statusCheckInterval);
+  // }, [isRecording, recognitionStatus, startRecognitionSession]);
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4">
