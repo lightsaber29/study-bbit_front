@@ -1,10 +1,16 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 
 export const useSpeechRecognition = ({ isRecording, onTranscriptAdd, onCurrentTranscriptChange }) => {
   const recognitionRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 100;
   const [recognitionStatus, setRecognitionStatus] = useState('idle');
+  const isRecordingRef = useRef(isRecording);
+  // isRecording 값이 변경될 때마다 ref를 업데이트
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+    console.log('isRecordingRef updated:', isRecordingRef.current);
+  }, [isRecording]);
 
   const initializeRecognition = () => {
     console.log('음성 인식 초기화 시작');
@@ -41,10 +47,11 @@ export const useSpeechRecognition = ({ isRecording, onTranscriptAdd, onCurrentTr
 
     recognitionRef.current.onend = () => {
       console.log(`음성 인식이 종료됨. 재시도 횟수: ${reconnectAttemptsRef.current}`);
-      if (isRecording && reconnectAttemptsRef.current < maxReconnectAttempts) {
+      console.log(isRecording);
+      if (isRecordingRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
         reconnectAttemptsRef.current += 1;
         setTimeout(() => {
-          if (isRecording) {
+          if (isRecordingRef.current) {
             console.log(`재시작 시도 #${reconnectAttemptsRef.current}`);
             startRecognitionSession();
           }
@@ -89,6 +96,7 @@ export const useSpeechRecognition = ({ isRecording, onTranscriptAdd, onCurrentTr
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
+        console.log('stopRecognition', isRecording);
       } catch (e) {
         console.error('녹음 중지 중 에러:', e);
       }
