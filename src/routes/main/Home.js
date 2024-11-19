@@ -5,7 +5,7 @@ import MyStudyCard from '../../components/MyStudyCard';
 import Modal from '../../components/Modal';
 import { useSelector } from 'react-redux';
 import { selectToken } from 'store/memberSlice';
-import axios from 'axios';
+import axios from 'api/axios';
 
 const Home = () => {
   const [studyList, setStudyList] = useState([]);
