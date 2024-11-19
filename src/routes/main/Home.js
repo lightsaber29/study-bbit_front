@@ -10,28 +10,32 @@ import axios from 'axios';
 const Home = () => {
   const [studyList, setStudyList] = useState([]);
   const [selectedStudy, setSelectedStudy] = useState(null);
+  const [page, setPage] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
 
   const token = useSelector(selectToken);
 
-  const getStudyList = async () => {
+  const getStudyList = async (page) => {
     try {
-      const response = await axios.get('/api/room');
-      console.log('response.data :: ', response);
-      setStudyList(response.data.content);
+      const response = await axios.get(`/api/room?page=${page}&size=8`);
+      // console.log('response.data :: ', response);
+      setStudyList(prevList => [...prevList, ...response.data.content]);
+      setPage(page + 1);
+      setIsLastPage(response.data.last);
     } catch (error) {
       console.error('전체 방 목록 조회 실패: ', error);
       const errorMessage = error.response?.data?.message || '전체 방 목록 조회 중 오류가 발생했습니다.';
       alert(errorMessage);
     }
-  };
+  }
 
   useEffect(() => {
-    getStudyList();
+    getStudyList(page);
   }, []);
 
   const handleCardClick = (study) => {
     setSelectedStudy(study);
-    console.log('study :: ', study);
+    // console.log('study :: ', study);
   };
 
   return (
@@ -106,9 +110,11 @@ const Home = () => {
       />
 
       {/* 더보기 버튼 */}
-      <div className="flex justify-center mt-6">
-        <Button variant="plain" className='rounded-full'>더보기</Button>
-      </div>
+      {!isLastPage && (
+        <div className="flex justify-center mt-6">
+          <Button variant="plain" className='rounded-full' onClick={() => getStudyList(page)}>더보기</Button>
+        </div>
+      )}
     </div>
   );
 };
