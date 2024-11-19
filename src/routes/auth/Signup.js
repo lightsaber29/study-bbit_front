@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from 'api/axios';
 import Button from '../../components/Button';
 import useFormInput from 'hooks/useFormInput';
 

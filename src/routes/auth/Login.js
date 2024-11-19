@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 import useFormInput from 'hooks/useFormInput';
-import axios from 'axios';
+import axios from 'api/axios';
 import { useDispatch } from 'react-redux';
 import { setMember } from 'store/memberSlice';
 

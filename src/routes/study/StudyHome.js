@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from 'api/axios';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);

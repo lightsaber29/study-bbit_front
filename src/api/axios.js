@@ -2,9 +2,6 @@ import axios from 'axios';
 import store from 'store/index';
 
 const instance = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? process.env.REACT_APP_API_URL 
-    : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
