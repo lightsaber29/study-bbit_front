@@ -1,92 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
+import useFormInput from 'hooks/useFormInput';
+import axios from 'api/axios';
+import UploadImage from '../../components/UploadImage'; 
 
 const CreateStudyRoom = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: '',
+
+  const nameRef = useRef();
+  const detailRef = useRef();
+  const passwordRef = useRef();
+
+  const { values, handleChange, setValues } = useFormInput({
+    name: '',
+    roomUrl: '',
     password: '',
-    description: '',
-    maxMembers: '4',
+    detail: '',
+    participants: '1',
+    maxParticipants: '4',
+    profileImageUrl: '',
+    isPrivate: false
   });
-  const [roomImage, setRoomImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState('/images/default-room.png');
+
+  const { name, roomUrl, password, detail, participants, maxParticipants, profileImageUrl, isPrivate } = values;
+
+  const [previewImage, setPreviewImage] = useState(null);
 
   // 최대 인원 옵션 (4~16명)
   const memberOptions = Array.from({ length: 13 }, (_, i) => i + 4);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+  const handleImageChange = (file) => {
+    setValues(prev => ({
       ...prev,
-      [name]: value
+      image: file
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-      setRoomImage(file);
+  const validateForm = () => {
+    if (!name) {
+      alert('방 이름을 입력해주세요.');
+      nameRef.current.focus();
+      return false;
     }
+    if (password.length > 0 && password.length < 4) {
+      alert('비밀번호는 4자 이상이어야 합니다.');
+      passwordRef.current.focus();
+      return false;
+    } 
+    if (!detail) {
+      alert('방 상세 설명을 입력해주세요.');
+      detailRef.current.focus();
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // 유효성 검사
-    if (!formData.title.trim()) {
-      alert('방 이름을 입력해주세요.');
+    if (!validateForm()) {
       return;
     }
 
     // API 호출 로직 구현
-    console.log('스터디룸 생성:', formData);
-    console.log('방 이미지:', roomImage);
-    
-    // 성공 시 홈 페이지로 이동
-    navigate('/');
+    try {
+      await axios.post('/api/room', values);
+      alert('스터디룸 생성이 완료되었습니다.');
+      navigate('/');
+    } catch (error) {
+      console.error('스터디룸 생성 실패:', error);
+      const errorMessage = error.response?.data?.message || '스터디룸 생성 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
   };
+
+  useEffect(() => {
+    const newIsPrivate = Boolean(values.password);
+    if (values.isPrivate !== newIsPrivate) {
+      handleChange({
+        target: {
+          name: 'isPrivate',
+          value: newIsPrivate
+        }
+      });
+    }
+  }, [values.password, values.isPrivate, handleChange]);
+
+  useEffect(() => {
+    if (values.name !== values.roomUrl) {
+      handleChange({
+        target: {
+          name: 'roomUrl',
+          value: values.name
+        }
+      });
+    }
+  }, [values.name, values.roomUrl, handleChange]);
 
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-8">스터디룸 만들기</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 방 프로필 이미지 - 수정된 부분 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            스터디룸 이미지
-          </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
-            <div className="flex flex-col items-center justify-center text-gray-400">
-              <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              <span>이미지를 업로드하세요</span>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </div>
-            {previewImage && previewImage !== '/images/default-room.png' && (
-              <div className="mt-4 flex justify-center">
-                <img
-                  src={previewImage}
-                  alt="preview"
-                  className="max-h-48 rounded"
-                />
-              </div>
-            )}
-          </div>
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        {/* 방 프로필 이미지 */}
+        <UploadImage 
+          onImageChange={handleImageChange}
+          previewImage={previewImage}
+          setPreviewImage={setPreviewImage}
+        />
 
         {/* 방 이름 */}
         <div>
@@ -95,9 +118,10 @@ const CreateStudyRoom = () => {
           </label>
           <input
             type="text"
-            name="title"
-            value={formData.title}
+            name="name"
+            value={name}
             onChange={handleChange}
+            ref={nameRef}
             placeholder="스터디룸 이름을 입력해주세요"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             required
@@ -112,8 +136,9 @@ const CreateStudyRoom = () => {
           <input
             type="password"
             name="password"
-            value={formData.password}
+            value={password}
             onChange={handleChange}
+            ref={passwordRef}
             placeholder="비밀번호를 입력해주세요 (선택사항)"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
@@ -125,8 +150,8 @@ const CreateStudyRoom = () => {
             최대 인원 *
           </label>
           <select
-            name="maxMembers"
-            value={formData.maxMembers}
+            name="maxParticipants"
+            value={maxParticipants}
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             required
@@ -145,9 +170,10 @@ const CreateStudyRoom = () => {
             방 상세 설명 *
           </label>
           <textarea
-            name="description"
-            value={formData.description}
+            name="detail"
+            value={detail}
             onChange={handleChange}
+            ref={detailRef}
             placeholder="스터디룸에 대한 설명을 입력해주세요"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[200px]"
             required
