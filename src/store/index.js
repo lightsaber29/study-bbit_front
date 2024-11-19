@@ -5,16 +5,18 @@ import { persistReducer } from 'redux-persist';
 import { persistStore } from 'redux-persist';
 
 import memberSlice from './memberSlice';
+import speechSlice from './speechSlice';
 
 // 루트 리듀서 생성
 const reducers = combineReducers({
-  member: memberSlice
+  member: memberSlice,
+  speech: speechSlice
 });
 
 const persistConfig = {
   key: 'root', // 저장 키
   storage: sessionStorage, // storage 선택 (default: localStorage)
-  whitelist: ['member'], // 저장할 slice를 선택적으로 포함
+  whitelist: ['member', 'speech'], // 저장할 slice를 선택적으로 포함
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);
