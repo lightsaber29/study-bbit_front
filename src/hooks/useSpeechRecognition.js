@@ -1,113 +1,134 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 
-export const useSpeechRecognition = ({ isRecording, onTranscriptAdd, onCurrentTranscriptChange }) => {
+export const useSpeechRecognition = ({ 
+  isRecording, 
+  onTranscriptAdd, 
+  onCurrentTranscriptChange,
+  language = 'ko-KR',
+  maxReconnectAttempts = 100,
+  reconnectDelay = 100
+}) => {
   const recognitionRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 100;
   const [recognitionStatus, setRecognitionStatus] = useState('idle');
   const isRecordingRef = useRef(isRecording);
-  // isRecording 값이 변경될 때마다 ref를 업데이트
-  useEffect(() => {
-    isRecordingRef.current = isRecording;
-    console.log('isRecordingRef updated:', isRecordingRef.current);
-  }, [isRecording]);
 
-  const initializeRecognition = () => {
-    console.log('음성 인식 초기화 시작');
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.onstart = null;
+      recognitionRef.current.onend = null;
+      recognitionRef.current.onerror = null;
+      recognitionRef.current.onresult = null;
+      recognitionRef.current = null;
+    }
+    reconnectAttemptsRef.current = 0;
+    setRecognitionStatus('idle');
+  }, []);
+
+  const initializeRecognition = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
     if (!SpeechRecognition) {
-      console.error('SpeechRecognition API를 사용할 수 없습니다');
+      console.error('SpeechRecognition API is not supported');
       return null;
     }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'ko-KR';
+    recognition.lang = language;
     
     return recognition;
-  };
+  }, [language]);
+
+  const handleRecognitionResult = useCallback((event) => {
+    const current = event.results[event.results.length - 1];
+    
+    if (current.isFinal) {
+      const transcript = current[0].transcript.trim();
+      if (transcript) {
+        onTranscriptAdd(transcript);
+        reconnectAttemptsRef.current = 0;
+      }
+    } else {
+      onCurrentTranscriptChange(current[0].transcript);
+    }
+  }, [onTranscriptAdd, onCurrentTranscriptChange]);
 
   const startRecognitionSession = useCallback(() => {
-    console.log('음성 인식 세션 시작');
     if (!recognitionRef.current) {
       recognitionRef.current = initializeRecognition();
     }
 
     if (!recognitionRef.current) {
-      console.error('음성 인식을 초기화할 수 없습니다');
-      alert('음성 인식을 초기화할 수 없습니다.');
+      setRecognitionStatus('failed');
       return;
     }
 
     recognitionRef.current.onstart = () => {
-      console.log('음성 인식이 시작되었습니다');
       setRecognitionStatus('active');
     };
 
     recognitionRef.current.onend = () => {
-      console.log(`음성 인식이 종료됨. 재시도 횟수: ${reconnectAttemptsRef.current}`);
-      console.log(isRecording);
       if (isRecordingRef.current && reconnectAttemptsRef.current < maxReconnectAttempts) {
         reconnectAttemptsRef.current += 1;
         setTimeout(() => {
           if (isRecordingRef.current) {
-            console.log(`재시작 시도 #${reconnectAttemptsRef.current}`);
             startRecognitionSession();
           }
-        }, 100);
+        }, reconnectDelay);
       }
     };
 
     recognitionRef.current.onerror = (event) => {
-      console.error('음성 인식 에러:', event.error);
+      console.error('Speech recognition error:', event.error);
       setRecognitionStatus('failed');
+      
       if (event.error === 'not-allowed') {
-        alert('마이크 권한이 필요합니다.');
+        throw new Error('Microphone permission denied');
       }
     };
 
-    recognitionRef.current.onresult = (event) => {
-      console.log('onresult 호출됨', event.results);
-      const current = event.results[event.results.length - 1];
-      if (current.isFinal) {
-        const transcript = current[0].transcript.trim();
-        if (transcript) {
-          console.log('음성 인식 결과:', transcript);
-          onTranscriptAdd(transcript);
-          reconnectAttemptsRef.current = 0;
-        }
-      } else {
-        console.log('중간 결과:', current[0].transcript);
-        onCurrentTranscriptChange(current[0].transcript);
-      }
-    };
+    recognitionRef.current.onresult = handleRecognitionResult;
 
     try {
       recognitionRef.current.start();
-      console.log('음성 인식 시작 성공');
-    } catch (err) {
-      console.error('음성 인식 시작 실패:', err);
+    } catch (error) {
+      console.error('Failed to start speech recognition:', error);
       setRecognitionStatus('failed');
+      throw error;
     }
-  }, [isRecording, onTranscriptAdd, onCurrentTranscriptChange]);
+  }, [initializeRecognition, handleRecognitionResult, maxReconnectAttempts, reconnectDelay]);
 
-  const stopRecognition = () => {
+  const stopRecognition = useCallback(() => {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-        console.log('stopRecognition', isRecording);
-      } catch (e) {
-        console.error('녹음 중지 중 에러:', e);
+      } catch (error) {
+        console.error('Error stopping recognition:', error);
       }
     }
-    setRecognitionStatus('idle');
-    reconnectAttemptsRef.current = 0;
-  };
+    cleanup();
+  }, [cleanup]);
+
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+    
+    if (isRecording) {
+      startRecognitionSession();
+    } else {
+      stopRecognition();
+    }
+
+    return () => {
+      cleanup();
+    };
+  }, [isRecording, startRecognitionSession, stopRecognition, cleanup]);
 
   return {
+    recognitionStatus,
     startRecognitionSession,
-    stopRecognition,
-    recognitionStatus
+    stopRecognition
   };
 };

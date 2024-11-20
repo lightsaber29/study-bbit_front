@@ -6,15 +6,59 @@ import { TranscriptList } from './TranscriptList';
 import { StatusIndicator } from './StatusIndicator';
 import { MeetingHeader} from './MeetingHeader';
 import LoadingOverlay from './LoadingOverlay';
+import { useParams } from 'react-router-dom';
+import { selectMember } from 'store/memberSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'api/axios';
 
-const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true }) => {
+// const MeetingTranscription = ({ meetingId, userId, isHost = false }) => {
+  const MeetingTranscription = ({ meetingId, userId }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcripts, setTranscripts] = useState([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [isResettingTranscripts, setIsResettingTranscripts] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isHost, setIsHost] = useState(false);
   const scrollRef = useRef(null);
+  const { roomId } = useParams();
+  const member = useSelector(selectMember);
+
+  meetingId = roomId;
+  userId = member.nickName;
+  console.log(userId);
+
+  const getRoomInfo = async () => {
+    try {
+      const response = await axios.get(`/room/member/${roomId}`);
+      
+      console.log('response.data :: ', response.data);
+      console.log('userId :: ', userId);
+      const member = response.data.find(member => member.nickname == userId);
+      console.log('after find')
+      if (member && member.leaderLabel == '방장') {
+        // 방장일 경우 변수 set
+        // debugger
+        console.log(isHost);
+        // isHost = true;
+        setIsHost(true);
+        console.log(isHost);
+        // debugger
+      }
+    } catch (error) {
+      console.error('스터디룸 상세 정보 조회 실패: ', error);
+      const errorMessage = error.response?.data?.message || '스터디룸 상세 정보 조회 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
+
+  useEffect(() => {
+    getRoomInfo();
+  }, []);
+
+  useEffect(() => {
+    console.log("host", isHost);
+  }, [isHost])
 
   const addTranscript = useCallback((text) => {
     if (text.trim()) {
@@ -25,7 +69,7 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
           minute: '2-digit',
           second: '2-digit'
         }),
-        userId
+        user : userId
       };
       console.log('새 트랜스크립트 추가:', newTranscript);
       socketRef.current.emit('newTranscript', { meetingId, transcript: newTranscript });
@@ -35,16 +79,16 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
     return false;
   }, [meetingId, userId]);
 
-  useEffect(() => {
-  console.log('isRecording changed to:', isRecording);
+//   useEffect(() => {
+//   console.log('isRecording changed to:', isRecording);
   
-  // isRecording이 true로 변경되었을 때만 음성 인식 세션 시작
-  if (isRecording) {
-    startRecognitionSession();
-  } else {
-    stopRecognition();
-  }
-}, [isRecording]);
+//   // isRecording이 true로 변경되었을 때만 음성 인식 세션 시작
+//   if (isRecording) {
+//     startRecognitionSession();
+//   } else {
+//     stopRecognition();
+//   }
+// }, [isRecording]);
 
   const socketRef = useSocket({
     meetingId,
@@ -82,6 +126,10 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
     onTranscriptAdd: addTranscript,
     onCurrentTranscriptChange: setCurrentTranscript
   });
+
+  useEffect(() => {
+    console.log(meetingId);
+  }, [meetingId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -139,7 +187,7 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
     }
   }, [meetingId]);
   const handleSaveMeeting = (meetingName) => {
-    setIsResettingTranscripts(true);
+    // setIsResettingTranscripts(true); //이것도 소켓으로 바꿔주기
     socketRef.current.emit('saveMeeting', { 
       meetingId,
       meetingName
@@ -207,7 +255,7 @@ const MeetingTranscription = ({ meetingId = 'changelater', userId, isHost = true
           />
         </div>
       </div>
-
+      
       {isResettingTranscripts && <LoadingOverlay />}
 
       <MeetingNameModal 
