@@ -8,19 +8,17 @@ export const TranscriptList = ({ transcripts, currentTranscript, scrollRef }) =>
     }
   
     return (
-      <div>
-        {transcripts.map((transcript, index) => (
-          <div key={`${transcript.timestamp}-${index}`} className="flex items-start space-x-2">
-            <span className="text-gray-500 min-w-[80px]">{transcript.timestamp}</span>
-            <span className="text-gray-600 min-w-[100px]">{transcript.userId}</span>
-            <span>{transcript.text}</span>
-          </div>
-        ))}
-        {currentTranscript && (
-          <div className="text-blue-600 animate-pulse">
-            <span>{currentTranscript}</span> ...
-          </div>
-        )}
-      </div>
+      <div className="space-y-1">
+      {transcripts.map((transcript, index) => (
+        <div 
+          key={`${transcript.timestamp}-${index}`} 
+          className="flex items-center text-sm"
+        >
+          <span className="text-gray-500">{transcript.timestamp}</span>
+          <span className="ml-2 text-gray-700">{transcript.user}: </span>
+          <span className="ml-1">{transcript.text}</span>
+        </div>
+      ))}
+    </div>
     );
   };
