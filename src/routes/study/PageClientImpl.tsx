@@ -25,6 +25,7 @@ import {
 } from 'livekit-client';
 import '@livekit/components-styles'
 import MeetingMinutes from './MeetingMinutes.js';
+import { StudyTimer } from '../../components/StudyTimer';
 
 const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/connection-details';
 const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
@@ -157,6 +158,10 @@ export function PageClientImpl(props: {
             {/* <DebugMode /> */}
             <RecordingIndicator />
           </LiveKitRoom>
+          <div style={{ margin: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <span>공부시간 측정</span>
+            <StudyTimer />
+          </div>
           <MeetingMinutes />
         </div>
       )}
