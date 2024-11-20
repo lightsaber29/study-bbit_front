@@ -12,6 +12,9 @@ const Home = () => {
   const [selectedStudy, setSelectedStudy] = useState(null);
   const [page, setPage] = useState(0);
   const [isLastPage, setIsLastPage] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [hours, setHours] = useState('');
+  const [minutes, setMinutes] = useState('');
 
   const token = useSelector(selectToken);
 
@@ -38,6 +41,14 @@ const Home = () => {
     // console.log('study :: ', study);
   };
 
+  const handleGoalSubmit = () => {
+    // 목표 시간 저장 로직 구현
+    // 예: 목표 시간을 저장하고 모달을 닫습니다.
+    setIsGoalModalOpen(false);
+    setHours('');
+    setMinutes('');
+  }
+
   return (
     <div>
       {/* 내 스터디 & 내 목표 섹션 */}
@@ -46,28 +57,70 @@ const Home = () => {
           <div className="bg-gray-100 p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-4">내 스터디</h2>
             <div className="flex items-center space-x-4">
-              <MyStudyCard isEmpty={false} title="스터디 1" photoUrl='/images/aespa_karina.jpeg' roomId='1' />
-              <MyStudyCard isEmpty={false} title="스터디 2" photoUrl='/images/aespa_winter.jpeg' roomId='2' />
+              <MyStudyCard isEmpty={false} title="클린코드를 읽는 사람들" photoUrl='/images/aespa_karina.jpeg' roomId='56' />
+              <MyStudyCard isEmpty={false} title="ReactNative 공부방" photoUrl='/images/aespa_winter.jpeg' roomId='2' />
               <MyStudyCard isEmpty={true} />
               <MyStudyCard isEmpty={true} />
             </div>
           </div>
 
-          {/* <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+          <div className="bg-gray-100 p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-4">내 목표</h2>
             <div className="text-sm text-gray-600 mb-2">오늘 공부할 시간 / 내 목표 시간</div>
-            <div className="text-2xl font-bold mb-4">0시간 0분 / 0시간 0분</div>
-            <input
-              type="text"
-              placeholder="내 목표시간을 설정해주세요."
-              className="w-full p-2 border rounded-lg mb-4"
-            />
-            <input
-              type="text"
-              placeholder="메모를 추가해보세요."
-              className="w-full p-2 border rounded-lg"
-            />
-          </div> */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="text-2xl font-bold">0시간 0분 / 0시간 0분</div>
+              <button 
+                onClick={() => setIsGoalModalOpen(true)}
+                className="p-1 hover:bg-gray-200 rounded-full"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* 목표 시간 설정 모달 */}
+          {isGoalModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg w-96">
+                <h3 className="text-lg font-semibold mb-4">목표 시간 설정</h3>
+                <div className="flex gap-4 mb-4">
+                  <input
+                    type="number"
+                    placeholder="시간"
+                    min="0"
+                    className="w-1/2 p-2 border rounded-lg"
+                    value={hours}
+                    onChange={(e) => setHours(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="분"
+                    min="0"
+                    max="59"
+                    className="w-1/2 p-2 border rounded-lg"
+                    value={minutes}
+                    onChange={(e) => setMinutes(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setIsGoalModalOpen(false)}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleGoalSubmit}
+                    className="px-4 py-2 bg-emerald-500 text-white hover:bg-blue-600 rounded-lg"
+                  >
+                    저장
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -107,6 +160,9 @@ const Home = () => {
         period={selectedStudy?.period}
         detail={selectedStudy?.detail}
         profileImageUrl={selectedStudy?.profileImageUrl}
+        hostProfileImage="host-profile.jpg"
+        hostNickname="쇼쇼"
+        // hostLevel={42}
       />
 
       {/* 더보기 버튼 */}

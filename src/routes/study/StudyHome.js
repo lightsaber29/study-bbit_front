@@ -137,7 +137,7 @@ const StudyHome = () => {
               </li>
               <li className="flex items-center">
                 <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                <span className="ml-2">김민수</span>
+                <span className="ml-2">최수빈</span>
               </li>
               <li className="flex items-center">
                 <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
@@ -145,7 +145,7 @@ const StudyHome = () => {
               </li>
               <li className="flex items-center">
                 <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                <span className="ml-2">최강강아지</span>
+                <span className="ml-2">쇼쇼</span>
               </li>
             </ul>
           </div>

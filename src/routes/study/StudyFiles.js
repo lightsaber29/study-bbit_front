@@ -8,16 +8,16 @@ const StudyFiles = () => {
   const [files, setFiles] = useState([
     {
       id: 1,
-      name: '과제 제출.pdf',
-      author: '최수빈',
-      uploadDate: '2024-03-20',
+      name: 'sw최적화를 위한 리팩토링 pdf',
+      author: '차은우',
+      uploadDate: '2024-11-20',
       size: '2.5MB',
     },
     {
       id: 2,
-      name: '발표자료.pptx',
-      author: '김철수',
-      uploadDate: '2024-03-19',
+      name: '갈라파고스의 클린코드 1장 핵심 정리 pdf',
+      author: '갈라파고스',
+      uploadDate: '2024-11-19',
       size: '5.1MB',
     }
   ]);

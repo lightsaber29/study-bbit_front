@@ -11,6 +11,8 @@ const QuestionWrite = lazy(() => import('./QuestionWrite'));
 const Profile = lazy(() => import('./Profile'));
 const SearchResults = lazy(() => import('./SearchResults'));
 const CreateStudyRoom = lazy(() => import('./CreateStudyRoom'));
+const Promotion = lazy(() => import('./Promotion'));
+const PromotionDetail = lazy(() => import('./PromotionDetail'));
 
 const mainRoutes = [
   {
@@ -52,6 +54,14 @@ const mainRoutes = [
   {
     path: '/create',
     element: <CreateStudyRoom />
+  },
+  {
+    path: '/promotion',
+    element: <Promotion />
+  },
+  {
+    path: '/promotion/:id',
+    element: <PromotionDetail />
   }
 ];
 

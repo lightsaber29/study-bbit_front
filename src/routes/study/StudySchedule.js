@@ -123,13 +123,13 @@ const StudySchedule = () => {
             
             {/* 현재 달 날짜들 */}
             {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
-              <div key={day} className={`h-24 p-2 border hover:bg-gray-50 ${day === 12 ? 'border-emerald-400' : 'border-gray-100'}`}>
+              <div key={day} className={`h-24 p-2 border hover:bg-gray-50 ${day === 21 ? 'border-emerald-400' : 'border-gray-100'}`}>
                 <span>{day}</span>
-                {day === 11 && (
+                {day === 25 && (
                   <div className="mt-1 text-xs">
                     <div className="flex items-center">
                       <span className="w-2 h-2 bg-emerald-400 rounded-full mr-1"></span>
-                      <span>테스트</span>
+                      <span>엉망진창 깃헙</span>
                     </div>
                   </div>
                 )}
@@ -141,7 +141,7 @@ const StudySchedule = () => {
         {/* 일정 상세 - 클릭 이벤트 추가 */}
         <div className="p-4 border-t">
           <div className="flex items-baseline space-x-4">
-            <div className="text-3xl">11</div>
+            <div className="text-3xl">25</div>
             <div className="text-gray-500">월요일</div>
           </div>
           <div className="mt-4">
@@ -154,12 +154,12 @@ const StudySchedule = () => {
                 owner: '최수빈'
               })}
             >
-              테스트
+              엉망진창 깃헙 레포 리팩토링 (SRP원칙 준수)
             </div>
-            <div className="text-gray-500">오후 2:46</div>
+            <div className="text-gray-500">오후 7:00</div>
             <div className="mt-2 flex items-center text-gray-500">
               <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
-              <span>기본 캘린더 · 최수빈</span>
+              <span>기본 캘린더 · 차은우</span>
             </div>
           </div>
         </div>
