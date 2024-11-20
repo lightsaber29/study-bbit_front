@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'api/axios';
 
 // const MeetingTranscription = ({ meetingId, userId, isHost = false }) => {
-  const MeetingTranscription = ({ meetingId, userId }) => {
+const MeetingTranscription = ({ meetingId, userId }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcripts, setTranscripts] = useState([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
@@ -51,10 +51,6 @@ import axios from 'api/axios';
     getRoomInfo();
   }, []);
 
-  useEffect(() => {
-    console.log("host", isHost);
-  }, [isHost])
-
   const addTranscript = useCallback((text) => {
     if (text.trim()) {
       const newTranscript = {
@@ -73,17 +69,6 @@ import axios from 'api/axios';
     }
     return false;
   }, [meetingId, userId]);
-
-//   useEffect(() => {
-//   console.log('isRecording changed to:', isRecording);
-  
-//   // isRecording이 true로 변경되었을 때만 음성 인식 세션 시작
-//   if (isRecording) {
-//     startRecognitionSession();
-//   } else {
-//     stopRecognition();
-//   }
-// }, [isRecording]);
 
   const socketRef = useSocket({
     meetingId,
