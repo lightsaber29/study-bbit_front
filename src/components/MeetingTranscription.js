@@ -30,20 +30,15 @@ import axios from 'api/axios';
 
   const getRoomInfo = async () => {
     try {
-      const response = await axios.get(`/room/member/${roomId}`);
+      const response = await axios.get(`/api/room/member/${roomId}`);
       
       console.log('response.data :: ', response.data);
       console.log('userId :: ', userId);
       const member = response.data.find(member => member.nickname == userId);
       console.log('after find')
       if (member && member.leaderLabel == '방장') {
-        // 방장일 경우 변수 set
-        // debugger
-        console.log(isHost);
-        // isHost = true;
         setIsHost(true);
         console.log(isHost);
-        // debugger
       }
     } catch (error) {
       console.error('스터디룸 상세 정보 조회 실패: ', error);

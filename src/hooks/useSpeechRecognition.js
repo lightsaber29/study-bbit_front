@@ -67,6 +67,7 @@ export const useSpeechRecognition = ({
     }
 
     recognitionRef.current.onstart = () => {
+      console.log('음성인식 시작');
       setRecognitionStatus('active');
     };
 
