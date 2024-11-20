@@ -11,6 +11,9 @@ import {
   PreJoin,
   VideoConference,
 } from '@livekit/components-react';
+
+import { CustomPreJoin } from '../../custom-livekit/CustomPrejoin.tsx';
+import { CustomVideoConference } from '../../custom-livekit/CustomVideoConference.tsx';
 import {
   ExternalE2EEKeyProvider,
   RoomOptions,
@@ -127,7 +130,7 @@ export function PageClientImpl(props: {
     <main style={{ height: '100%' }}>
       {connectionDetails === undefined || preJoinChoices === undefined ? (
         <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
-          <PreJoin
+          <CustomPreJoin
             defaults={preJoinDefaults}
             onSubmit={handlePreJoinSubmit}
             onError={handleError}
@@ -147,7 +150,7 @@ export function PageClientImpl(props: {
             onEncryptionError={handleEncryptionError}
             onError={handleError}
           >
-            <VideoConference
+            <CustomVideoConference
               chatMessageFormatter={formatChatMessageLinks}
               SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
             />
