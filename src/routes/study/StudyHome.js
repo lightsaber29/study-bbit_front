@@ -3,12 +3,15 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useParams } from 'react-router-dom';
 import axios from 'api/axios';
+import { useSelector } from 'react-redux';
+import { selectNickName } from 'store/memberSlice';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [date, setDate] = useState(new Date());
   const { roomId } = useParams();
+  const nickName = useSelector(selectNickName);
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -50,6 +53,28 @@ const StudyHome = () => {
       console.error('스터디룸 상세 정보 조회 실패: ', error);
       const errorMessage = error.response?.data?.message || '스터디룸 상세 정보 조회 중 오류가 발생했습니다.';
       alert(errorMessage);
+    }
+  };
+
+  const handleVideoMeeting = async () => {
+    try {
+      // 참가자 목록 조회
+      const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
+      
+      // 현재 사용자의 중복 접속 확인
+      const isAlreadyConnected = participants.some(participant => participant.name === nickName);
+      if (isAlreadyConnected) {
+        alert('이미 다른 기기에서 접속중인 사용자입니다. 중복 접속은 불가능합니다.');
+        return;
+      }
+
+      // 화상채팅 페이지 열기
+      const videoUrl = `/study/${roomId}/video?hideLayout=true`;
+      const windowFeatures = 'width=1200,height=700';
+      window.open(videoUrl, '_blank', windowFeatures);
+    } catch (error) {
+      console.error('화상 회의 접속 중 오류:', error);
+      alert('화상 회의 접속 중 문제가 발생했습니다. 새로고침 후 다시 시도해 주세요.');
     }
   };
 
@@ -177,9 +202,7 @@ const StudyHome = () => {
           <div className="text-gray-500">회의 없음</div>
           <button
             className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors"
-            onClick={() => {
-              window.open(`/study/${roomId}/video?hideLayout=true`, '_blank', 'width=1200,height=700');
-            }}
+            onClick={handleVideoMeeting}
           >
             화상 회의 시작하기
           </button>
