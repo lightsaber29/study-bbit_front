@@ -229,7 +229,7 @@ import type {
       ...(defaults.videoDeviceId !== undefined && { videoDeviceId: defaults.videoDeviceId }),
       ...(defaults.audioEnabled !== undefined && { audioEnabled: defaults.audioEnabled }),
       ...(defaults.videoEnabled !== undefined && { videoEnabled: defaults.videoEnabled }),
-      ...(defaults.username !== undefined && { username: defaults.username }),
+      // ...(defaults.username !== undefined && { username: defaults.username }),
     };
   
     const {
@@ -270,8 +270,10 @@ import type {
       saveVideoInputDeviceId(videoDeviceId);
     }, [videoDeviceId, saveVideoInputDeviceId]);
     React.useEffect(() => {
-      saveUsername(username);
-    }, [username, saveUsername]);
+      if (defaults.username) {
+        setUsername(defaults.username);
+      }
+    }, [defaults.username]);
   
     const tracks = usePreviewTracks(
       {

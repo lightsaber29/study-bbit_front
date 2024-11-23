@@ -20,10 +20,6 @@ const Login = () => {
 
   const { email, password } = values;
 
-  // useEffect(() => {
-  //   console.log('check values :: ', values);
-  // }, [values]);
-
   const validateForm = () => {
     // 이메일 검증
     if (!email) {
@@ -41,10 +37,10 @@ const Login = () => {
       alert('비밀번호를 입력해주세요.');
       passwordRef.current.focus();
       return false;
-    // } else if (password.length < 8) {
-    //   alert('비밀번호는 8자 이상이어야 합니다.');
-    //   passwordRef.current.focus();
-    //   return false;
+    } else if (password.length < 4) {
+      alert('비밀번호는 4자 이상이어야 합니다.');
+      passwordRef.current.focus();
+      return false;
     }
   
     return true;
@@ -72,8 +68,15 @@ const Login = () => {
       }
     } catch (error) {
       console.error('로그인 실패:', error);
-      const errorMessage = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
+      // const errorMessage = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
+      const errorMessage = error.response?.data || '로그인 중 오류가 발생했습니다.';
       alert(errorMessage);
+      handleChange({
+        target: {
+          name: 'password',
+          value: ''
+        }
+      });
     }
   };
 
