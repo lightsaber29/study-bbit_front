@@ -27,7 +27,7 @@ import '@livekit/components-styles'
 import MeetingMinutes from './MeetingMinutes.js';
 import { StudyTimer } from '../../components/StudyTimer';
 
-const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/connection-details';
+const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/express/connection-details';
 const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
 
 export function PageClientImpl(props: {
