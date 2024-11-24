@@ -42,18 +42,19 @@ const ProfileModal = ({ isOpen, onClose }) => {
         </div> */}
       </div>
 
-      {/* 프리미엄 회원 정보 */}
+      {/* 레벨 및 경험치 정보 */}
       {/* <div className="p-4 border-b">
         <div className="flex justify-between items-center">
-          <span>프리미엄 회원</span>
-          <button className="text-blue-500 hover:underline">
-            이용권 구매
-          </button>
+          <span className="font-medium pl-2">Lv. {member.level || 1}</span>
+          <div className="text-sm text-gray-500">
+            {member.exp || 0} / {member.nextExp || 100} EXP
+          </div>
         </div>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-blue-500">0</span>
-          <span>구글</span>
-          <span className="text-blue-500">충전</span>
+        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-500 h-2 rounded-full"
+            style={{ width: `${((member.exp || 0) / (member.nextExp || 100)) * 100}%` }}
+          ></div>
         </div>
       </div> */}
 

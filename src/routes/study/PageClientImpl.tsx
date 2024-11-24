@@ -11,6 +11,10 @@ import {
   PreJoin,
   VideoConference,
 } from '@livekit/components-react';
+import axios from 'api/axios';
+
+import { CustomPreJoin } from '../../custom-livekit/CustomPrejoin.tsx';
+import { CustomVideoConference } from '../../custom-livekit/CustomVideoConference.tsx';
 import {
   ExternalE2EEKeyProvider,
   RoomOptions,
@@ -22,8 +26,9 @@ import {
 } from 'livekit-client';
 import '@livekit/components-styles'
 import MeetingMinutes from './MeetingMinutes.js';
+import { StudyTimer } from '../../components/StudyTimer';
 
-const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/connection-details';
+// const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/express/connection-details';
 const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
 
 export function PageClientImpl(props: {
@@ -49,15 +54,27 @@ export function PageClientImpl(props: {
     //const url = new URL(CONN_DETAILS_ENDPOINT, "http://localhost:6081");
 
     // @@배포용
-    const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
+    // const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
     
-    url.searchParams.append('roomName', props.roomName);
-    url.searchParams.append('participantName', values.username);
+    // url.searchParams.append('roomName', props.roomName);
+    // url.searchParams.append('participantName', values.username);
+    // if (props.region) {
+    //   url.searchParams.append('region', props.region);
+    // }
+
+    const params = new URLSearchParams({
+      roomName: props.roomName,
+      participantName: values.username,
+    });
     if (props.region) {
-      url.searchParams.append('region', props.region);
+      params.append('region', props.region);
     }
-    const connectionDetailsResp = await fetch(url.toString());
-    const connectionDetailsData = await connectionDetailsResp.json();
+
+    // const connectionDetailsResp = await fetch(url.toString());
+    // const connectionDetailsData = await connectionDetailsResp.json();
+    const { data: connectionDetailsData } = await axios.get(
+      `/api/express/connection-details?${params.toString()}`
+    );
     console.log(connectionDetailsData);
     setConnectionDetails(connectionDetailsData);
   }, [props.roomName, props.region]);
@@ -127,7 +144,7 @@ export function PageClientImpl(props: {
     <main style={{ height: '100%' }}>
       {connectionDetails === undefined || preJoinChoices === undefined ? (
         <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
-          <PreJoin
+          <CustomPreJoin
             defaults={preJoinDefaults}
             onSubmit={handlePreJoinSubmit}
             onError={handleError}
@@ -147,13 +164,17 @@ export function PageClientImpl(props: {
             onEncryptionError={handleEncryptionError}
             onError={handleError}
           >
-            <VideoConference
+            <CustomVideoConference
               chatMessageFormatter={formatChatMessageLinks}
               SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
             />
             {/* <DebugMode /> */}
             <RecordingIndicator />
           </LiveKitRoom>
+          <div style={{ margin: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <span>공부시간 측정</span>
+            <StudyTimer />
+          </div>
           <MeetingMinutes />
         </div>
       )}

@@ -2,7 +2,7 @@ import React from 'react';
 import Button from './Button.js';
 import { useNavigate } from 'react-router-dom';
 
-const Modal = ({ isOpen, onClose, name, participants, period, detail, profileImageUrl, roomId }) => {
+const Modal = ({ isOpen, onClose, name, participants, period, detail, profileImageUrl, roomId, hostProfileImage, hostNickname, hostLevel }) => {
   const navigate = useNavigate();
 
   if (!isOpen) return null;
@@ -36,9 +36,25 @@ const Modal = ({ isOpen, onClose, name, participants, period, detail, profileIma
           </div>
 
           <div className="space-y-4">
-            <div>
-              <h3 className="text-lg text-gray-700 font-semibold">스터디 정원</h3>
-              <p className="font-semibold">{participants} 명</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg text-gray-700 font-semibold">스터디 정원</h3>
+                <p className="font-semibold">{participants} 명</p>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden">
+                  <img 
+                    src={`${process.env.PUBLIC_URL}/images/${hostProfileImage}`}
+                    alt="Host profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="font-semibold">{hostNickname}</p>
+                  {/* <p className="text-sm text-gray-500">Lv.{hostLevel}</p> */}
+                </div>
+              </div>
             </div>
 
             <div>

@@ -8,19 +8,19 @@ const StudyBoard = () => {
     setPosts([
       {
         id: 1,
-        author: '최수빈',
-        time: '7시간 전',
-        title: '테스트',
-        date: '2024년 11월 11일 오후 2:46',
-        type: 'notice',
+        author: '차은우',
+        time: '4분 전',
+        title: '엉망진창 깃헙 레포 리팩토링 (SRP원칙 준수)\n참고할 레포입니다.\nhttps://github.com/marchislike/christmas',
+        date: '2024년 11월 21일 오전 10:04',
+        type: 'poll',
       },
       {
         id: 2,
         author: '최수빈',
-        time: '7시간 전',
-        title: '테스트 투표',
+        time: '1일 전',
+        title: '12월 19일에 스터디원 비대면 회식이 있습니다.\n참석이 가능하신 분은 내용을 읽어보시고 참석 여부를 남겨주세요.\n그리고 그외 다른 것들은 댓글로 남겨주세요.',
         participantCount: 0,
-        type: 'poll',
+        type: 'notice',
       },
     ]);
   }, []);
@@ -98,9 +98,9 @@ const StudyBoard = () => {
 
       {/* 게시글 목록 */}
       <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
+        {/* <div className="p-4 border-b">
           <h2 className="font-semibold">공지사항</h2>
-        </div>
+        </div> */}
         
         {posts.map((post) => (
           <div key={post.id} className="p-4 border-b">

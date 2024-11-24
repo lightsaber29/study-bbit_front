@@ -135,7 +135,14 @@ const Header = () => {
           <Button variant="secondary" className="text-white-700" onClick={() => navigate('/question')}>질문하기</Button>
           
           {token ? (
-            <div className="relative">
+            <div className="relative flex space-x-4">
+              <Button 
+                variant="primary" 
+                className="text-white-700 profile-button"
+                onClick={() => navigate('/promotion')}
+              >
+                스터디 찾기
+              </Button>
               <Button 
                 variant="primary" 
                 className="text-white-700 profile-button"
