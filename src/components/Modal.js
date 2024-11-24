@@ -1,15 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from './Button.js';
 import { useNavigate } from 'react-router-dom';
+import axios from 'api/axios';
 
-const Modal = ({ isOpen, onClose, name, participants, period, detail, profileImageUrl, roomId, hostProfileImage, hostNickname, hostLevel }) => {
+const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, roomId, hostProfileImage, hostNickname, isPrivate }) => {
   const navigate = useNavigate();
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
-  const handleEnter = () => {
-    onClose();
-    navigate(`/study/${roomId}`);
+  const handleEnter = async () => {
+    try {
+      if (isPrivate && !password) {
+        setError('비밀번호를 입력해주세요.');
+        return;
+      }
+
+      const response = await axios.post(`/api/room/member/join/${roomId}`, {
+        password: isPrivate ? password : undefined,
+      });
+
+      console.log('response :: ', response);
+
+      onClose();
+      alert(response.data.message);
+      navigate(`/study/${roomId}`);
+    } catch (error) {
+      console.log('error :: ', error);
+      setError(error.response?.data?.message || '입장에 실패했습니다.');
+    }
   };
 
   return (
@@ -52,7 +72,6 @@ const Modal = ({ isOpen, onClose, name, participants, period, detail, profileIma
                 </div>
                 <div>
                   <p className="font-semibold">{hostNickname}</p>
-                  {/* <p className="text-sm text-gray-500">Lv.{hostLevel}</p> */}
                 </div>
               </div>
             </div>
@@ -62,23 +81,19 @@ const Modal = ({ isOpen, onClose, name, participants, period, detail, profileIma
               <p className="text-gray-600">{detail}</p>
             </div>
 
-            {/* <div>
-              <h3 className="text-lg text-gray-700 font-semibold">스터디 비밀번호</h3>
-              <input type="text" placeholder="비밀번호를 입력해주세요." className="w-full p-2 border rounded-lg" />
-            </div> */}
-
-            {/* Warning box */}
-            {/* <div className="bg-gray-100 p-4 rounded-lg">
-              <div className="flex items-center text-red-500 mb-2">
-                <span className="mr-2">⚠️</span>
-                <span className="font-semibold">불량(음란) 사용자 신고 안내</span>
+            {isPrivate && (
+              <div>
+                <h3 className="text-lg text-gray-700 font-semibold">스터디 비밀번호</h3>
+                <input 
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="비밀번호를 입력해주세요."
+                  className="w-full p-2 border rounded-lg"
+                />
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
               </div>
-              <p className="text-sm text-gray-600">
-                신고 접수된 사용자는 구루미 캠스터디 운영정책에 따라 스터디 입장이 제한됩니다. 
-                허위로 신고 시 서비스 사용이 제한될 수 있으니 주의해 주세요.
-              </p>
-              <button className="text-gray-600 underline text-sm mt-2">자세히 보기</button>
-            </div> */}
+            )}
           </div>
         </div>
 

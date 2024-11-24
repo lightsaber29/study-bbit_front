@@ -21,7 +21,7 @@ const Home = () => {
   const getStudyList = async (page) => {
     try {
       const response = await axios.get(`/api/room?page=${page}&size=8`);
-      // console.log('response.data :: ', response);
+      console.log('response.data :: ', response);
       setStudyList(prevList => [...prevList, ...response.data.content]);
       setPage(page + 1);
       setIsLastPage(response.data.last);
@@ -157,9 +157,10 @@ const Home = () => {
         onClose={() => setSelectedStudy(null)}
         name={selectedStudy?.name}
         participants={selectedStudy?.participants}
-        period={selectedStudy?.period}
         detail={selectedStudy?.detail}
         profileImageUrl={selectedStudy?.profileImageUrl}
+        leaderId={selectedStudy?.leaderId}
+        isPrivate={selectedStudy?.private}
         hostProfileImage="host-profile.jpg"
         hostNickname="쇼쇼"
       />

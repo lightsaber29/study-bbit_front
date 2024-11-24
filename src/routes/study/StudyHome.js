@@ -16,6 +16,8 @@ const StudyHome = () => {
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [members, setMembers] = useState([]);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -97,6 +99,40 @@ const StudyHome = () => {
     }
   };
 
+  // 스터디룸 나가기 핸들러 추가
+  const handleLeaveRoom = async () => {
+    if (window.confirm('정말로 스터디룸을 나가시겠습니까?')) {
+      try {
+        await axios.delete(`/api/room/member/leave/${roomId}`);
+        alert('스터디룸을 나갔습니다.');
+        navigate('/');
+      } catch (error) {
+        console.error('스터디룸 나가기 실패:', error);
+        const errorMessage = error.response?.data?.message || '스터디룸 나가기에 실패했습니다.';
+        alert(errorMessage);
+      }
+    }
+  };
+
+  // 초대 핸들러 추가
+  const handleInvite = async () => {
+    if (!inviteEmail) {
+      alert('이메일을 입력해주세요.');
+      return;
+    }
+    
+    try {
+      await axios.post(`/api/room/member/invite/${roomId}`, { email: inviteEmail });
+      alert('초대되었습니다.');
+      setIsInviteModalOpen(false);
+      setInviteEmail('');
+    } catch (error) {
+      console.error('초대 실패:', error);
+      const errorMessage = error.response?.data?.message || '초대 처리 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
+
   useEffect(() => {
     getRoomInfo();
     getMembers();
@@ -169,14 +205,17 @@ const StudyHome = () => {
                 </div>
               </div>
 
-              {/* OPIc 정보 섹션 */}
+              {/* 스터디룸 정보 섹션 */}
               <div className="mt-4">
                 <h2 className="text-xl font-bold mb-2">{roomInfo?.name || ''}</h2>
                 <p className="text-gray-600">{roomInfo?.detail || ''}</p>
               </div>
 
-              {/* 초대 버튼 */}
-              <button className="w-full mt-6 py-2 border border-gray-300 rounded-lg flex items-center justify-center">
+              {/* 초대 버튼 수정 */}
+              <button 
+                className="w-full mt-6 py-2 border border-gray-300 rounded-lg flex items-center justify-center"
+                onClick={() => setIsInviteModalOpen(true)}
+              >
                 <span className="mr-2">+</span> 초대
               </button>
 
@@ -201,11 +240,20 @@ const StudyHome = () => {
               </div>
 
               {/* 설정 아이콘 */}
-              <div className="absolute bottom-4 right-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                <button
+                  onClick={handleLeaveRoom}
+                  className="text-red-500 hover:text-red-600 flex items-center gap-1"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="text-sm">나가기</span>
+                </button>
+                {/* <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                </svg> */}
               </div>
             </div>
           </div>
@@ -250,6 +298,35 @@ const StudyHome = () => {
               />
             </div>
           </div>
+
+          {/* 초대 모달 추가 */}
+          {isInviteModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-96">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">스터디원 초대하기</h3>
+                  <button onClick={() => setIsInviteModalOpen(false)}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <input
+                  type="email"
+                  placeholder="초대할 이메일 주소를 입력하세요"
+                  className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+                <button
+                  className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
+                  onClick={handleInvite}
+                >
+                  초대하기
+                </button>
+              </div>
+            </div>
+          )}
 
         </>
       ) : (
