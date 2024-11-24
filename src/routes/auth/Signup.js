@@ -10,18 +10,16 @@ const Signup = () => {
   const nicknameRef = useRef();
   const passwordRef = useRef();
   const emailRef = useRef();
+  const passwordConfirmRef = useRef();
 
   const { values, handleChange } = useFormInput({
     nickname: '',
     password: '',
+    passwordConfirm: '',
     email: ''
   });
 
-  const { nickname, password, email } = values;
-
-  // useEffect(() => {
-  //   console.log('check values :: ', values);
-  // }, [values]);
+  const { nickname, password, passwordConfirm, email } = values;
 
   const validateForm = () => {
     // 이메일 검증
@@ -40,10 +38,23 @@ const Signup = () => {
       alert('비밀번호를 입력해주세요.');
       passwordRef.current.focus();
       return false;
-    // } else if (password.length < 8) {
-    //   alert('비밀번호는 8자 이상이어야 합니다.');
-    //   passwordRef.current.focus();
-    //   return false;
+    } else if (password.length < 4) {
+      alert('비밀번호는 4자 이상이어야 합니다.');
+      passwordRef.current.focus();
+      return false;
+    }
+
+    // 비밀번호 확인 검증
+    if (!passwordConfirm) {
+      alert('비밀번호 확인을 입력해주세요.');
+      passwordConfirmRef.current.focus();
+      return false;
+    }
+
+    if (password !== passwordConfirm) {
+      alert('비밀번호가 일치하지 않습니다.');
+      passwordConfirmRef.current.focus();
+      return false;
     }
 
     // 닉네임 검증
@@ -121,6 +132,23 @@ const Signup = () => {
                 value={password}
                 onChange={handleChange}
                 ref={passwordRef}
+              />
+            </div>
+
+            {/* 비밀번호 확인 입력 */}
+            <div>
+              <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700 mb-1">
+                비밀번호 확인
+              </label>
+              <input
+                id="passwordConfirm"
+                name="passwordConfirm"
+                type="password"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="비밀번호를 다시 입력하세요"
+                value={passwordConfirm}
+                onChange={handleChange}
+                ref={passwordConfirmRef}
               />
             </div>
 
