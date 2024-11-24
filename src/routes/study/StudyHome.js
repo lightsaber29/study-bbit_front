@@ -15,6 +15,7 @@ const StudyHome = () => {
   const navigate = useNavigate();
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [members, setMembers] = useState([]);
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -64,6 +65,16 @@ const StudyHome = () => {
     }
   }, [roomId, navigate]);
 
+  const getMembers = useCallback(async () => {
+    try {
+      const response = await axios.get(`/api/room/member/${roomId}`);
+      console.log('response.data :: ', response.data);
+      setMembers(response.data);
+    } catch (error) {
+      console.error('멤버 목록 조회 실패:', error);
+    }
+  }, [roomId]);
+
   const handleVideoMeeting = async () => {
     try {
       // 참가자 목록 조회
@@ -88,7 +99,8 @@ const StudyHome = () => {
 
   useEffect(() => {
     getRoomInfo();
-  }, [getRoomInfo]);
+    getMembers();
+  }, [getRoomInfo, getMembers]);
 
   useEffect(() => {
     console.log('roomInfo :: ', roomInfo);
@@ -172,23 +184,19 @@ const StudyHome = () => {
               <div className="mt-6">
                 <h3 className="text-gray-600 mb-4">참여 멤버</h3>
                 <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <span className="ml-2">차은우</span>
-                    <span className="ml-2">👑</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <span className="ml-2">최수빈</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <span className="ml-2">갈라파고스</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <span className="ml-2">쇼쇼</span>
-                  </li>
+                  {members.map((member) => (
+                    <li key={member.nickname} className="flex items-center">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full">
+                        <img 
+                          src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default_profile.png`}
+                          alt={member.nickname} 
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      </div>
+                      <span className="ml-2">{member.nickname}</span>
+                      {member.leaderLabel === '방장' && <span className="ml-2">👑</span>}
+                    </li>
+                  ))}
                 </ul>
               </div>
 
