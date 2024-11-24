@@ -162,7 +162,6 @@ const Home = () => {
         profileImageUrl={selectedStudy?.profileImageUrl}
         hostProfileImage="host-profile.jpg"
         hostNickname="쇼쇼"
-        // hostLevel={42}
       />
 
       {/* 더보기 버튼 */}
