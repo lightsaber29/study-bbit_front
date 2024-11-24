@@ -6,7 +6,7 @@ import Pagination  from 'components/Pagination'; //'../../components/Pagination'
 import MeetingTranscriptsList from 'components/MeetingTranscriptsList';
 
 const StudyMeeting = () => {
-  const { meetingId } = useParams();
+  const { roomId } = useParams();
   const [transcripts, setTranscripts] = useState([]);
   const [openMeetingId, setOpenMeetingId] = useState(null);
   const [markdownContent, setMarkdownContent] = useState({});
@@ -17,7 +17,7 @@ const StudyMeeting = () => {
   useEffect(() => {
     const fetchTranscripts = async () => {
       try {
-        const response = await axios.get(`/api/meetings/56`);
+        const response = await axios.get(`/api/meetings/${roomId}`);
         // console.log(response.data.data);
         // const data = await response.json();
         if (response) {
