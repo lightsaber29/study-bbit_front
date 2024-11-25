@@ -23,8 +23,8 @@ const NotificationModal = ({ isOpen, onClose }) => {
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('/api/notifications');
-        setNotifications(response.data?.content || []);
+        // const response = await axios.get('/api/notifications');
+        // setNotifications(response.data?.content || []);
       } catch (error) {
         console.error('Error fetching notifications:', error);
       } finally {
