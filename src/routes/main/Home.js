@@ -50,7 +50,9 @@ const Home = () => {
 
   useEffect(() => {
     getStudyList(page);
-    getMyStudyList();
+    if (token) {
+      getMyStudyList();
+    }
   }, []);
 
   const handleCardClick = (study) => {
