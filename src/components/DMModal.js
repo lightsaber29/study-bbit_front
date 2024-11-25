@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import MessageDialog from './MessageDialog';
 import axios from 'api/axios';
 
+const MessageSkeleton = () => (
+  <div className="p-4">
+    <div className="flex items-center space-x-3">
+      <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+      <div className="flex-1">
+        <div className="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+        <div className="h-3 bg-gray-200 rounded w-32 animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const DMModal = ({ isOpen, onClose }) => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [activeTab, setActiveTab] = useState('received');
@@ -11,10 +23,11 @@ const DMModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       setLoading(true);
+      setMessages([]);
       try {
         const endpoint = activeTab === 'received' ? '/api/dm/received' : '/api/dm/sent';
         const response = await axios.get(endpoint);
-        console.log("fetchMessages response :: ", response);
+        // console.log("fetchMessages response :: ", response);
         setMessages(response.data?.content);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -46,7 +59,7 @@ const DMModal = ({ isOpen, onClose }) => {
           <button
             className={`flex-1 py-2 px-4 text-sm font-medium ${
               activeTab === 'received'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-emerald-600 border-b-2 border-emerald-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
             onClick={() => setActiveTab('received')}
@@ -56,7 +69,7 @@ const DMModal = ({ isOpen, onClose }) => {
           <button
             className={`flex-1 py-2 px-4 text-sm font-medium ${
               activeTab === 'sent'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'text-emerald-600 border-b-2 border-emerald-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
             onClick={() => setActiveTab('sent')}
@@ -66,7 +79,11 @@ const DMModal = ({ isOpen, onClose }) => {
         </div>
         
         <div className="divide-y divide-gray-100">
-          {activeTab === 'received' ? (
+          {loading ? (
+            <>
+              <MessageSkeleton />
+            </>
+          ) : activeTab === 'received' ? (
             receivedMessages.length > 0 ? (
               receivedMessages.map((message) => (
                 <div 

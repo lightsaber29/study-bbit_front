@@ -8,6 +8,7 @@ import { useRef } from 'react';
 import { BiBell, BiChat } from 'react-icons/bi';
 import { selectMember } from 'store/memberSlice';
 import DMModal from '../components/DMModal';
+import NotificationModal from '../components/NotificationModal';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -36,6 +37,7 @@ const Header = () => {
   const token = useSelector(selectToken);
   const searchInputRef = useRef(null);
   const [showDMModal, setShowDMModal] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -113,21 +115,23 @@ const Header = () => {
     };
   }, [showDMModal]);
 
-  // 임시 메시지 데이터 (실제로는 API에서 가져와야 함)
-  const messages = [
-    {
-      id: 1,
-      senderName: "김철수",
-      senderProfileImage: "/images/profile1.jpg",
-      content: "안녕하세요! 스터디 참여 가능할까요?",
-    },
-    {
-      id: 2,
-      senderName: "이영희",
-      senderProfileImage: "/images/profile2.jpg",
-      content: "다음 스터디 일정 문의드립니다.",
-    },
-  ];
+  // 알림 모달 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showNotificationModal && 
+        !event.target.closest('.notification-modal') && 
+        !event.target.closest('.notification-button')
+      ) {
+        setShowNotificationModal(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotificationModal]);
 
   return (
     <div className="flex flex-col border-b shadow-sm">
@@ -177,7 +181,10 @@ const Header = () => {
               </Button>
               
               {/* 알림 버튼 */}
-              <button className="p-2 hover:bg-gray-100 rounded-full relative">
+              <button 
+                className="p-2 hover:bg-gray-100 rounded-full relative notification-button"
+                onClick={() => setShowNotificationModal(!showNotificationModal)}
+              >
                 <BiBell size={24} className="text-gray-600" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
@@ -193,7 +200,6 @@ const Header = () => {
                 <DMModal 
                   isOpen={showDMModal}
                   onClose={() => setShowDMModal(false)}
-                  messages={messages}
                 />
               </div>
               
@@ -212,6 +218,12 @@ const Header = () => {
                 <ProfileModal 
                   isOpen={showProfileModal} 
                   onClose={() => setShowProfileModal(false)} 
+                />
+              </div>
+              <div className="notification-modal relative z-50">
+                <NotificationModal 
+                  isOpen={showNotificationModal}
+                  onClose={() => setShowNotificationModal(false)}
                 />
               </div>
             </div>
