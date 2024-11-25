@@ -49,7 +49,7 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
           
           <div className="w-full h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden">
             <img 
-              src={`${process.env.PUBLIC_URL}/images/${profileImageUrl}`}
+              src={decodeURIComponent(profileImageUrl)}
               alt="Study thumbnail" 
               className="w-full h-full object-cover"
             />
@@ -65,7 +65,7 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 rounded-full overflow-hidden">
                   <img 
-                    src={`${process.env.PUBLIC_URL}/images/${hostProfileImage}`}
+                    src={decodeURIComponent(profileImageUrl)}
                     alt="Host profile"
                     className="w-full h-full object-cover"
                   />
