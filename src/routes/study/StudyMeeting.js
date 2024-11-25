@@ -10,6 +10,7 @@ const StudyMeeting = () => {
   const [transcripts, setTranscripts] = useState([]);
   const [openMeetingId, setOpenMeetingId] = useState(null);
   const [markdownContent, setMarkdownContent] = useState({});
+  const [originalContent, setOriginalContent] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 5;
@@ -17,13 +18,13 @@ const StudyMeeting = () => {
   useEffect(() => {
     const fetchTranscripts = async () => {
       try {
-        const response = await axios.get(`/api/meetings/${roomId}`);
+        const response = await axios.get(`/api/express/meetings/${roomId}`);
         // console.log(response.data.data);
         // const data = await response.json();
         if (response) {
           setTranscripts(response.data.data);
-          // console.log(transcripts);
-          setTotalPages(Math.ceil(response.data.length / itemsPerPage));
+          console.log(transcripts);
+          setTotalPages(Math.ceil(response.data.data.length / itemsPerPage));
         }
       } catch (error) {
         console.error('Failed to fetch transcripts:', error);
@@ -46,6 +47,23 @@ const StudyMeeting = () => {
     }
   };
 
+  const fetchOriginalContent = async (url) => {
+    try {
+      console.log(url);
+      const response = await fetch(url);
+      console.log(response);
+      const content = await response.text();
+      const data = JSON.parse(content); // JSON 객체로 변환
+      console.log(data)
+      const minuteData = data.minute  //.split("\n"); // 줄바꿈으로 분리
+      console.log(minuteData);
+      return minuteData;
+    } catch (error) {
+      console.error('Failed to fetch markdown content:', error);
+      return '내용을 불러오는데 실패했습니다.';
+    }
+  };
+
   const toggleMeeting = async (id) => {
     if (openMeetingId === id) {
       setOpenMeetingId(null);
@@ -53,9 +71,14 @@ const StudyMeeting = () => {
       setOpenMeetingId(id);
       if (!markdownContent[id]) {
         const content = await fetchMarkdownContent(transcripts[id].mm_summary_url);
+        const original_content = await fetchOriginalContent(transcripts[id].mm_original_url)
         setMarkdownContent(prev => ({
           ...prev,
           [id]: content
+        }));
+        setOriginalContent(prev => ({
+          ...prev,
+          [id]: original_content
         }));
       }
     }
@@ -79,6 +102,7 @@ const StudyMeeting = () => {
         openMeetingId={openMeetingId}
         toggleMeeting={toggleMeeting}
         markdownContent={markdownContent}
+        originalContent={originalContent}
       />
       <Pagination
         currentPage={currentPage}
