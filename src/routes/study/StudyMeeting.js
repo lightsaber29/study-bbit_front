@@ -15,6 +15,10 @@ const StudyMeeting = () => {
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 5;
 
+  const handleDelete = (deletedId) => {
+    setTranscripts(prev => prev.filter(transcript => transcript.mm_summary_id !== deletedId));
+  };
+
   useEffect(() => {
     const fetchTranscripts = async () => {
       try {
@@ -103,6 +107,7 @@ const StudyMeeting = () => {
         toggleMeeting={toggleMeeting}
         markdownContent={markdownContent}
         originalContent={originalContent}
+        onDelete={handleDelete}
       />
       <Pagination
         currentPage={currentPage}
