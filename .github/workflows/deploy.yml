@@ -41,3 +41,4 @@ jobs:
           sudo docker stop study-bbit_front || true
           sudo docker rm study-bbit_front || true
           sudo docker run -d -p 3000:3000 --name study-bbit_front --restart always gyqjajang/study-bbit_front
+          sudo docker system prune -f --volumes
