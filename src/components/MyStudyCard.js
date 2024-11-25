@@ -17,10 +17,10 @@ const MyStudyCard = ({
       ) : (
         <div className="w-full bg-gray-200 h-60 rounded-lg" onClick={() => navigate(`/study/${roomId}`)}>
           <div className="h-2/3 overflow-hidden">
-            <img src={photoUrl} alt="photoUrl" className="w-full h-full object-cover rounded-t-lg" />
+            <img src={`${process.env.PUBLIC_URL}/images/${photoUrl}`} alt="photoUrl" className="w-full h-full object-cover rounded-t-lg" />
           </div>
           <div className="h-1/3 p-4">
-            <h3 className="text-sm font-medium">{title}</h3>
+            <h3 className="text-sm font-medium line-clamp-2">{title}</h3>
           </div>
         </div>
       )}
