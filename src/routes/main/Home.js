@@ -46,11 +46,13 @@ const Home = () => {
       const errorMessage = error.response?.data?.message || '내 스터디 목록 조회 중 오류가 발생했습니다.';
       alert(errorMessage);
     }
-  } 
+  }
 
   useEffect(() => {
     getStudyList(page);
-    getMyStudyList();
+    if (token) {
+      getMyStudyList();
+    }
   }, []);
 
   const handleCardClick = (study) => {

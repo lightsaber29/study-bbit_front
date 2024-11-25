@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord }) => {
   const socketRef = useRef(null);
 
-  // const domain = 'http://localhost:6080'; // local
+  // const domain = 'http://localhost:6081'; // local
   const domain = 'https://node.studybbit.site'; // dev
 
   useEffect(() => {
