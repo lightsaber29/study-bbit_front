@@ -6,6 +6,7 @@ import Modal from '../../components/Modal';
 import { useSelector } from 'react-redux';
 import { selectToken } from 'store/memberSlice';
 import axios from 'api/axios';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [studyList, setStudyList] = useState([]);
@@ -19,6 +20,7 @@ const Home = () => {
   const [startIndex, setStartIndex] = useState(0);
 
   const token = useSelector(selectToken);
+  const navigate = useNavigate();
 
   const getStudyList = async (page) => {
     try {
@@ -52,8 +54,13 @@ const Home = () => {
   }, []);
 
   const handleCardClick = (study) => {
-    setSelectedStudy(study);
-    // console.log('study :: ', study);
+    const isMyStudy = myStudyList.some(myStudy => myStudy.id === study.id);
+    
+    if (isMyStudy) {
+      navigate(`/study/${study.id}`);
+    } else {
+      setSelectedStudy(study);
+    }
   };
 
   const handleGoalSubmit = () => {
