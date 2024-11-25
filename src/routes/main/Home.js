@@ -6,22 +6,26 @@ import Modal from '../../components/Modal';
 import { useSelector } from 'react-redux';
 import { selectToken } from 'store/memberSlice';
 import axios from 'api/axios';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [studyList, setStudyList] = useState([]);
+  const [myStudyList, setMyStudyList] = useState([]);
   const [selectedStudy, setSelectedStudy] = useState(null);
   const [page, setPage] = useState(0);
   const [isLastPage, setIsLastPage] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
+  const [startIndex, setStartIndex] = useState(0);
 
   const token = useSelector(selectToken);
+  const navigate = useNavigate();
 
   const getStudyList = async (page) => {
     try {
       const response = await axios.get(`/api/room?page=${page}&size=8`);
-      console.log('response.data :: ', response);
+      console.log('getStudyList response.data :: ', response);
       setStudyList(prevList => [...prevList, ...response.data.content]);
       setPage(page + 1);
       setIsLastPage(response.data.last);
@@ -32,13 +36,31 @@ const Home = () => {
     }
   }
 
+  const getMyStudyList = async () => {
+    try {
+      const response = await axios.get('/api/member/mystudy?size=20');
+      console.log('getMyStudyList response.data :: ', response);
+      setMyStudyList(response.data?.myRooms);
+    } catch (error) {
+      console.error('내 스터디 목록 조회 실패: ', error);
+      const errorMessage = error.response?.data?.message || '내 스터디 목록 조회 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  } 
+
   useEffect(() => {
     getStudyList(page);
+    getMyStudyList();
   }, []);
 
   const handleCardClick = (study) => {
-    setSelectedStudy(study);
-    // console.log('study :: ', study);
+    const isMyStudy = myStudyList.some(myStudy => myStudy.id === study.id);
+    
+    if (isMyStudy) {
+      navigate(`/study/${study.id}`);
+    } else {
+      setSelectedStudy(study);
+    }
   };
 
   const handleGoalSubmit = () => {
@@ -49,6 +71,14 @@ const Home = () => {
     setMinutes('');
   }
 
+  const handlePrevSlide = () => {
+    setStartIndex(prev => Math.max(0, prev - 4));
+  };
+
+  const handleNextSlide = () => {
+    setStartIndex(prev => Math.min(myStudyList.length - 4, prev + 4));
+  };
+
   return (
     <div>
       {/* 내 스터디 & 내 목표 섹션 */}
@@ -56,11 +86,49 @@ const Home = () => {
         <div className="gap-6 mb-8">
           <div className="bg-gray-100 p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-4">내 스터디</h2>
-            <div className="flex items-center space-x-4">
-              <MyStudyCard isEmpty={false} title="클린코드를 읽는 사람들" photoUrl='/images/aespa_karina.jpeg' roomId='56' />
-              <MyStudyCard isEmpty={false} title="ReactNative 공부방" photoUrl='/images/aespa_winter.jpeg' roomId='2' />
-              <MyStudyCard isEmpty={true} />
-              <MyStudyCard isEmpty={true} />
+            <div className="relative">
+              <div className="w-full overflow-hidden">
+                <div className="flex justify-between w-full gap-4">
+                  {[...Array(4)].map((_, index) => {
+                    const study = myStudyList[startIndex + index];
+                    return (
+                      <div 
+                        key={study?.id || `empty-study-${index}`} 
+                        className="w-1/4"
+                      >
+                        <MyStudyCard
+                          isEmpty={!study}
+                          title={study?.name}
+                          photoUrl={study?.profileImageUrl}
+                          roomId={study?.id}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {myStudyList.length > 4 && startIndex > 0 && (
+                <button
+                  onClick={handlePrevSlide}
+                  className="absolute left-[-20px] top-1/2 transform -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+              )}
+
+              {myStudyList.length > 4 && startIndex < myStudyList.length - 4 && (
+                <button
+                  onClick={handleNextSlide}
+                  className="absolute right-[-20px] top-1/2 transform -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 

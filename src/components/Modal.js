@@ -49,7 +49,7 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
           
           <div className="w-full h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden">
             <img 
-              src={`${process.env.PUBLIC_URL}/images/${profileImageUrl}`} 
+              src={`${process.env.PUBLIC_URL}/images/${profileImageUrl}`}
               alt="Study thumbnail" 
               className="w-full h-full object-cover"
             />

@@ -17,7 +17,7 @@ const Card = ({
           className="w-full h-full object-cover rounded-t-lg"
         />
       </div>
-      <h3 className="text-md font-semibold">{name}</h3>
+      <h3 className="text-md font-semibold whitespace-nowrap overflow-hidden text-ellipsis">{name}</h3>
       <div className="text-sm text-gray-600">{participants} / {maxParticipants}</div>
       {/* <div className="text-sm text-gray-500">공무원 자율 스터디 1</div> */}
     </div>
