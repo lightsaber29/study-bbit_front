@@ -23,12 +23,12 @@ const ProfileModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed top-14 right-4 z-50 w-80 bg-white rounded-lg shadow-lg">
+    <div className="fixed top-14 right-4 z-50 w-80 bg-white rounded-lg shadow-lg border border-gray-200">
       {/* 프로필 정보 */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
           <img
-            src={`${process.env.PUBLIC_URL}/images/default_profile.png`}
+            src={member?.profileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`}
             alt="profile"
             className="w-12 h-12 rounded-full"
           />
@@ -37,26 +37,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
             <p className="text-sm text-gray-500">{member.email}</p>
           </div>
         </div>
-        {/* <div className="mt-2 text-sm text-gray-500">
-          <span>등급 ~ {profileData.joinDate}</span>
-        </div> */}
       </div>
-
-      {/* 레벨 및 경험치 정보 */}
-      {/* <div className="p-4 border-b">
-        <div className="flex justify-between items-center">
-          <span className="font-medium pl-2">Lv. {member.level || 1}</span>
-          <div className="text-sm text-gray-500">
-            {member.exp || 0} / {member.nextExp || 100} EXP
-          </div>
-        </div>
-        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-blue-500 h-2 rounded-full"
-            style={{ width: `${((member.exp || 0) / (member.nextExp || 100)) * 100}%` }}
-          ></div>
-        </div>
-      </div> */}
 
       {/* 메뉴 항목들 */}
       <div className="p-2">
