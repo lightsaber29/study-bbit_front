@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UploadImage from 'components/UploadImage';
 import useFormInput from 'hooks/useFormInput';
+import axios from 'api/axios';
 
 const StudySettings = () => {
+  const { roomId } = useParams();
   const navigate = useNavigate();
 
   const { values, handleChange, setValues } = useFormInput({
     password: '',
-    description: '',
+    detail: '',
     image: null
   })
 
-  const { password, description, image } = values;
+  const { password, detail, image } = values;
 
   const [showPassword, setShowPassword] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
@@ -24,16 +26,59 @@ const StudySettings = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: 설정 변경 API 연동
-    console.log('설정 변경:', values);
+
+    try {
+      const formData = new FormData();
+      if (image) {
+        formData.append('roomImage', image);
+        formData.append('roomImageChanged', 'true');
+      }
+      if (password) {
+        formData.append('password', password);
+      }
+      if (detail) {
+        formData.append('detail', detail);
+      }
+
+      // FormData 내용 확인을 위한 코드
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      // 또는 이렇게도 확인 가능
+      console.log('image:', formData.get('image'));
+      console.log('password:', formData.get('password'));
+      console.log('detail:', formData.get('detail'));
+
+      const response = await axios.post(`/api/room/${roomId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      console.log('스터디룸 수정 성공:', response.data);
+      alert('스터디룸 설정이 변경되었습니다.');
+      navigate(-1);
+    } catch (error) {
+      console.error('스터디룸 수정 실패:', error);
+      const errorMessage = error.response?.data?.message || '스터디룸 설정 변경 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
   };
 
-  const handleLeaveStudy = () => {
-    if (window.confirm('정말로 스터디룸을 나가시겠습니까?')) {
-      // TODO: 스터디룸 탈퇴 API 연동
-      navigate('/');
+  const handleDeleteStudy = async () => {
+    if (window.confirm('정말로 스터디룸을 삭제하시겠습니까?')) {
+      try {
+        await axios.delete(`/api/room/${roomId}`);
+        alert('스터디룸이 삭제되었습니다.');
+        navigate('/');
+      } catch (error) {
+        console.error('스터디룸 삭제 실패:', error);
+        const errorMessage = error.response?.data?.message || '스터디룸 삭제 중 오류가 발생했습니다.';
+        alert(errorMessage);
+      }
     }
   };
 
@@ -92,8 +137,8 @@ const StudySettings = () => {
               스터디룸 설명
             </label>
             <textarea
-              name="description"
-              value={description}
+              name="detail"
+              value={detail}
               onChange={handleChange}
               rows="4"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -107,10 +152,10 @@ const StudySettings = () => {
               {/* 왼쪽: 스터디룸 나가기 */}
               <button
                 type="button"
-                onClick={handleLeaveStudy}
+                onClick={handleDeleteStudy}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                스터디룸 나가기
+                스터디룸 삭제
               </button>
 
               {/* 오른쪽: 저장 및 취소 버튼 */}
