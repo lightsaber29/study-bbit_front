@@ -22,9 +22,6 @@ const UploadImage = ({ onImageChange, previewImage, setPreviewImage }) => {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        스터디룸 이미지
-      </label>
       <div 
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-gray-400 flex justify-center items-center"
         onClick={handleClick}
