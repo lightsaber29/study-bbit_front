@@ -209,9 +209,13 @@ const Header = () => {
                 onClick={handleProfileClick}
               >
                 <img 
-                  src={member?.profileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`} 
+                  src={
+                    member.profileImageUrl 
+                      ? decodeURIComponent(member.profileImageUrl)
+                      : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                  } 
                   alt="Profile" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full rounded-full border-2 border-slate-600"
                 />
               </button>
               <div className="profile-modal">

@@ -12,7 +12,11 @@ const Card = ({
     <div className="bg-white p-4 rounded-lg shadow-md">
       <div className="bg-gray-300 h-32 rounded-lg mb-4">
         <img
-          src={decodeURIComponent(profileImageUrl)}
+          src={
+            profileImageUrl 
+              ? decodeURIComponent(profileImageUrl)
+              : `${process.env.PUBLIC_URL}/images/default-room-image.jpg`
+          }
           alt="photoUrl"
           className="w-full h-full object-cover rounded-t-lg"
         />

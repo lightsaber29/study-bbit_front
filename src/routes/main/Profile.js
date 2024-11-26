@@ -9,7 +9,7 @@ const Profile = () => {
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    nickname: '최수빈',
+    nickname: '',
   });
   const [profileImage, setProfileImage] = useState('/images/profile-default.png');
   const [previewImage, setPreviewImage] = useState('/images/profile-default.png');
