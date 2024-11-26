@@ -1,60 +1,69 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
+import UploadImage from 'components/UploadImage';
+import useFormInput from 'hooks/useFormInput';
+import { useSelector } from 'react-redux';
+import { selectEmail, selectNickName } from 'store/memberSlice';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: 'lightsaber2929@gmail.com',
+  const userEmail = useSelector(selectEmail);
+  const userNickName = useSelector(selectNickName);
+  
+  const { values, handleChange, setValues } = useFormInput({
+    email: userEmail || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    nickname: '',
+    nickname: userNickName || '',
+    image: null
   });
-  const [profileImage, setProfileImage] = useState('/images/profile-default.png');
-  const [previewImage, setPreviewImage] = useState('/images/profile-default.png');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+  const { email, currentPassword, newPassword, confirmPassword, nickname, image } = values;
+  const [previewImage, setPreviewImage] = useState(null);
+
+  const handleImageChange = (file) => {
+    setValues(prev => ({
       ...prev,
-      [name]: value
+      image: file
     }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-      setProfileImage(file);
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 비밀번호 변경 시 유효성 검사
-    if (formData.newPassword) {
-      if (formData.newPassword !== formData.confirmPassword) {
+    if (newPassword) {
+      if (newPassword !== confirmPassword) {
         alert('새 비밀번호가 일치하지 않습니다.');
         return;
       }
-      if (!formData.currentPassword) {
+      if (!currentPassword) {
         alert('현재 비밀번호를 입력해주세요.');
         return;
       }
     }
 
-    // API 호출 로직 구현
-    console.log('프로필 수정:', formData);
-    console.log('새 프로필 이미지:', profileImage);
-    
-    // 성공 시 프로필 페이지로 이동
-    navigate('/profile');
+    try {
+      const formData = new FormData();
+      if (image) {
+        formData.append('profileImage', image);
+      }
+      formData.append('nickname', nickname);
+      if (newPassword) {
+        formData.append('currentPassword', currentPassword);
+        formData.append('newPassword', newPassword);
+      }
+
+      // API 호출 로직 구현
+      console.log('프로필 수정:', formData);
+      
+      // 성공 시 프로필 페이지로 이동
+      navigate('/profile');
+    } catch (error) {
+      console.error('프로필 수정 실패:', error);
+      alert('프로필 수정 중 오류가 발생했습니다.');
+    }
   };
 
   const handleWithdraw = () => {
@@ -71,24 +80,15 @@ const Profile = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 프로필 이미지 섹션 */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative">
-            <img
-              src={previewImage}
-              alt="profile"
-              className="w-32 h-32 rounded-full object-cover mb-4"
-            />
-            <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md cursor-pointer">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-              📷
-            </label>
-          </div>
-          <p className="text-sm text-gray-500">프로필 사진 변경</p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            프로필 이미지
+          </label>
+          <UploadImage 
+            onImageChange={handleImageChange}
+            previewImage={previewImage}
+            setPreviewImage={setPreviewImage}
+          />
         </div>
 
         {/* 이메일 */}
@@ -99,7 +99,7 @@ const Profile = () => {
           <input
             type="email"
             name="email"
-            value={formData.email}
+            value={email}
             disabled
             className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50"
           />
@@ -113,7 +113,7 @@ const Profile = () => {
           <input
             type="text"
             name="nickname"
-            value={formData.nickname}
+            value={nickname}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
@@ -130,7 +130,7 @@ const Profile = () => {
             <input
               type="password"
               name="currentPassword"
-              value={formData.currentPassword}
+              value={currentPassword}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
@@ -143,7 +143,7 @@ const Profile = () => {
             <input
               type="password"
               name="newPassword"
-              value={formData.newPassword}
+              value={newPassword}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
@@ -156,7 +156,7 @@ const Profile = () => {
             <input
               type="password"
               name="confirmPassword"
-              value={formData.confirmPassword}
+              value={confirmPassword}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />

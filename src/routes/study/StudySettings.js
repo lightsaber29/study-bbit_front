@@ -90,11 +90,16 @@ const StudySettings = () => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <UploadImage 
-            onImageChange={handleImageChange}
-            previewImage={previewImage}
-            setPreviewImage={setPreviewImage}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              스터디룸 이미지
+            </label>
+            <UploadImage 
+              onImageChange={handleImageChange}
+              previewImage={previewImage}
+              setPreviewImage={setPreviewImage}
+            />
+          </div>
 
           {/* 비밀번호 변경 */}
           <div>

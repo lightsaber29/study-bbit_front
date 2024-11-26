@@ -40,7 +40,7 @@ const CreateStudyRoom = () => {
 
   const validateForm = () => {
     if (!name) {
-      alert('방 이름을 입력해주세요.');
+      alert('방 이름��� 입력해주세요.');
       nameRef.current.focus();
       return false;
     }
@@ -143,12 +143,16 @@ const CreateStudyRoom = () => {
       <h1 className="text-2xl font-bold mb-8">스터디룸 만들기</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        {/* 방 프로필 이미지 */}
-        <UploadImage 
-          onImageChange={handleImageChange}
-          previewImage={previewImage}
-          setPreviewImage={setPreviewImage}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            스터디룸 이미지
+          </label>
+          <UploadImage 
+            onImageChange={handleImageChange}
+            previewImage={previewImage}
+            setPreviewImage={setPreviewImage}
+          />
+        </div>
 
         {/* 방 이름 */}
         <div>
