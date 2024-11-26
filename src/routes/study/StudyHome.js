@@ -191,17 +191,15 @@ const StudyHome = () => {
               {/* 이미지 섹션 */}
               <div className="mt-8 text-center">
                 <div className="bg-gray-100 w-full aspect-square mb-4">
-                  {roomInfo?.profileImageUrl ? (
-                    <img 
-                      src={`${process.env.PUBLIC_URL}/images/${roomInfo?.profileImageUrl}`}
-                      alt="스터디룸 이미지" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <p>이미지 없음</p>
-                    </div>
-                  )}
+                  <img 
+                    src={
+                      roomInfo?.profileImageUrl 
+                        ? decodeURIComponent(roomInfo?.profileImageUrl)
+                        : `${process.env.PUBLIC_URL}/images/default-room-image.jpg`
+                    }
+                    alt="스터디룸 이미지" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
 
@@ -225,11 +223,15 @@ const StudyHome = () => {
                 <ul className="space-y-4">
                   {members.map((member) => (
                     <li key={member.nickname} className="flex items-center">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full">
-                        <img 
-                          src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default_profile.png`}
+                      <div className="w-8 h-8 rounded-full">
+                        <img
+                          src={
+                            member.profileImageUrl 
+                              ? decodeURIComponent(member.profileImageUrl)
+                              : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                          }
                           alt={member.nickname} 
-                          className="w-full h-full rounded-full object-cover"
+                          className="w-full h-full rounded-full border-2 border-slate-600"
                         />
                       </div>
                       <span className="ml-2">{member.nickname}</span>

@@ -28,9 +28,13 @@ const ProfileModal = ({ isOpen, onClose }) => {
       <div className="p-4 border-b">
         <div className="flex items-center gap-3">
           <img
-            src={member?.profileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`}
+            src={
+              member.profileImageUrl 
+                ? decodeURIComponent(member.profileImageUrl)
+                : `${process.env.PUBLIC_URL}/images/default-profile.png`
+            }
             alt="profile"
-            className="w-12 h-12 rounded-full"
+            className="w-12 h-12 rounded-full border-2 border-slate-600"
           />
           <div>
             <h3 className="font-semibold">{member.nickName}</h3>

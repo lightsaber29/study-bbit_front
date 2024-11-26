@@ -18,8 +18,11 @@ const MyStudyCard = ({
         <div className="w-full bg-gray-200 h-60 rounded-lg" onClick={() => navigate(`/study/${roomId}`)}>
           <div className="h-2/3 overflow-hidden">
             <img
-              // src={`${process.env.PUBLIC_URL}/images/${photoUrl}`}
-              src={decodeURIComponent(photoUrl)}
+              src={
+                photoUrl 
+                  ? decodeURIComponent(photoUrl)
+                  : `${process.env.PUBLIC_URL}/images/default-room-image.jpg`
+              }
               alt="photoUrl"
               className="w-full h-full object-cover rounded-t-lg"
             />

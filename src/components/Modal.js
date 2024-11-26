@@ -49,9 +49,13 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
           
           <div className="w-full h-48 mb-4 bg-gray-100 rounded-lg overflow-hidden">
             <img 
-              src={decodeURIComponent(profileImageUrl)}
+              src={
+                profileImageUrl 
+                  ? decodeURIComponent(profileImageUrl)
+                  : `${process.env.PUBLIC_URL}/images/default-room-image.jpg`
+              }
               alt="Study thumbnail" 
-              className="w-full h-full object-cover"
+              className="w-full h-full rounded-lg"
             />
           </div>
 
@@ -65,9 +69,13 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 rounded-full overflow-hidden">
                   <img 
-                    src={decodeURIComponent(profileImageUrl)}
+                    src={
+                      profileImageUrl 
+                        ? decodeURIComponent(profileImageUrl)
+                        : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                    }
                     alt="Host profile"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full rounded-full border-2 border-slate-600"
                   />
                 </div>
                 <div>
