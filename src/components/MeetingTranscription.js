@@ -8,7 +8,7 @@ import { MeetingHeader} from './MeetingHeader';
 import LoadingOverlay from './LoadingOverlay';
 import { useParams } from 'react-router-dom';
 import { selectMember } from 'store/memberSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import axios from 'api/axios';
 
 // const MeetingTranscription = ({ meetingId, userId, isHost = false }) => {
@@ -25,7 +25,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   const member = useSelector(selectMember);
 
   meetingId = roomId;
-  userId = member.nickName;
+  userId = member.nickname;
   console.log(userId);
 
   const getRoomInfo = async () => {
@@ -34,9 +34,9 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       
       console.log('response.data :: ', response.data);
       console.log('userId :: ', userId);
-      const member = response.data.find(member => member.nickname == userId);
+      const member = response.data.find(member => member.nickname === userId);
       console.log('after find')
-      if (member && member.leaderLabel == '방장') {
+      if (member && member.leaderLabel === '방장') {
         setIsHost(true);
         console.log(isHost);
       }

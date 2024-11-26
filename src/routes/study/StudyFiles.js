@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectNickName } from 'store/memberSlice';
+import { selectNickname } from 'store/memberSlice';
 
 const StudyFiles = () => {
-  const nickName = useSelector(selectNickName);
+  const nickname = useSelector(selectNickname);
   const fileInputRef = React.useRef(null);
   const [files, setFiles] = useState([
     {
@@ -32,7 +32,7 @@ const StudyFiles = () => {
       const newFile = {
         id: files.length + 1,
         name: uploadedFile.name,
-        author: nickName,
+        author: nickname,
         uploadDate: new Date().toISOString().split('T')[0],
         size: `${(uploadedFile.size / (1024 * 1024)).toFixed(1)}MB`
       };

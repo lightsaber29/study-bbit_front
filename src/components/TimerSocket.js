@@ -19,7 +19,7 @@
 //   const timeRef = useRef(0);
 
 //   const meetingId = roomId;
-//   const userId = member.nickName;
+//   const userId = member.nickname;
 
 //   const updateMaxTime = (time) => {
 //   maxTimeRef.current = time;
@@ -238,7 +238,7 @@ const TimerSocket = () => {
   const modalRef = useRef(false);
 
   const meetingId = roomId;
-  const userId = member.nickName;
+  const userId = member.nickname;
 
   const updateMaxTime = (time) => {
     maxTimeRef.current = time;

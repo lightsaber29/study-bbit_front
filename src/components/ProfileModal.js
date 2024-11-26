@@ -37,7 +37,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
             className="w-12 h-12 rounded-full border-2 border-slate-600"
           />
           <div>
-            <h3 className="font-semibold">{member.nickName}</h3>
+            <h3 className="font-semibold">{member.nickname}</h3>
             <p className="text-sm text-gray-500">{member.email}</p>
           </div>
         </div>

@@ -42,16 +42,6 @@ const StudySettings = () => {
         formData.append('detail', detail);
       }
 
-      // FormData 내용 확인을 위한 코드
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
-      // 또는 이렇게도 확인 가능
-      console.log('image:', formData.get('image'));
-      console.log('password:', formData.get('password'));
-      console.log('detail:', formData.get('detail'));
-
       const response = await axios.post(`/api/room/${roomId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
