@@ -4,19 +4,21 @@ import Button from '../../components/Button';
 import UploadImage from 'components/UploadImage';
 import useFormInput from 'hooks/useFormInput';
 import { useSelector } from 'react-redux';
-import { selectEmail, selectNickName } from 'store/memberSlice';
+import { selectEmail, selectNickname, selectMemberId } from 'store/memberSlice';
+import axios from 'api/axios';
 
 const Profile = () => {
   const navigate = useNavigate();
   const userEmail = useSelector(selectEmail);
-  const userNickName = useSelector(selectNickName);
+  const userNickname = useSelector(selectNickname);
+  const memberId = useSelector(selectMemberId);
   
   const { values, handleChange, setValues } = useFormInput({
     email: userEmail || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    nickname: userNickName || '',
+    nickname: userNickname || '',
     image: null
   });
 
@@ -47,7 +49,8 @@ const Profile = () => {
     try {
       const formData = new FormData();
       if (image) {
-        formData.append('profileImage', image);
+        formData.append('memberProfile', image);
+        formData.append('profileChanged', true);
       }
       formData.append('nickname', nickname);
       if (newPassword) {
@@ -55,11 +58,14 @@ const Profile = () => {
         formData.append('newPassword', newPassword);
       }
 
-      // API 호출 로직 구현
-      console.log('프로필 수정:', formData);
-      
-      // 성공 시 프로필 페이지로 이동
-      navigate('/profile');
+      await axios.post(`/api/member/${memberId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      alert('프로필이 수정되었습니다.');
+      navigate('/');
     } catch (error) {
       console.error('프로필 수정 실패:', error);
       alert('프로필 수정 중 오류가 발생했습니다.');

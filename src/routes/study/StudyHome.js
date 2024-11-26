@@ -4,14 +4,14 @@ import 'react-calendar/dist/Calendar.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
 import { useSelector } from 'react-redux';
-import { selectNickName } from 'store/memberSlice';
+import { selectNickname } from 'store/memberSlice';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [date, setDate] = useState(new Date());
   const { roomId } = useParams();
-  const nickName = useSelector(selectNickName);
+  const nickname = useSelector(selectNickname);
   const navigate = useNavigate();
   const [isValidRoom, setIsValidRoom] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,7 +83,7 @@ const StudyHome = () => {
       const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
       
       // 현재 사용자의 중복 접속 확인
-      const isAlreadyConnected = participants.some(participant => participant.name === nickName);
+      const isAlreadyConnected = participants.some(participant => participant.name === nickname);
       if (isAlreadyConnected) {
         alert('이미 다른 기기에서 접속중인 사용자입니다. 중복 접속은 불가능합니다.');
         return;
