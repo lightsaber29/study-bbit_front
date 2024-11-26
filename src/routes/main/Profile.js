@@ -3,15 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 import UploadImage from 'components/UploadImage';
 import useFormInput from 'hooks/useFormInput';
+import { useSelector } from 'react-redux';
+import { selectEmail, selectNickName } from 'store/memberSlice';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const userEmail = useSelector(selectEmail);
+  const userNickName = useSelector(selectNickName);
+  
   const { values, handleChange, setValues } = useFormInput({
-    email: '',
+    email: userEmail || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    nickname: '',
+    nickname: userNickName || '',
     image: null
   });
 
