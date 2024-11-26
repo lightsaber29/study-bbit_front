@@ -20,10 +20,11 @@ const CreateStudyRoom = () => {
     participants: '1',
     maxParticipants: '4',
     profileImageUrl: '',
-    isPrivate: false
+    isPrivate: false,
+    image: null
   });
 
-  const { name, roomUrl, password, detail, participants, maxParticipants, profileImageUrl, isPrivate } = values;
+  const { name, password, detail, maxParticipants, isPrivate, image } = values;
 
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -43,11 +44,21 @@ const CreateStudyRoom = () => {
       nameRef.current.focus();
       return false;
     }
-    if (password.length > 0 && password.length < 4) {
-      alert('비밀번호는 4자 이상이어야 합니다.');
-      passwordRef.current.focus();
-      return false;
-    } 
+
+    // 비공개방일 때만 비밀번호 검증
+    if (isPrivate) {
+      if (!password) {
+        alert('비공개방은 비밀번호를 필수로 입력해야 합니다.');
+        passwordRef.current.focus();
+        return false;
+      }
+      if (password.length < 4) {
+        alert('비밀번호는 4자 이상이어야 합니다.');
+        passwordRef.current.focus();
+        return false;
+      }
+    }
+
     if (!detail) {
       alert('방 상세 설명을 입력해주세요.');
       detailRef.current.focus();
@@ -64,9 +75,49 @@ const CreateStudyRoom = () => {
       return;
     }
 
-    // API 호출 로직 구현
+    // FormData 생성 및 데이터 추가
     try {
-      await axios.post('/api/room', values);
+      const formData = new FormData();
+      
+      // 기본 필드들 추가
+      formData.append('name', values.name);
+      formData.append('roomUrl', values.roomUrl);
+      formData.append('detail', values.detail);
+      formData.append('participants', values.participants);
+      formData.append('maxParticipants', values.maxParticipants);
+      formData.append('isPrivate', values.isPrivate);
+      
+      // 비공개방일 경우에만 비밀번호 추가
+      if (values.isPrivate) {
+        formData.append('password', values.password);
+      }
+
+      // 이미지가 있는 경우에만 추가
+      if (values.image) {
+        formData.append('roomImage', values.image);
+      }
+
+      // FormData 내용 확인을 위한 코드
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      // 또는 개별 필드 확인
+      console.log('name:', formData.get('name'));
+      console.log('roomUrl:', formData.get('roomUrl'));
+      console.log('detail:', formData.get('detail'));
+      console.log('participants:', formData.get('participants'));
+      console.log('maxParticipants:', formData.get('maxParticipants'));
+      console.log('isPrivate:', formData.get('isPrivate'));
+      console.log('password:', formData.get('password'));
+      console.log('roomImage:', formData.get('roomImage'));
+
+      await axios.post('/api/room', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       alert('스터디룸 생성이 완료되었습니다.');
       navigate('/');
     } catch (error) {
@@ -75,18 +126,6 @@ const CreateStudyRoom = () => {
       alert(errorMessage);
     }
   };
-
-  useEffect(() => {
-    const newIsPrivate = Boolean(values.password);
-    if (values.isPrivate !== newIsPrivate) {
-      handleChange({
-        target: {
-          name: 'isPrivate',
-          value: newIsPrivate
-        }
-      });
-    }
-  }, [values.password, values.isPrivate, handleChange]);
 
   useEffect(() => {
     if (values.name !== values.roomUrl) {
@@ -123,25 +162,93 @@ const CreateStudyRoom = () => {
             onChange={handleChange}
             ref={nameRef}
             placeholder="스터디룸 이름을 입력해주세요"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
             required
           />
         </div>
 
-        {/* 방 비밀번호 */}
-        <div>
+        {/* 방 공개 설정 및 비밀번호 */}
+        <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            방 비밀번호
+            방 공개 설정
           </label>
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={handleChange}
-            ref={passwordRef}
-            placeholder="비밀번호를 입력해주세요 (선택사항)"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex space-x-4">
+            <label className="relative flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                name="isPrivate"
+                checked={!isPrivate}
+                onChange={() => {
+                  setValues(prev => ({
+                    ...prev,
+                    isPrivate: false,
+                    password: ''
+                  }));
+                }}
+                className="absolute w-0 h-0 opacity-0"
+              />
+              <div className={`
+                w-5 h-5 rounded-full border-2 mr-2 flex items-center justify-center
+                ${!isPrivate 
+                  ? 'border-emerald-500 bg-emerald-500' 
+                  : 'border-gray-300 bg-white group-hover:border-emerald-300'}
+              `}>
+                {!isPrivate && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                )}
+              </div>
+              <span className={`text-sm ${!isPrivate ? 'text-emerald-500 font-medium' : 'text-gray-700'}`}>
+                공개방
+              </span>
+            </label>
+
+            <label className="relative flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                name="isPrivate"
+                checked={isPrivate}
+                onChange={() => {
+                  setValues(prev => ({
+                    ...prev,
+                    isPrivate: true
+                  }));
+                }}
+                className="absolute w-0 h-0 opacity-0"
+              />
+              <div className={`
+                w-5 h-5 rounded-full border-2 mr-2 flex items-center justify-center
+                ${isPrivate 
+                  ? 'border-emerald-500 bg-emerald-500' 
+                  : 'border-gray-300 bg-white group-hover:border-emerald-300'}
+              `}>
+                {isPrivate && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                )}
+              </div>
+              <span className={`text-sm ${isPrivate ? 'text-emerald-500 font-medium' : 'text-gray-700'}`}>
+                비공개방
+              </span>
+            </label>
+          </div>
+
+          {/* 비공개방 선택시에만 비밀번호 입력창 표시 */}
+          {isPrivate && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                방 비밀번호
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={password}
+                onChange={handleChange}
+                ref={passwordRef}
+                placeholder="비밀번호를 입력해주세요"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                required
+              />
+            </div>
+          )}
         </div>
 
         {/* 최대 인원 설정 */}
@@ -153,7 +260,7 @@ const CreateStudyRoom = () => {
             name="maxParticipants"
             value={maxParticipants}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
             required
           >
             {memberOptions.map(num => (
@@ -175,7 +282,7 @@ const CreateStudyRoom = () => {
             onChange={handleChange}
             ref={detailRef}
             placeholder="스터디룸에 대한 설명을 입력해주세요"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 min-h-[200px]"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 min-h-[200px]"
             required
           />
         </div>
