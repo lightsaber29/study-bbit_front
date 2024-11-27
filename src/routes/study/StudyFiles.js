@@ -21,6 +21,7 @@ const StudyFiles = () => {
       size: '5.1MB',
     }
   ]);
+  const [selectedFileId, setSelectedFileId] = useState(null);
 
   const handleClick = () => {
     fileInputRef.current.click();
@@ -40,6 +41,16 @@ const StudyFiles = () => {
       setFiles([...files, newFile]);
       // TODO: 파일 업로드 API 호출
     }
+  };
+
+  const handleMenuClick = (fileId) => {
+    setSelectedFileId(selectedFileId === fileId ? null : fileId);
+  };
+
+  const handleDeleteFile = (fileId) => {
+    setFiles(files.filter(file => file.id !== fileId));
+    setSelectedFileId(null);
+    // TODO: API 호출하여 실제 파일 삭제
   };
 
   return (
@@ -88,11 +99,26 @@ const StudyFiles = () => {
                   </div>
                 </div>
               </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                </svg>
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => handleMenuClick(file.id)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                {selectedFileId === file.id && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                    <button
+                      onClick={() => handleDeleteFile(file.id)}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      파일 삭제
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}
