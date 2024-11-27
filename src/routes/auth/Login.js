@@ -103,7 +103,7 @@ const Login = () => {
                 name="email"
                 type="email"
                 required
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="이메일을 입력하세요"
                 value={email}
                 onChange={handleChange}
@@ -119,7 +119,7 @@ const Login = () => {
                 name="password"
                 type="password"
                 required
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="비밀번호를 입력하세요"
                 value={password}
                 onChange={handleChange}
@@ -144,13 +144,13 @@ const Login = () => {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-emerald-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 text-gray-600">
                 로그인 상태 유지
               </label>
             </div>
-            <Link to="/forgot-password" className="text-blue-500 hover:text-blue-600">
+            <Link to="/forgot-password" className="text-emerald-500 hover:text-emerald-600">
               비밀번호 찾기
             </Link>
           </div> */}
@@ -158,7 +158,7 @@ const Login = () => {
           {/* 회원가입 링크 */}
           <div className="text-center text-sm">
             <span className="text-gray-600">아직 회원이 아니신가요?</span>{' '}
-            <Link to="/signup" className="text-blue-500 hover:text-blue-600 font-medium">
+            <Link to="/signup" className="text-emerald-500 hover:text-emerald-600 font-medium">
               회원가입
             </Link>
           </div>
