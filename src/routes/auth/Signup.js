@@ -21,6 +21,42 @@ const Signup = () => {
 
   const { nickname, password, passwordConfirm, email } = values;
 
+  // 닉네임 중복 확인 상태 추가
+  const [isNicknameChecked, setIsNicknameChecked] = React.useState(false);
+  const [isNicknameAvailable, setIsNicknameAvailable] = React.useState(false);
+
+  // 닉네임 중복 확인 함수
+  const checkNicknameDuplicate = async () => {
+    if (!nickname) {
+      alert('닉네임을 입력해주세요.');
+      nicknameRef.current.focus();
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/api/member/isExist/${nickname}`);
+      console.log("닉네임 중복 확인 응답:", response);
+      if (response.data) {
+        alert('이미 사용 중인 닉네임입니다.');
+        setIsNicknameAvailable(false);
+      } else {
+        alert('사용 가능한 닉네임입니다.');
+        setIsNicknameAvailable(true);
+      }
+      setIsNicknameChecked(true);
+    } catch (error) {
+      console.error('닉네임 중복 확인 실패:', error);
+      alert('닉네임 중복 확인 중 오류가 발생했습니다.');
+    }
+  };
+
+  // handleChange 수정
+  const handleNicknameChange = (e) => {
+    handleChange(e);
+    setIsNicknameChecked(false);
+    setIsNicknameAvailable(false);
+  };
+
   const validateForm = () => {
     // 이메일 검증
     if (!email) {
@@ -67,7 +103,13 @@ const Signup = () => {
       nicknameRef.current.focus();
       return false;
     }
-  
+
+    // 닉네임 중복 확인 검증 추가
+    if (!isNicknameChecked || !isNicknameAvailable) {
+      alert('닉네임 중복 확인이 필요합니다.');
+      return false;
+    }
+
     return true;
   };
 
@@ -157,16 +199,31 @@ const Signup = () => {
               <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-1">
                 닉네임
               </label>
-              <input
-                id="nickname"
-                name="nickname"
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="닉네임을 입력하세요"
-                value={nickname}
-                onChange={handleChange}
-                ref={nicknameRef}
-              />
+              <div className="flex gap-2">
+                <input
+                  id="nickname"
+                  name="nickname"
+                  type="text"
+                  className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="닉네임을 입력하세요"
+                  value={nickname}
+                  onChange={handleNicknameChange}
+                  ref={nicknameRef}
+                />
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={checkNicknameDuplicate}
+                  className="whitespace-nowrap px-4"
+                >
+                  중복 확인
+                </Button>
+              </div>
+              {isNicknameChecked && (
+                <p className={`text-sm mt-1 ${isNicknameAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                  {isNicknameAvailable ? '사용 가능한 닉네임입니다.' : '이미 사용 중인 닉네임입니다.'}
+                </p>
+              )}
             </div>
           </div>
 
@@ -182,7 +239,7 @@ const Signup = () => {
           {/* 로그인 링크 */}
           <div className="text-center text-sm">
             <span className="text-gray-600">이미 계정이 있으신가요?</span>{' '}
-            <Link to="/login" className="text-blue-500 hover:text-blue-600 font-medium">
+            <Link to="/login" className="text-emerald-500 hover:text-emerald-600 font-medium">
               로그인
             </Link>
           </div>
