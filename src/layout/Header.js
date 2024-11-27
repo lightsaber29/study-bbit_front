@@ -17,8 +17,8 @@ const NAV_ITEMS = [
   { path: '/board', label: '게시글' },
   { path: '/meeting', label: '회의록' },
   { path: '/files', label: '자료실' },
-  { path: '/schedule', label: '일정' },
-  { path: '/settings', label: '설정' }
+  { path: '/schedule', label: '일정' }
+  // { path: '/settings', label: '설정' }
 ];
 
 // 네비게이션 링크 스타일 유틸리티
