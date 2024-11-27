@@ -3,7 +3,7 @@ import Button from './Button.js';
 import { useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
 
-const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, roomId, hostProfileImage, hostNickname, isPrivate }) => {
+const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, roomId, leaderImageUrl, leaderNickname, isPrivate }) => {
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -70,8 +70,8 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
                 <div className="w-12 h-12 rounded-full overflow-hidden">
                   <img 
                     src={
-                      profileImageUrl 
-                        ? decodeURIComponent(profileImageUrl)
+                      leaderImageUrl 
+                        ? decodeURIComponent(leaderImageUrl)
                         : `${process.env.PUBLIC_URL}/images/default-profile.png`
                     }
                     alt="Host profile"
@@ -79,7 +79,7 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
                   />
                 </div>
                 <div>
-                  <p className="font-semibold">{hostNickname}</p>
+                  <p className="font-semibold">{leaderNickname}</p>
                 </div>
               </div>
             </div>
