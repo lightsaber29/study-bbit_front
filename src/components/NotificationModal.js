@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectNotifications } from '../store/notificationSlice';
 
 const NotificationSkeleton = () => (
   <div className="p-4">
@@ -15,7 +17,7 @@ const NotificationSkeleton = () => (
 );
 
 const NotificationModal = ({ isOpen, onClose }) => {
-  const [notifications, setNotifications] = useState([]);
+  const notifications = useSelector(selectNotifications);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 

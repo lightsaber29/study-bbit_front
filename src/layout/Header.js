@@ -8,6 +8,8 @@ import { BiBell, BiChat } from 'react-icons/bi';
 import { selectMember } from 'store/memberSlice';
 import DMModal from '../components/DMModal';
 import NotificationModal from '../components/NotificationModal';
+import { useDispatch } from 'react-redux';
+import { addNotification } from 'store/notificationSlice';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -36,6 +38,7 @@ const Header = () => {
   const searchInputRef = useRef(null);
   const [showDMModal, setShowDMModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const dispatch = useDispatch();
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -132,6 +135,89 @@ const Header = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showNotificationModal]);
+
+  useEffect(() => {
+    const connectToSSE = async () => {
+      if (!token) {
+        console.log("No token available, SSE connection aborted");
+        return;
+      }
+
+      console.log("Attempting to connect to SSE...");
+      try {
+        const response = await fetch("http://localhost:8080/api/noti/subscribe", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+
+        if (!response.ok) {
+          console.error('Failed to connect to SSE:', response.status, response.statusText);
+          return;
+        }
+
+        console.log("SSE connection established successfully");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            console.log("SSE connection closed");
+            break;
+          }
+
+          const rawMessage = decoder.decode(value);
+          console.log("Raw SSE message received:", rawMessage);
+
+          const lines = rawMessage.split('\n').filter(Boolean);
+          let eventData = '';
+
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              eventData = line.slice(5).trim();
+              console.log("Extracted event data:", eventData);
+            }
+          }
+
+          if (eventData) {
+            try {
+              const parsedData = JSON.parse(eventData);
+              console.log("Parsed notification data:", parsedData);
+              
+              const notification = {
+                id: Date.now(),
+                content: parsedData.content,
+                createdAt: parsedData.createdAt,
+                read: false,
+                link: parsedData.url
+              };
+              
+              console.log("Dispatching notification:", notification);
+              dispatch(addNotification(notification));
+            } catch (parseError) {
+              console.error("Error parsing event data:", parseError);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error during SSE connection:', error);
+      }
+    };
+
+    let cleanup = false;
+    
+    connectToSSE().catch(error => {
+      if (!cleanup) {
+        console.error('SSE connection error:', error);
+      }
+    });
+
+    return () => {
+      cleanup = true;
+      console.log("Cleaning up SSE connection");
+    };
+  }, [token, dispatch]);
 
   return (
     <div className="flex flex-col border-b shadow-sm">
