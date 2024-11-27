@@ -462,7 +462,7 @@ const TimerSocket = () => {
           min="0"
           max="99"
           style={{
-            width: '50px',
+            width: '70px',
             textAlign: 'center',
             padding: '5px',
             borderRadius: '4px',
@@ -478,7 +478,16 @@ const TimerSocket = () => {
         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>시</span>
       </div>
 
-      <span>:</span>
+      <span
+    style={{
+      fontSize: '2rem',
+      position: 'relative',
+      top: '-15px', // 위로 이동
+      color: '#333',
+    }}
+  >
+    :
+  </span>
 
       {/* 분 */}
       <div
@@ -498,7 +507,7 @@ const TimerSocket = () => {
           min="0"
           max="59"
           style={{
-            width: '50px',
+            width: '70px',
             textAlign: 'center',
             padding: '5px',
             borderRadius: '4px',
@@ -514,7 +523,16 @@ const TimerSocket = () => {
         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>분</span>
       </div>
 
-      <span>:</span>
+      <span
+    style={{
+      fontSize: '2rem',
+      position: 'relative',
+      top: '-15px', // 위로 이동
+      color: '#333',
+    }}
+  >
+    :
+  </span>
 
       {/* 초 */}
       <div
@@ -534,7 +552,7 @@ const TimerSocket = () => {
           min="0"
           max="59"
           style={{
-            width: '50px',
+            width: '70px',
             textAlign: 'center',
             padding: '5px',
             borderRadius: '4px',
@@ -557,14 +575,14 @@ const TimerSocket = () => {
         modalControl();
       }}
       style={{
-        padding: '10px 20px',
+        padding: '5px 10px',
         borderRadius: '8px',
         backgroundColor: '#4CAF50',
         color: 'white',
         border: 'none',
         cursor: 'pointer',
         marginTop: '15px',
-        width: '35%',
+        width: '40%',
         fontSize: '1rem',
       }}
     >
