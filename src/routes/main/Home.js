@@ -20,12 +20,17 @@ const Home = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [todayStudyHours, setTodayStudyHours] = useState(0);
   const [todayStudyMinutes, setTodayStudyMinutes] = useState(0);
+  const [dailyGoalHours, setDailyGoalHours] = useState(0);
+  const [dailyGoalMinutes, setDailyGoalMinutes] = useState(0);
 
   const token = useSelector(selectToken);
   const navigate = useNavigate();
 
   const parseDuration = (duration) => {
     // ISO 8601 (PT00H00M00S) 형식의 문자열을 파싱
+    if (!duration) {
+      return { hours: 0, minutes: 0 };
+    }
     const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:\d+S)?/);
     const hours = matches[1] ? parseInt(matches[1]) : 0;
     const minutes = matches[2] ? parseInt(matches[2]) : 0;
@@ -35,7 +40,7 @@ const Home = () => {
   const getStudyList = async (page) => {
     try {
       const response = await axios.get(`/api/room?page=${page}&size=8`);
-      console.log('getStudyList response.data :: ', response);
+      // console.log('getStudyList response.data :: ', response);
       setStudyList(prevList => [...prevList, ...response.data.content]);
       setPage(page + 1);
       setIsLastPage(response.data.last);
@@ -49,7 +54,7 @@ const Home = () => {
   const getMyStudyList = async () => {
     try {
       const response = await axios.get('/api/member/mystudy?size=20');
-      console.log('getMyStudyList response.data :: ', response);
+      // console.log('getMyStudyList response.data :: ', response);
       setMyStudyList(response.data?.myRooms);
     } catch (error) {
       console.error('내 스터디 목록 조회 실패: ', error);
@@ -62,8 +67,8 @@ const Home = () => {
     const today = new Date().toISOString().split('T')[0];
     try {
       const response = await axios.get(`/api/daily-study/${today}`);
-      console.log('getTodayStudyTime response.data :: ', response);
-      const { hours, minutes } = parseDuration(response.data.studyTime);
+      // console.log('getTodayStudyTime response.data :: ', response);
+      const { hours, minutes } = parseDuration(response.data?.studyTime);
       setTodayStudyHours(hours);
       setTodayStudyMinutes(minutes);
     } catch (error) {
@@ -75,6 +80,9 @@ const Home = () => {
     try {
       const response = await axios.get('/api/member/dailyGoal');
       console.log('getDailyGoalTime response.data :: ', response);
+      const { hours, minutes } = parseDuration(response.data?.dailyGoal);
+      setDailyGoalHours(hours);
+      setDailyGoalMinutes(minutes);
     } catch (error) {
       console.error('내 목표 시간 조회 실패: ', error);
     }
@@ -99,13 +107,34 @@ const Home = () => {
     }
   };
 
-  const handleGoalSubmit = () => {
-    // 목표 시간 저장 로직 구현
-    // 예: 목표 시간을 저장하고 모달을 닫습니다.
-    setIsGoalModalOpen(false);
-    setGoalHours('');
-    setGoalMinutes('');
-  }
+  const handleGoalSubmit = async () => {
+    // Validation 추가
+    if (!goalHours && !goalMinutes) {
+      alert('시간 또는 분을 입력해주세요.');
+      return;
+    }
+
+    if (goalHours < 0 || goalMinutes < 0 || goalMinutes > 59) {
+      alert('올바른 시간을 입력해주세요.');
+      return;
+    }
+
+    try {
+      const dailyGoal = `PT${goalHours || 0}H${goalMinutes || 0}M00S`;
+      await axios.post('/api/member/dailyGoal', { dailyGoal });
+      
+      await getDailyGoalTime();
+      
+      setIsGoalModalOpen(false);
+      setGoalHours('');
+      setGoalMinutes('');
+      alert('목표 시간이 성공적으로 저장되었습니다.');
+    } catch (error) {
+      console.error('목표 시간 설정 실패:', error);
+      const errorMessage = error.response?.data?.message || '목표 시간 설정 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
 
   const handlePrevSlide = () => {
     setStartIndex(prev => Math.max(0, prev - 4));
@@ -173,7 +202,7 @@ const Home = () => {
             <div className="text-sm text-gray-600 mb-2">오늘 공부할 시간 / 내 목표 시간</div>
             <div className="flex items-center gap-2 mb-4">
               <div className="text-2xl font-bold">
-                {todayStudyHours}시간 {todayStudyMinutes}분 / 0시간 0분
+                {todayStudyHours}시간 {todayStudyMinutes}분 / {dailyGoalHours}시간 {dailyGoalMinutes}분
               </div>
               <button 
                 onClick={() => setIsGoalModalOpen(true)}
@@ -219,7 +248,7 @@ const Home = () => {
                   </button>
                   <button
                     onClick={handleGoalSubmit}
-                    className="px-4 py-2 bg-emerald-500 text-white hover:bg-blue-600 rounded-lg"
+                    className="px-4 py-2 bg-emerald-500 text-white hover:bg-emerald-600 rounded-lg"
                   >
                     저장
                   </button>
