@@ -18,6 +18,8 @@ const StudyHome = () => {
   const [members, setMembers] = useState([]);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [isLeader, setIsLeader] = useState(false);
+  const [isVideoMeeting, setIsVideoMeeting] = useState(false);
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -70,10 +72,25 @@ const StudyHome = () => {
   const getMembers = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/member/${roomId}`);
-      console.log('response.data :: ', response.data);
       setMembers(response.data);
+      
+      const isCurrentUserLeader = response.data.some(
+        member => member.nickname === nickname && member.leaderLabel === '방장'
+      );
+      setIsLeader(isCurrentUserLeader);
     } catch (error) {
       console.error('멤버 목록 조회 실패:', error);
+    }
+  }, [roomId, nickname]);
+
+  const checkVideoMeeting = useCallback(async () => {
+    try {
+      const response = await axios.get(`/api/express/list-participants/${roomId}`);
+      if (response.data?.participants?.length > 0) {
+        setIsVideoMeeting(true);
+      }
+    } catch (error) {
+      console.error('화상 회의 체크 실패:', error);
     }
   }, [roomId]);
 
@@ -136,11 +153,8 @@ const StudyHome = () => {
   useEffect(() => {
     getRoomInfo();
     getMembers();
-  }, [getRoomInfo, getMembers]);
-
-  useEffect(() => {
-    console.log('roomInfo :: ', roomInfo);
-  }, [roomInfo]);
+    checkVideoMeeting();
+  }, [getRoomInfo, getMembers, checkVideoMeeting]);
 
   return (
     <div className="study-home max-w-3xl mx-auto p-4 pb-16">
@@ -242,7 +256,7 @@ const StudyHome = () => {
               </div>
 
               {/* 설정 아이콘 */}
-              <div className="absolute bottom-4 right-4 flex items-center gap-3">
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
                 <button
                   onClick={handleLeaveRoom}
                   className="text-red-500 hover:text-red-600 flex items-center gap-1"
@@ -252,10 +266,18 @@ const StudyHome = () => {
                   </svg>
                   <span className="text-sm">나가기</span>
                 </button>
-                {/* <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg> */}
+                {isLeader && (
+                  <button 
+                    onClick={() => navigate(`/study/${roomId}/settings`)}
+                    className="text-gray-500 hover:text-gray-600 flex items-center gap-1"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="text-sm">설정</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -274,16 +296,27 @@ const StudyHome = () => {
           <div className="flex justify-between gap-8">
             {/* 기존 회의 버튼 섹션 */}
             <div className="flex flex-col items-center space-y-3 flex-1">
-              <div className="text-gray-500">회의 없음</div>
-              <button
-                className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors"
-                onClick={handleVideoMeeting}
-              >
-                화상 회의 시작하기
-              </button>
-              <button className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors">
-                참가하기
-              </button>
+              {isVideoMeeting ? (
+                <>
+                  <div className="text-emerald-500 font-semibold">회의중</div>
+                  <button
+                    className="w-full max-w-md bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
+                    onClick={handleVideoMeeting}
+                  >
+                    회의 참가하기
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="text-gray-500">회의 없음</div>
+                  <button
+                    className="w-full max-w-md bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
+                    onClick={handleVideoMeeting}
+                  >
+                    화상 회의 시작하기
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Calendar 컴포넌트 */}
