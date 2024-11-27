@@ -19,6 +19,7 @@ const StudyHome = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [isLeader, setIsLeader] = useState(false);
+  const [isVideoMeeting, setIsVideoMeeting] = useState(false);
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -71,7 +72,6 @@ const StudyHome = () => {
   const getMembers = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/member/${roomId}`);
-      console.log('response.data :: ', response.data);
       setMembers(response.data);
       
       const isCurrentUserLeader = response.data.some(
@@ -82,6 +82,17 @@ const StudyHome = () => {
       console.error('멤버 목록 조회 실패:', error);
     }
   }, [roomId, nickname]);
+
+  const checkVideoMeeting = useCallback(async () => {
+    try {
+      const response = await axios.get(`/api/express/list-participants/${roomId}`);
+      if (response.data?.participants?.length > 0) {
+        setIsVideoMeeting(true);
+      }
+    } catch (error) {
+      console.error('화상 회의 체크 실패:', error);
+    }
+  }, [roomId]);
 
   const handleVideoMeeting = async () => {
     try {
@@ -142,11 +153,8 @@ const StudyHome = () => {
   useEffect(() => {
     getRoomInfo();
     getMembers();
-  }, [getRoomInfo, getMembers]);
-
-  useEffect(() => {
-    console.log('roomInfo :: ', roomInfo);
-  }, [roomInfo]);
+    checkVideoMeeting();
+  }, [getRoomInfo, getMembers, checkVideoMeeting]);
 
   return (
     <div className="study-home max-w-3xl mx-auto p-4 pb-16">
@@ -288,16 +296,27 @@ const StudyHome = () => {
           <div className="flex justify-between gap-8">
             {/* 기존 회의 버튼 섹션 */}
             <div className="flex flex-col items-center space-y-3 flex-1">
-              <div className="text-gray-500">회의 없음</div>
-              <button
-                className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors"
-                onClick={handleVideoMeeting}
-              >
-                화상 회의 시작하기
-              </button>
-              <button className="w-full max-w-md bg-green-400 text-white py-3 px-6 rounded-full hover:bg-emerald-500 transition-colors">
-                참가하기
-              </button>
+              {isVideoMeeting ? (
+                <>
+                  <div className="text-emerald-500 font-semibold">회의중</div>
+                  <button
+                    className="w-full max-w-md bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
+                    onClick={handleVideoMeeting}
+                  >
+                    회의 참가하기
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="text-gray-500">회의 없음</div>
+                  <button
+                    className="w-full max-w-md bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
+                    onClick={handleVideoMeeting}
+                  >
+                    화상 회의 시작하기
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Calendar 컴포넌트 */}
