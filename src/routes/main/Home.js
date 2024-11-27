@@ -15,12 +15,22 @@ const Home = () => {
   const [page, setPage] = useState(0);
   const [isLastPage, setIsLastPage] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [hours, setHours] = useState('');
-  const [minutes, setMinutes] = useState('');
+  const [goalHours, setGoalHours] = useState('');
+  const [goalMinutes, setGoalMinutes] = useState('');
   const [startIndex, setStartIndex] = useState(0);
+  const [todayStudyHours, setTodayStudyHours] = useState(0);
+  const [todayStudyMinutes, setTodayStudyMinutes] = useState(0);
 
   const token = useSelector(selectToken);
   const navigate = useNavigate();
+
+  const parseDuration = (duration) => {
+    // ISO 8601 (PT00H00M00S) 형식의 문자열을 파싱
+    const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:\d+S)?/);
+    const hours = matches[1] ? parseInt(matches[1]) : 0;
+    const minutes = matches[2] ? parseInt(matches[2]) : 0;
+    return { hours, minutes };
+  };
 
   const getStudyList = async (page) => {
     try {
@@ -48,10 +58,34 @@ const Home = () => {
     }
   }
 
+  const getTodayStudyTime = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const response = await axios.get(`/api/daily-study/${today}`);
+      console.log('getTodayStudyTime response.data :: ', response);
+      const { hours, minutes } = parseDuration(response.data.studyTime);
+      setTodayStudyHours(hours);
+      setTodayStudyMinutes(minutes);
+    } catch (error) {
+      console.error('오늘 공부한 시간 조회 실패: ', error);
+    }
+  }
+
+  const getDailyGoalTime = async () => {
+    try {
+      const response = await axios.get('/api/member/dailyGoal');
+      console.log('getDailyGoalTime response.data :: ', response);
+    } catch (error) {
+      console.error('내 목표 시간 조회 실패: ', error);
+    }
+  }
+
   useEffect(() => {
     getStudyList(page);
     if (token) {
       getMyStudyList();
+      getTodayStudyTime();
+      getDailyGoalTime();
     }
   }, []);
 
@@ -69,8 +103,8 @@ const Home = () => {
     // 목표 시간 저장 로직 구현
     // 예: 목표 시간을 저장하고 모달을 닫습니다.
     setIsGoalModalOpen(false);
-    setHours('');
-    setMinutes('');
+    setGoalHours('');
+    setGoalMinutes('');
   }
 
   const handlePrevSlide = () => {
@@ -138,7 +172,9 @@ const Home = () => {
             <h2 className="text-lg font-semibold mb-4">내 목표</h2>
             <div className="text-sm text-gray-600 mb-2">오늘 공부할 시간 / 내 목표 시간</div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="text-2xl font-bold">0시간 0분 / 0시간 0분</div>
+              <div className="text-2xl font-bold">
+                {todayStudyHours}시간 {todayStudyMinutes}분 / 0시간 0분
+              </div>
               <button 
                 onClick={() => setIsGoalModalOpen(true)}
                 className="p-1 hover:bg-gray-200 rounded-full"
@@ -161,8 +197,8 @@ const Home = () => {
                     placeholder="시간"
                     min="0"
                     className="w-1/2 p-2 border rounded-lg"
-                    value={hours}
-                    onChange={(e) => setHours(e.target.value)}
+                    value={goalHours}
+                    onChange={(e) => setGoalHours(e.target.value)}
                   />
                   <input
                     type="number"
@@ -170,8 +206,8 @@ const Home = () => {
                     min="0"
                     max="59"
                     className="w-1/2 p-2 border rounded-lg"
-                    value={minutes}
-                    onChange={(e) => setMinutes(e.target.value)}
+                    value={goalMinutes}
+                    onChange={(e) => setGoalMinutes(e.target.value)}
                   />
                 </div>
                 <div className="flex justify-end gap-2">
@@ -231,8 +267,8 @@ const Home = () => {
         profileImageUrl={selectedStudy?.profileImageUrl}
         leaderId={selectedStudy?.leaderId}
         isPrivate={selectedStudy?.private}
-        hostProfileImage="host-profile.jpg"
-        hostNickname="쇼쇼"
+        leaderImageUrl={selectedStudy?.leaderImageUrl}
+        leaderNickname={selectedStudy?.leaderNickname}
       />
 
       {/* 더보기 버튼 */}
