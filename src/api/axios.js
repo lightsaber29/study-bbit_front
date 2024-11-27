@@ -12,7 +12,6 @@ instance.interceptors.request.use(
   (config) => {
     // store에서 현재 상태의 토큰 가져오기
     const token = store.getState().member.token;
-    console.log('token :: ', token);
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
