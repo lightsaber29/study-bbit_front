@@ -342,18 +342,38 @@ const TimerSocket = () => {
     setIsSetting(true);
   };
 
-  const handleConfirmTimer = () => {
-    const inputTime = parseInt(document.getElementById('timerInput').value, 10);
+  // const handleConfirmTimer = () => {
+  //   const inputTime = parseInt(document.getElementById('timerInput').value, 10);
 
-    if (!isNaN(inputTime) && inputTime > 0) {
-      socketRef.current.emit('timerSet', {
-        meetingId,
-        time: inputTime,
-      });
-      setShowModal(false);
-    } else {
+  //   if (!isNaN(inputTime) && inputTime > 0) {
+  //     socketRef.current.emit('timerSet', {
+  //       meetingId,
+  //       time: inputTime,
+  //     });
+  //     setShowModal(false);
+  //   } else {
+  //     alert('올바른 시간을 입력해주세요.');
+  //   }
+  // };
+  const handleConfirmTimer = () => {
+    const hours = parseInt(document.getElementById('hoursInput').value || '0', 10);
+    const minutes = parseInt(document.getElementById('minutesInput').value || '0', 10);
+    const seconds = parseInt(document.getElementById('secondsInput').value || '0', 10);
+  
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  
+    if (isNaN(totalSeconds) || totalSeconds <= 0) {
       alert('올바른 시간을 입력해주세요.');
+      return;
     }
+  
+    // 타이머 설정 로직
+    socketRef.current.emit('timerSet', {
+      meetingId,
+      time: totalSeconds,
+    });
+  
+    console.log(`타이머 설정: ${hours}시간 ${minutes}분 ${seconds}초 (${totalSeconds}초)`);
   };
 
   const handleStartTimer = () => {
@@ -370,9 +390,7 @@ const TimerSocket = () => {
 
   const modalControl = () => {
     socketRef.current.emit('modalSet', { meetingId });
-  };
-
-  
+  };  
 
   return (
     <>
@@ -398,7 +416,7 @@ const TimerSocket = () => {
               textAlign: 'center',
             }}
           >
-            {isHost ? (
+            {/* {isHost ? (
               <>
                 <p>시간을 입력해주세요 (초 단위):</p>
                 <input id="timerInput" type="number" style={{ width: '100%' }} />
@@ -422,7 +440,140 @@ const TimerSocket = () => {
               </>
             ) : (
               <p>방장이 타이머를 설정 중입니다...</p>
-            )}
+            )} */}
+            {isHost ? (
+  <>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '2rem' }}>
+      {/* 시 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          cursor: 'pointer',
+          borderBottom: '2px solid transparent',
+        }}
+        onClick={() => document.getElementById('hoursInput').focus()}
+      >
+        <input
+          id="hoursInput"
+          type="number"
+          placeholder="00"
+          min="0"
+          max="99"
+          style={{
+            width: '50px',
+            textAlign: 'center',
+            padding: '5px',
+            borderRadius: '4px',
+            border: '1px solid #ddd',
+            fontSize: '2rem',
+            backgroundColor: '#f4f7fa',
+            transition: 'border-color 0.3s',
+            outline: 'none',
+          }}
+          onFocus={(e) => (e.target.style.borderColor = '#4CAF50')}
+          onBlur={(e) => (e.target.style.borderColor = '#ddd')}
+        />
+        <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>시</span>
+      </div>
+
+      <span>:</span>
+
+      {/* 분 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          cursor: 'pointer',
+          borderBottom: '2px solid transparent',
+        }}
+        onClick={() => document.getElementById('minutesInput').focus()}
+      >
+        <input
+          id="minutesInput"
+          type="number"
+          placeholder="00"
+          min="0"
+          max="59"
+          style={{
+            width: '50px',
+            textAlign: 'center',
+            padding: '5px',
+            borderRadius: '4px',
+            border: '1px solid #ddd',
+            fontSize: '2rem',
+            backgroundColor: '#f4f7fa',
+            transition: 'border-color 0.3s',
+            outline: 'none',
+          }}
+          onFocus={(e) => (e.target.style.borderColor = '#4CAF50')}
+          onBlur={(e) => (e.target.style.borderColor = '#ddd')}
+        />
+        <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>분</span>
+      </div>
+
+      <span>:</span>
+
+      {/* 초 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          cursor: 'pointer',
+          borderBottom: '2px solid transparent',
+        }}
+        onClick={() => document.getElementById('secondsInput').focus()}
+      >
+        <input
+          id="secondsInput"
+          type="number"
+          placeholder="00"
+          min="0"
+          max="59"
+          style={{
+            width: '50px',
+            textAlign: 'center',
+            padding: '5px',
+            borderRadius: '4px',
+            border: '1px solid #ddd',
+            fontSize: '2rem',
+            backgroundColor: '#f4f7fa',
+            transition: 'border-color 0.3s',
+            outline: 'none',
+          }}
+          onFocus={(e) => (e.target.style.borderColor = '#4CAF50')}
+          onBlur={(e) => (e.target.style.borderColor = '#ddd')}
+        />
+        <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>초</span>
+      </div>
+    </div>
+
+    <button
+      onClick={() => {
+        handleConfirmTimer();
+        modalControl();
+      }}
+      style={{
+        padding: '10px 20px',
+        borderRadius: '8px',
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        border: 'none',
+        cursor: 'pointer',
+        marginTop: '15px',
+        width: '35%',
+        fontSize: '1rem',
+      }}
+    >
+      확인
+    </button>
+  </>
+) : (
+  <p>방장이 타이머를 설정 중입니다...</p>
+)}
           </div>
         </div>
       )}
