@@ -53,11 +53,11 @@ const Login = () => {
     }
     try {
       const res = await axios.post('/api/member/login', values);
-      // 로그인 결과에서 반환되는 토큰 가져오기
       const token = res.headers['authorization'];
       if (token) {
+        const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
         dispatch(setMember({
-          ...res.data,
+          ...selectMemberRes.data,
           token: token.split(' ')[1]
         }));
         alert('로그인되었습니다.');

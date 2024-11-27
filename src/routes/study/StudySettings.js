@@ -42,16 +42,6 @@ const StudySettings = () => {
         formData.append('detail', detail);
       }
 
-      // FormData 내용 확인을 위한 코드
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
-      // 또는 이렇게도 확인 가능
-      console.log('image:', formData.get('image'));
-      console.log('password:', formData.get('password'));
-      console.log('detail:', formData.get('detail'));
-
       const response = await axios.post(`/api/room/${roomId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -90,11 +80,16 @@ const StudySettings = () => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <UploadImage 
-            onImageChange={handleImageChange}
-            previewImage={previewImage}
-            setPreviewImage={setPreviewImage}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              스터디룸 이미지
+            </label>
+            <UploadImage 
+              onImageChange={handleImageChange}
+              previewImage={previewImage}
+              setPreviewImage={setPreviewImage}
+            />
+          </div>
 
           {/* 비밀번호 변경 */}
           <div>

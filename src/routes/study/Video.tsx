@@ -3,13 +3,13 @@ import { PageClientImpl } from './PageClientImpl.tsx';
 import { isVideoCodec } from '../../types/types.ts';
 import '@livekit/components-styles'
 import { useParams } from 'react-router-dom';
-import { selectNickName } from 'store/memberSlice.js';
+import { selectNickname } from 'store/memberSlice.js';
 import { useSelector } from 'react-redux';
 
 function VideoTest() {
   const { roomId = '' } = useParams();
   const searchParams = { region: "us", hq: "true", codec: "vp9" };
-  const nickname = useSelector(selectNickName);
+  const nickname = useSelector(selectNickname);
   
   const codec =
     typeof searchParams.codec === 'string' && isVideoCodec(searchParams.codec)

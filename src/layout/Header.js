@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from '../components/Button';
 import ProfileModal from '../components/ProfileModal';
 import { useSelector } from 'react-redux';
-import { selectToken } from 'store/memberSlice';
 import { useRef } from 'react';
 import { BiBell, BiChat } from 'react-icons/bi';
 import { selectMember } from 'store/memberSlice';
@@ -36,7 +35,6 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const token = useSelector(selectToken);
   const searchInputRef = useRef(null);
   const [showDMModal, setShowDMModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -49,6 +47,8 @@ const Header = () => {
   const shouldShowNav = location.pathname.startsWith('/study');
 
   const member = useSelector(selectMember);
+  const token = member.token;
+  const profileImageUrl = member.profileImageUrl
 
   const handleProfileClick = (e) => {
     e.stopPropagation();
@@ -295,9 +295,13 @@ const Header = () => {
                 onClick={handleProfileClick}
               >
                 <img 
-                  src={member?.profileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`} 
+                  src={
+                    profileImageUrl
+                      ? decodeURIComponent(profileImageUrl)
+                      : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                  } 
                   alt="Profile" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full rounded-full border-2 border-slate-600"
                 />
               </button>
               <div className="profile-modal">
