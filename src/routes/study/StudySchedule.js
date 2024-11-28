@@ -14,12 +14,14 @@ const StudySchedule = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [date, setDate] = useState(new Date());
   const [activeStartDate, setActiveStartDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDateEvents, setSelectedDateEvents] = useState([]);
 
   const getSchedules = async () => {
     try {
       const response = await axios.get(`/api/schedule/${roomId}`);
-      console.log("getSchedules response :: ", response.data);
-      setSchedules(response.data);
+      // console.log("getSchedules response :: ", response.data?.content);
+      setSchedules(response.data?.content);
     } catch (error) {
       console.error('일정 목록 조회 실패:', error);
       const errorMessage = error.response?.data?.message || '일정 목록 조회 중 오류가 발생했습니다.';
@@ -57,6 +59,7 @@ const StudySchedule = () => {
 
   // 일정 클릭 핸들러
   const handleEventClick = (event) => {
+    console.log('Selected event:', event);
     setSelectedEvent(event);
   };
 
@@ -68,7 +71,7 @@ const StudySchedule = () => {
   // Calendar의 tileContent 부분 수정
   const tileContent = ({ date }) => {
     const matchingSchedules = schedules.filter(schedule => {
-      const scheduleDate = new Date(schedule.date);
+      const scheduleDate = new Date(schedule.startDate);
       return scheduleDate.getDate() === date.getDate() &&
              scheduleDate.getMonth() === date.getMonth() &&
              scheduleDate.getFullYear() === date.getFullYear();
@@ -82,6 +85,18 @@ const StudySchedule = () => {
         </div>
       );
     }
+  };
+
+  // 날짜 클릭 핸들러 추가
+  const handleDayClick = (date) => {
+    setSelectedDate(date);
+    const dayEvents = schedules.filter(schedule => {
+      const scheduleDate = new Date(schedule.startDate);
+      return scheduleDate.getDate() === date.getDate() &&
+             scheduleDate.getMonth() === date.getMonth() &&
+             scheduleDate.getFullYear() === date.getFullYear();
+    });
+    setSelectedDateEvents(dayEvents);
   };
 
   return (
@@ -137,35 +152,50 @@ const StudySchedule = () => {
             locale="ko-KR"
             calendarType="US"
             formatDay={(locale, date) => date.getDate()}
-            // tileContent={tileContent}
+            tileContent={tileContent}
+            onClickDay={handleDayClick}
           />
         </div>
 
         {/* 일정 상세 - 클릭 이벤트 추가 */}
-        <div className="p-4 border-t">
-          <div className="flex items-baseline space-x-4">
-            <div className="text-3xl">25</div>
-            <div className="text-gray-500">월요일</div>
+        {selectedDate && (
+          <div className="p-4 border-t">
+            <>
+              <div className="flex items-baseline space-x-4">
+                <div className="text-3xl">{selectedDate.getDate()}</div>
+                <div className="text-gray-500">
+                  {new Intl.DateTimeFormat('ko-KR', { weekday: 'long' }).format(selectedDate)}
+                </div>
+              </div>
+              <div className="mt-4">
+                {selectedDateEvents.length > 0 ? (
+                  selectedDateEvents.map((event) => (
+                    <div key={event.scheduleId} className="mb-4">
+                      <div 
+                        className="text-lg cursor-pointer hover:text-emerald-600"
+                        onClick={() => handleEventClick(event)}
+                      >
+                        {event.title}
+                      </div>
+                      <div className="text-gray-500">
+                        {new Date(event.startDate).toLocaleTimeString('ko-KR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                      <div className="mt-2 flex items-center text-gray-500">
+                        <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
+                        <span>기본 캘린더 · {event.creatorName}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500">일정이 없습니다.</div>
+                )}
+              </div>
+            </>
           </div>
-          <div className="mt-4">
-            <div 
-              className="text-lg cursor-pointer hover:text-emerald-600"
-              onClick={() => handleEventClick({
-                title: '테스트',
-                date: '2024년 11월 11일 오후 2:46',
-                calendar: '기본 캘린더',
-                owner: '최수빈'
-              })}
-            >
-              엉망진창 깃헙 레포 리팩토링 (SRP원칙 준수)
-            </div>
-            <div className="text-gray-500">오후 7:00</div>
-            <div className="mt-2 flex items-center text-gray-500">
-              <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
-              <span>기본 캘린더 · 차은우</span>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* 이벤트 상세 모달 */}
         {selectedEvent && (
