@@ -145,7 +145,7 @@ const Header = () => {
 
       console.log("Attempting to connect to SSE...");
       try {
-        const response = await fetch("http://localhost:8080/api/noti/subscribe", {
+        const response = await fetch("/api/noti/subscribe", {
           headers: {
             Authorization: `Bearer ${token}`,
           }
@@ -159,6 +159,7 @@ const Header = () => {
         console.log("SSE connection established successfully");
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
+        let buffer = '';
 
         while (true) {
           const { value, done } = await reader.read();
@@ -167,36 +168,32 @@ const Header = () => {
             break;
           }
 
-          const rawMessage = decoder.decode(value);
-          console.log("Raw SSE message received:", rawMessage);
+          buffer += decoder.decode(value, { stream: true });
+          
+          // 완전한 메시지를 찾아 처리
+          const messages = buffer.split('\n\n');
+          buffer = messages.pop() || ''; // 마지막 불완전한 메시지는 버퍼에 저장
 
-          const lines = rawMessage.split('\n').filter(Boolean);
-          let eventData = '';
+          for (const message of messages) {
+            if (!message.trim()) continue;
 
-          for (const line of lines) {
-            if (line.startsWith('data:')) {
-              eventData = line.slice(5).trim();
-              console.log("Extracted event data:", eventData);
+            const lines = message.split('\n');
+            const parsedMessage = {};
+
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                parsedMessage.type = line.slice(6).trim();
+              } else if (line.startsWith('data:')) {
+                try {
+                  parsedMessage.data = JSON.parse(line.slice(5).trim());
+                } catch (e) {
+                  console.error('Error parsing data:', e);
+                }
+              }
             }
-          }
 
-          if (eventData) {
-            try {
-              const parsedData = JSON.parse(eventData);
-              console.log("Parsed notification data:", parsedData);
-              
-              const notification = {
-                id: Date.now(),
-                content: parsedData.content,
-                createdAt: parsedData.createdAt,
-                read: false,
-                link: parsedData.url
-              };
-              
-              console.log("Dispatching notification:", notification);
-              dispatch(addNotification(notification));
-            } catch (parseError) {
-              console.error("Error parsing event data:", parseError);
+            if (parsedMessage.type && parsedMessage.data) {
+              handleEvent(parsedMessage);
             }
           }
         }
@@ -218,6 +215,29 @@ const Header = () => {
       console.log("Cleaning up SSE connection");
     };
   }, [token, dispatch]);
+
+  const handleEvent = (event) => {
+    console.log("Handling event:", event);
+    
+    switch (event.type) {
+      case 'sendDm':
+        if (event.data) {
+          const notification = {
+            id: Date.now(),
+            content: event.data.content,
+            createdAt: event.data.createdAt,
+            read: false,
+            link: event.data.url
+          };
+          
+          console.log("Dispatching notification:", notification);
+          dispatch(addNotification(notification));
+        }
+        break;
+      default:
+        console.log("Unhandled event type:", event.type);
+    }
+  };
 
   return (
     <div className="flex flex-col border-b shadow-sm">
