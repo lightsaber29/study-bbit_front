@@ -14,29 +14,60 @@ const StudyMeeting = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 5;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleDelete = (deletedId) => {
-    setTranscripts(prev => prev.filter(transcript => transcript.mm_summary_id !== deletedId));
+  const handleDelete = async (deletedId) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.delete(`/api/express/summary/${deletedId}`);
+      
+      if (response.status === 200) {
+        const updatedResponse = await axios.get(`/api/express/meetings/${roomId}`);
+        if (updatedResponse) {
+          setTranscripts(updatedResponse.data.data);
+          setTotalPages(Math.ceil(updatedResponse.data.data.length / itemsPerPage));
+        }
+        setShowSuccessModal(true);
+        setTimeout(() => {
+          setShowSuccessModal(false);
+        }, 1500);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to delete meeting:', error);
+      setShowErrorModal(true);
+      setTimeout(() => {
+        setShowErrorModal(false);
+      }, 1500);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     const fetchTranscripts = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get(`/api/express/meetings/${roomId}`);
-        // console.log(response.data.data);
-        // const data = await response.json();
         if (response) {
           setTranscripts(response.data.data);
-          console.log(transcripts);
           setTotalPages(Math.ceil(response.data.data.length / itemsPerPage));
         }
       } catch (error) {
         console.error('Failed to fetch transcripts:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchTranscripts();
-  }, []);
+  }, [roomId]);
 
   const fetchMarkdownContent = async (url) => {
     try {
@@ -108,12 +139,41 @@ const StudyMeeting = () => {
         markdownContent={markdownContent}
         originalContent={originalContent}
         onDelete={handleDelete}
+        isLoading={isLoading}
       />
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+
+      {/* 삭제 성공 모달 */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-20">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex items-center space-x-2">
+              <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <p className="text-lg">회의록이 삭제되었습니다.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 삭제 실패 모달 */}
+      {showErrorModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-20">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex items-center space-x-2">
+              <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              <p className="text-lg">회의록 삭제가 실패하였습니다.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
