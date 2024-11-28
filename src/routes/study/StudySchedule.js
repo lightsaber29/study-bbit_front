@@ -18,42 +18,6 @@ const StudySchedule = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">
-      {/* 햄버거 메뉴 버튼 - 위치 조정 */}
-      {/* <div className="flex items-center justify-between mb-6">
-        <button 
-          className="p-2 hover:bg-gray-100 rounded-lg"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <h1 className="text-xl font-bold">스터디</h1>
-        <div className="w-8"></div>
-      </div> */}
-
-      {/* 사이드바 */}
-      {/* <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="p-4">
-          <div className="flex justify-end">
-            <button onClick={() => setIsSidebarOpen(false)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <nav className="mt-8">
-            <ul className="space-y-4">
-              <li><a href="#" className="block hover:text-gray-600">메뉴 1</a></li>
-              <li><a href="#" className="block hover:text-gray-600">메뉴 2</a></li>
-              <li><a href="#" className="block hover:text-gray-600">메뉴 3</a></li>
-            </ul>
-          </nav>
-        </div>
-      </div> */}
-
       {/* 새 게시글 작성 섹션 */}
       <div className="bg-white rounded-lg shadow mb-6">
         {/* 상단 헤더 */}
