@@ -1,10 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import EventDetailModal from '../../components/EventDetailModal';
 import CreateEventModal from '../../components/CreateEventModal';
+import '../../styles/StudySchedule.css';
+import axios from 'api/axios';
+import { useParams } from 'react-router-dom';
 
 const StudySchedule = () => {
+  const { roomId } = useParams();
+  const [schedules, setSchedules] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [activeStartDate, setActiveStartDate] = useState(new Date());
+
+  const getSchedules = async () => {
+    try {
+      const response = await axios.get(`/api/schedule/${roomId}`);
+      console.log("getSchedules response :: ", response.data);
+      setSchedules(response.data);
+    } catch (error) {
+      console.error('일정 목록 조회 실패:', error);
+      const errorMessage = error.response?.data?.message || '일정 목록 조회 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
+
+  useEffect(() => {
+    getSchedules();
+  }, []);
+
+  // 월 이동 핸들러 수정
+  const handlePrevMonth = () => {
+    const newDate = new Date(date.getFullYear(), date.getMonth() - 1);
+    setDate(newDate);
+    setActiveStartDate(newDate);
+  };
+
+  const handleNextMonth = () => {
+    const newDate = new Date(date.getFullYear(), date.getMonth() + 1);
+    setDate(newDate);
+    setActiveStartDate(newDate);
+  };
+
+  const handleToday = () => {
+    const today = new Date();
+    setDate(today);
+    setActiveStartDate(today);
+  };
+
+  // 현재 표시되는 년월을 포맷팅하는 함수
+  const formatYearMonth = (date) => {
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+  };
 
   // 일정 클릭 핸들러
   const handleEventClick = (event) => {
@@ -16,6 +65,25 @@ const StudySchedule = () => {
     setSelectedEvent(null);
   };
 
+  // Calendar의 tileContent 부분 수정
+  const tileContent = ({ date }) => {
+    const matchingSchedules = schedules.filter(schedule => {
+      const scheduleDate = new Date(schedule.date);
+      return scheduleDate.getDate() === date.getDate() &&
+             scheduleDate.getMonth() === date.getMonth() &&
+             scheduleDate.getFullYear() === date.getFullYear();
+    });
+
+    if (matchingSchedules.length > 0) {
+      return (
+        <div className="event-dot">
+          <span></span>
+          <span>{matchingSchedules[0].title}</span>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">
       {/* 새 게시글 작성 섹션 */}
@@ -23,32 +91,33 @@ const StudySchedule = () => {
         {/* 상단 헤더 */}
         <div className="p-4 border-b flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h2 className="text-xl">2024년 11월</h2>
+            <h2 className="text-xl">{formatYearMonth(date)}</h2>
             <div className="flex space-x-1">
-              <button className="p-1 hover:bg-gray-100 rounded">
+              <button 
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={handlePrevMonth}
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="p-1 hover:bg-gray-100 rounded">
+              <button 
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={handleNextMonth}
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              <button className="ml-2 px-3 py-1 border rounded hover:bg-gray-50">오늘</button>
+              <button 
+                className="ml-2 px-3 py-1 border rounded hover:bg-gray-50"
+                onClick={handleToday}
+              >
+                오늘
+              </button>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button>
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </button>
-            <button>
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              </svg>
-            </button>
             <button 
               className="px-4 py-2 bg-emerald-400 text-white rounded-lg hover:bg-emerald-500"
               onClick={() => setShowCreateModal(true)}
@@ -58,48 +127,18 @@ const StudySchedule = () => {
           </div>
         </div>
 
-        {/* 필터 버튼 */}
-        <div className="flex justify-end space-x-4 p-4 border-b">
-          <button className="text-gray-500 hover:text-gray-700">가져오기</button>
-          <button className="text-gray-500 hover:text-gray-700">내보내기</button>
-          <button className="text-gray-500 hover:text-gray-700">인쇄하기</button>
-        </div>
-
-        {/* 캘린더 그리드 */}
+        {/* Calendar 컴포넌트로 교체 */}
         <div className="p-4">
-          {/* 요일 헤더 */}
-          <div className="grid grid-cols-7 text-center mb-2">
-            <div className="text-red-500">일</div>
-            <div>월</div>
-            <div>화</div>
-            <div>수</div>
-            <div>목</div>
-            <div>금</div>
-            <div className="text-blue-500">토</div>
-          </div>
-
-          {/* 날짜 그리드 */}
-          <div className="grid grid-cols-7 gap-1">
-            {/* 이전 달 날짜들 */}
-            {[27, 28, 29, 30, 31].map(day => (
-              <div key={day} className="h-24 p-2 text-gray-400">{day}</div>
-            ))}
-            
-            {/* 현재 달 날짜들 */}
-            {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
-              <div key={day} className={`h-24 p-2 border hover:bg-gray-50 ${day === 21 ? 'border-emerald-400' : 'border-gray-100'}`}>
-                <span>{day}</span>
-                {day === 25 && (
-                  <div className="mt-1 text-xs">
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full mr-1"></span>
-                      <span>엉망진창 깃헙</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <Calendar
+            onChange={setDate}
+            value={date}
+            activeStartDate={activeStartDate}
+            className="w-full"
+            locale="ko-KR"
+            calendarType="US"
+            formatDay={(locale, date) => date.getDate()}
+            // tileContent={tileContent}
+          />
         </div>
 
         {/* 일정 상세 - 클릭 이벤트 추가 */}
