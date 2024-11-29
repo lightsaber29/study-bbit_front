@@ -83,6 +83,7 @@
   display: flex;
   align-items: center;
   font-size: 12px;
+  max-width: calc(100% - 16px); /* 좌우 여백을 뺀 최대 너비 */
 }
 
 .event-dot span:first-child {
@@ -91,9 +92,15 @@
   background-color: #50e3c2;
   border-radius: 50%;
   margin-right: 4px;
+  flex-shrink: 0;
   display: inline-block;
 }
-/* ... 기존 CSS ... */
+
+.event-dot span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* 선택된 날짜 스타일 */
 .react-calendar__tile--active {

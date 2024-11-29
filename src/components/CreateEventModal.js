@@ -1,30 +1,150 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import axios from 'api/axios';
+import useFormInput from 'hooks/useFormInput';
 
-const CreateEventModal = ({ onClose }) => {
-  const [formData, setFormData] = useState({
+const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
+  const { values, handleChange, setValues } = useFormInput({
     title: '',
-    description: '',
+    detail: '',
     date: '',
-    startTime: '',
-    location: '',
-    calendar: '기본 캘린더',
-    visibility: '모두',
-    notification: '없음',
-    reminder: '없음'
+    startHour: '',
+    startMinute: '',
+    endHour: '',
+    endMinute: '',
+    repeatType: 'once',
+    selectedDays: [],
+    endDate: '',
   });
 
-  const handleSubmit = (e) => {
+  const titleRef = useRef(null);
+  const dateRef = useRef(null);
+  const startHourRef = useRef(null);
+  const endHourRef = useRef(null);
+  const endDateRef = useRef(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: 일정 생성 로직 구현
-    onClose();
+    
+    // 필수 입력값 검증
+    if (!values.title.trim()) {
+      alert('제목을 입력해주세요.');
+      titleRef.current?.focus();
+      return;
+    }
+    
+    if (!values.date) {
+      alert('날짜를 선택해주세요.');
+      dateRef.current?.focus();
+      return;
+    }
+    
+    if (!values.startHour || !values.startMinute) {
+      alert('시작 시간을 선택해주세요.');
+      startHourRef.current?.focus();
+      return;
+    }
+    
+    if (!values.endHour || !values.endMinute) {
+      alert('종료 시간을 선택해주세요.');
+      endHourRef.current?.focus();
+      return;
+    }
+
+    // 주간 반복 선택 시 추가 검증
+    if (values.repeatType === 'weekly') {
+      if (values.selectedDays.length === 0) {
+        alert('반복할 요일을 선택해주세요.');
+        return;
+      }
+      if (!values.endDate) {
+        alert('반복 종료일을 선택해주세요.');
+        endDateRef.current?.focus();
+        return;
+      }
+    }
+    
+    // 시작 시간과 종료 시간 비교 검증
+    const startDateTime = new Date(`${values.date}T${values.startHour.toString().padStart(2, '0')}:${values.startMinute.toString().padStart(2, '0')}`);
+    const endDateTime = new Date(`${values.date}T${values.endHour.toString().padStart(2, '0')}:${values.endMinute.toString().padStart(2, '0')}`);
+    
+    if (startDateTime >= endDateTime) {
+      alert('종료 시간은 시작 시간보다 늦어야 합니다.');
+      
+      // setValues를 사용하여 한 번에 모든 시간 값을 초기화
+      setValues({
+        ...values,
+        startHour: '',
+        startMinute: '',
+        endHour: '',
+        endMinute: ''
+      });
+
+      startHourRef.current?.focus();
+      return;
+    }
+
+    try {
+      // 시작 시간과 종료 시간을 HH:mm 형식으로 변환
+      const startTime = `${values.startHour.toString().padStart(2, '0')}:${values.startMinute.toString().padStart(2, '0')}`;
+      const endTime = `${values.endHour.toString().padStart(2, '0')}:${values.endMinute.toString().padStart(2, '0')}`;
+
+      const scheduleData = {
+        roomId,
+        title: values.title,
+        startDate: values.date,
+        startTime,
+        endTime,
+        detail: values.detail,
+        repeatFlag: values.repeatType === 'weekly' ? true : false,
+        repeatPattern: values.repeatType === 'weekly' ? 'WEEKLY' : null,
+        daysOfWeek: values.repeatType === 'weekly' ? values.selectedDays.join(',') : null,
+        repeatEndDate: values.repeatType === 'weekly' ? values.endDate : null,
+      };
+      console.log("before submit :: scheduleData: ", scheduleData);
+
+      const response = await axios.post('/api/schedule', scheduleData);
+
+      console.log("response :: ", response);
+      
+      onSuccess?.();
+      onClose();
+      alert('일정이 성공적으로 생성되었습니다.');
+    } catch (error) {
+      console.error('일정 생성 실패:', error);
+      const errorMessage = error.response?.data?.message || '일정 생성 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
+
+  // 반복 타입 변경 핸들러
+  const handleRepeatTypeChange = (type) => {
+    handleChange({
+      target: {
+        name: 'repeatType',
+        value: type
+      }
+    });
+  };
+
+  // 요일 선택 핸들러
+  const handleDaySelect = (day) => {
+    const newDays = values.selectedDays.includes(day)
+      ? values.selectedDays.filter(d => d !== day)
+      : [...values.selectedDays, day];
+    
+    handleChange({
+      target: {
+        name: 'selectedDays',
+        value: newDays
+      }
+    });
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl mx-4">
-        {/* 모달 헤더 */}
+      <div className="bg-white rounded-lg w-full max-w-lg mx-4">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-semibold">일정 만들기</h2>
+          <h2 className="text-xl font-semibold">일정 추가</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -32,131 +152,175 @@ const CreateEventModal = ({ onClose }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          {/* 일정 제목 */}
-          <div className="mb-6">
-            <div className="relative">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* 제목 입력 */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">제목</label>
+            <input
+              ref={titleRef}
+              type="text"
+              name="title"
+              placeholder="제목을 입력하세요"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              value={values.title}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* 설명 입력 */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">설명</label>
+            <textarea
+              name="detail"
+              placeholder="설명을 입력하세요"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              value={values.detail}
+              onChange={handleChange}
+              rows={3}
+            />
+          </div>
+
+          {/* 날짜 및 시간 선택 */}
+          <div className="flex items-center gap-4">
+            <div className="w-36">
+              <label className="block text-sm text-gray-600 mb-1">날짜</label>
               <input
-                type="text"
-                placeholder="일정 제목"
-                className="w-full p-3 border rounded-lg pr-12"
+                ref={dateRef}
+                type="date"
+                name="date"
+                className="w-full p-2 border rounded-lg"
+                value={values.date}
+                onChange={handleChange}
               />
-              <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            </div>
+
+            <div className="flex items-center gap-4 flex-1">
+              <div className="flex-1">
+                <label className="block text-sm text-gray-600 mb-1">시작 시간</label>
+                <div className="flex gap-2">
+                  <select 
+                    ref={startHourRef}
+                    name="startHour"
+                    className="flex-1 p-2 border rounded-lg"
+                    value={values.startHour}
+                    onChange={handleChange}
+                  >
+                    <option value="">시</option>
+                    {Array.from({length: 24}, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                  <select 
+                    name="startMinute"
+                    className="flex-1 p-2 border rounded-lg"
+                    value={values.startMinute}
+                    onChange={handleChange}
+                  >
+                    <option value="">분</option>
+                    {Array.from({length: 60}, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <label className="block text-sm text-gray-600 mb-1">종료 시간</label>
+                <div className="flex gap-2">
+                  <select 
+                    ref={endHourRef}
+                    name="endHour"
+                    className="flex-1 p-2 border rounded-lg"
+                    value={values.endHour}
+                    onChange={handleChange}
+                  >
+                    <option value="">시</option>
+                    {Array.from({length: 24}, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                  <select 
+                    name="endMinute"
+                    className="flex-1 p-2 border rounded-lg"
+                    value={values.endMinute}
+                    onChange={handleChange}
+                  >
+                    <option value="">분</option>
+                    {Array.from({length: 60}, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 반복 설정 */}
+          <div className="space-y-4">
+            <label className="block text-sm text-gray-600 mb-1">반복 설정</label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                className={`flex-1 p-2 rounded-lg border ${
+                  values.repeatType === 'once' ? 'bg-emerald-500 text-white' : 'bg-white'
+                }`}
+                onClick={() => handleRepeatTypeChange('once')}
+              >
+                하루
+              </button>
+              <button
+                type="button"
+                className={`flex-1 p-2 rounded-lg border ${
+                  values.repeatType === 'weekly' ? 'bg-emerald-500 text-white' : 'bg-white'
+                }`}
+                onClick={() => handleRepeatTypeChange('weekly')}
+              >
+                주간 반복
               </button>
             </div>
+
+            {values.repeatType === 'weekly' && (
+              <>
+                {/* 요일 선택 */}
+                <div className="flex justify-between">
+                  {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      className={`w-10 h-10 rounded-full ${
+                        values.selectedDays.includes(day)
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-gray-100'
+                      }`}
+                      onClick={() => handleDaySelect(day)}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 종료 날짜 선택 */}
+                <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg">
+                  <span>종료일</span>
+                  <input
+                    ref={endDateRef}
+                    type="date"
+                    name="endDate"
+                    className="bg-transparent"
+                    value={values.endDate}
+                    onChange={handleChange}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
-          {/* 일정 설명 */}
-          <div className="mb-6">
-            <textarea
-              placeholder="일정 설명"
-              className="w-full p-3 border rounded-lg h-24"
-            />
-          </div>
-
-          {/* 시작 날짜 및 시간 */}
-          <div className="mb-6 grid grid-cols-4 gap-4">
-            <div className="col-span-1">
-              <label className="block text-gray-700">시작</label>
-            </div>
-            <div className="col-span-3 grid grid-cols-2 gap-4">
-              <input
-                type="date"
-                defaultValue="2024-11-12"
-                className="p-2 border rounded-lg"
-              />
-              <select className="p-2 border rounded-lg">
-                <option>오전 1:00</option>
-                {/* 시간 옵션들 */}
-              </select>
-            </div>
-          </div>
-
-          {/* 종료 */}
-          <div className="mb-6 grid grid-cols-4 gap-4">
-            <div className="col-span-1">
-              <label className="block text-gray-700">종료</label>
-            </div>
-            <div className="col-span-3 grid grid-cols-2 gap-4">
-              <button className="p-2 border rounded-lg text-left">날짜 설정</button>
-              <button className="p-2 border rounded-lg text-left">시간 설정</button>
-            </div>
-          </div>
-
-          {/* 음력/하루 종일 */}
-          <div className="mb-6 grid grid-cols-4 gap-4">
-            <div className="col-span-2">
-              <label className="inline-flex items-center">
-                <input type="checkbox" className="form-checkbox" />
-                <span className="ml-2">음력</span>
-              </label>
-            </div>
-            <div className="col-span-2">
-              <label className="inline-flex items-center">
-                <input type="checkbox" className="form-checkbox" />
-                <span className="ml-2">하루 종일</span>
-              </label>
-            </div>
-          </div>
-
-          {/* 위치 */}
-          <div className="mb-6">
-            <input
-              type="text"
-              placeholder="위치"
-              className="w-full p-3 border rounded-lg"
-            />
-          </div>
-
-          {/* 캘린더 선택 */}
-          <div className="mb-6">
-            <select className="w-full p-3 border rounded-lg">
-              <option>기본 캘린더</option>
-            </select>
-          </div>
-
-          {/* 공개 대상 */}
-          <div className="mb-6 flex justify-between items-center">
-            <span className="text-gray-700">공개 대상</span>
-            <button type="button" className="text-gray-500 hover:text-gray-700">
-              모두 〉
-            </button>
-          </div>
-
-          {/* 반복/알림 설정 */}
-          <div className="space-y-4">
-            <select className="w-full p-3 border rounded-lg">
-              <option>반복 없음</option>
-            </select>
-            <select className="w-full p-3 border rounded-lg">
-              <option>미리 알림 없음</option>
-            </select>
-          </div>
-
-          {/* 체크박스 옵션들 */}
-          <div className="mt-6 space-y-3">
-            <label className="flex items-center">
-              <input type="checkbox" className="form-checkbox" />
-              <span className="ml-2">참석여부 확인 요청</span>
-            </label>
-            <label className="flex items-center">
-              <input type="checkbox" className="form-checkbox" />
-              <span className="ml-2">게시글로 공유</span>
-            </label>
-          </div>
-
-          {/* 제출 버튼 */}
-          <div className="mt-6">
-            <button
-              type="submit"
-              className="w-full bg-gray-700 text-white py-3 rounded-lg hover:bg-gray-800"
-            >
-              완료
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600"
+          >
+            일정 설정
+          </button>
         </form>
       </div>
     </div>

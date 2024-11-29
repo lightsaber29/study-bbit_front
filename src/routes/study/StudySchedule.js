@@ -81,7 +81,7 @@ const StudySchedule = () => {
       return (
         <div className="event-dot">
           <span></span>
-          <span>{matchingSchedules[0].title}</span>
+          <span className="event-title">{matchingSchedules[0].title}</span>
         </div>
       );
     }
@@ -209,7 +209,9 @@ const StudySchedule = () => {
       {/* 일정 만들기 모달 */}
       {showCreateModal && (
         <CreateEventModal 
+          roomId={roomId}
           onClose={() => setShowCreateModal(false)}
+          onSuccess={getSchedules}
         />
       )}
     </div>
