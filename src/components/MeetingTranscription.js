@@ -20,6 +20,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   const [showNameModal, setShowNameModal] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isHost, setIsHost] = useState(false);
+  const [isMikeOn, setIsMikeOn] = useState(true);
   const scrollRef = useRef(null);
   const { roomId } = useParams();
   const member = useSelector(selectMember);
@@ -101,8 +102,12 @@ const MeetingTranscription = ({ meetingId, userId }) => {
     }
   });
 
+  const handleToggleMike = useCallback(() => {
+    setIsMikeOn(prev => !prev);
+  }, []);
+
   const { startRecognitionSession, stopRecognition, recognitionStatus } = useSpeechRecognition({
-    isRecording,
+    isRecording: isRecording && isMikeOn,
     onTranscriptAdd: addTranscript,
     onCurrentTranscriptChange: setCurrentTranscript
   });
@@ -215,10 +220,12 @@ const MeetingTranscription = ({ meetingId, userId }) => {
           isRecording={isRecording}
           isOnline={isOnline}
           isHost={isHost}
+          isMikeOn={isMikeOn}
           transcripts={transcripts}
           onStartRecording={startRecording}
           onStopRecording={stopRecording}
           onEndMeeting={endMeeting}
+          onToggleMike={handleToggleMike}
         />
       
 
