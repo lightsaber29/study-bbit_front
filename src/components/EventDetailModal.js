@@ -45,7 +45,7 @@ const EventDetailModal = ({ event, onClose }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <div className="text-lg font-medium">{event.startDate} ({event.daysOfWeek})</div>
+                <div className="text-lg font-medium">{event.startDate} ({event.day})</div>
                 <div className="text-gray-600">
                   오전 {event.startTime.substring(0, 5)} - 오전 {event.endTime.substring(0, 5)}
                 </div>
