@@ -174,6 +174,9 @@ const Header = () => {
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
           },
+        }).catch(fetchError => {
+          console.error('Fetch 자체 에러:', fetchError);
+          throw fetchError;
         });
 
         console.log('fetch 응답 받음:', { 
@@ -181,29 +184,24 @@ const Header = () => {
           ok: response.ok 
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        retryCount = 0;
-        setConnectionStatus('connected');
-        isConnectingRef.current = false;
-        console.log("SSE 연결 성공!");
-
         const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
+        console.log('Reader 생성됨');
 
         while (isSubscribed) {
-          const { value, done } = await reader.read();
+          console.log('Reader.read 시도');
+          const { value, done } = await reader.read().catch(readError => {
+            console.error('Reader.read 에러:', readError);
+            throw readError;
+          });
+          
           if (done) {
             console.log('Reader done, 연결 종료');
             break;
           }
-
-          buffer += decoder.decode(value, { stream: true });
+          console.log('청크 데이터 수신');
+          const buffer = new TextDecoder().decode(value, { stream: true });
           const messages = buffer.split('\n\n');
-          buffer = messages.pop() || '';
+          const lastMessage = messages.pop() || '';
 
           console.log('메시지 수신:', { messagesCount: messages.length });
 
