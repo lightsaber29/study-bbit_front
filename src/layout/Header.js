@@ -220,7 +220,7 @@ const Header = () => {
           retryCount 
         });
         
-        if (isSubscribed && connectionStatus !== 'disconnected') {
+        if (isSubscribed) {
           setConnectionStatus('disconnected');
           isConnectingRef.current = false;
           
