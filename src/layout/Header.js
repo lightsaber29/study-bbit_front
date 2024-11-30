@@ -40,6 +40,8 @@ const Header = () => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const dispatch = useDispatch();
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const reconnectTimeoutRef = useRef(null);
+  const isConnectingRef = useRef(false);
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -140,10 +142,12 @@ const Header = () => {
   useEffect(() => {
     let isSubscribed = true;
     let retryCount = 0;
-    let retryTimeout = null;
     
     const connectToSSE = async () => {
-      if (!token || !isSubscribed) return;
+      // 이미 연결 시도 중이면 중복 실행 방지
+      if (!token || !isSubscribed || isConnectingRef.current) return;
+      
+      isConnectingRef.current = true;
       setConnectionStatus('connecting');
 
       try {
@@ -160,8 +164,9 @@ const Header = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        setConnectionStatus('connected');
         retryCount = 0;
+        setConnectionStatus('connected');
+        isConnectingRef.current = false;
         console.log("SSE connection established successfully");
 
         const reader = response.body.getReader();
@@ -178,50 +183,61 @@ const Header = () => {
 
           for (const message of messages) {
             if (!message.trim()) continue;
-            
-            try {
-              const lines = message.split('\n');
-              const parsedMessage = {};
-              
-              for (const line of lines) {
-                if (line.startsWith('event:')) {
-                  parsedMessage.type = line.slice(6).trim();
-                } else if (line.startsWith('data:')) {
-                  parsedMessage.data = JSON.parse(line.slice(5).trim());
-                }
-              }
-
-              if (parsedMessage.type && parsedMessage.data) {
-                handleEvent(parsedMessage);
-              }
-            } catch (e) {
-              console.error('Error processing message:', e);
-            }
+            handleMessage(message);
           }
         }
       } catch (error) {
         console.error('SSE connection error:', error);
-        setConnectionStatus('disconnected');
         
-        if (isSubscribed) {
+        if (isSubscribed && connectionStatus !== 'disconnected') {
+          setConnectionStatus('disconnected');
+          isConnectingRef.current = false;
+          
           const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 30000);
           console.log(`Retrying connection in ${backoffTime}ms... (attempt ${retryCount + 1})`);
           
           retryCount++;
-          retryTimeout = setTimeout(connectToSSE, backoffTime);
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connectToSSE();
+          }, backoffTime);
         }
       }
     };
 
-    connectToSSE();
+    // 초기 연결 시도
+    if (connectionStatus === 'disconnected') {
+      connectToSSE();
+    }
 
     return () => {
       isSubscribed = false;
-      if (retryTimeout) {
-        clearTimeout(retryTimeout);
+      isConnectingRef.current = false;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [token, dispatch, connectionStatus]);
+  }, [token, connectionStatus]);
+
+  const handleMessage = (message) => {
+    try {
+      const lines = message.split('\n');
+      const parsedMessage = {};
+      
+      for (const line of lines) {
+        if (line.startsWith('event:')) {
+          parsedMessage.type = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+          parsedMessage.data = JSON.parse(line.slice(5).trim());
+        }
+      }
+
+      if (parsedMessage.type && parsedMessage.data) {
+        handleEvent(parsedMessage);
+      }
+    } catch (e) {
+      console.error('Error processing message:', e);
+    }
+  };
 
   const handleEvent = (event) => {
     console.log("Handling event:", event);
