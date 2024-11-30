@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import UpdateEventModal from './UpdateEventModal';
-import axios from 'axios';
+import axios from 'api/axios';
 
 const EventDetailModal = ({ event, onClose, onSuccess }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -10,6 +10,14 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
   const menuRef = useRef(null);
   const [editType, setEditType] = useState(null); // 'single', 'upcoming', 'all' 중 하나
   const [deleteType, setDeleteType] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [commentInput, setCommentInput] = useState('');
+  const [activeCommentMenu, setActiveCommentMenu] = useState(null);
+  const [showCommentEditModal, setShowCommentEditModal] = useState(false);
+  const [editCommentContent, setEditCommentContent] = useState('');
+  const [selectedComment, setSelectedComment] = useState(null);
+  const commentMenuRef = useRef();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -23,6 +31,37 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    fetchComments();
+  }, [event.scheduleId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (event.target.closest('.comment-menu-button') || event.target.closest('.comment-menu-items')) {
+        return;
+      }
+      if (commentMenuRef.current && !commentMenuRef.current.contains(event.target)) {
+        setActiveCommentMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fetchComments = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`/api/schedule/detail/${event.scheduleId}`);
+      console.log("comments :: ", response.data?.comments?.content);
+      setComments(response.data?.comments?.content || []);
+    } catch (error) {
+      console.error('댓글 불러오기 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleEditClick = () => {
     setShowMenu(false);
@@ -92,6 +131,65 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
     }
   };
 
+  const handleCommentSubmit = async () => {
+    if (!commentInput.trim()) return;
+
+    try {
+      await axios.post('/api/schedule/comment', {
+        scheduleId: event.scheduleId,
+        content: commentInput.trim()
+      });
+      
+      // 댓글 입력 초기화
+      setCommentInput('');
+      // 댓글 목록 새로고침
+      await fetchComments();
+    } catch (error) {
+      console.error('댓글 등록 실패:', error);
+      alert('댓글 등록에 실패했습니다.');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+  };
+
+  const handleEditComment = async () => {
+    if (!editCommentContent.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      await axios.post(`/api/schedule/comment/${selectedComment.scheduleCommentId}`, {
+        scheduleId: event.scheduleId,
+        content: editCommentContent.trim()
+      });
+      setShowCommentEditModal(false);
+      alert('댓글이 수정되었습니다.');
+      await fetchComments();
+    } catch (error) {
+      console.error('댓글 수정 실패:', error);
+      alert('댓글 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('댓글을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/schedule/comment/${commentId}`);
+      alert('댓글이 삭제되었습니다.');
+      await fetchComments();
+    } catch (error) {
+      console.error('댓글 삭제 실패:', error);
+      alert('댓글 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -156,15 +254,83 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
             </div>
           </div>
 
-          {/* 댓글 입력 */}
+          {/* 댓글 영역 */}
           <div className="p-4 border-t">
+            {/* 댓글 목록 - 댓글이 있을 때만 표시 */}
+            {comments.length > 0 && (
+              <div className="space-y-4 mb-4">
+                {comments.map((comment) => (
+                  <div key={comment.scheduleCommentId} className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={
+                          comment.profileImageUrl
+                            ? decodeURIComponent(comment.profileImageUrl)
+                            : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                        }
+                        alt="Profile" 
+                        className="w-8 h-8 bg-gray-200 rounded-full"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{comment.memberNickname}</span>
+                        <span className="text-sm text-gray-500">{formatDate(comment.createdAt)}</span>
+                      </div>
+                      <p className="text-gray-700">{comment.content}</p>
+                    </div>
+                    <div className="relative" ref={commentMenuRef}>
+                      <button 
+                        className="text-gray-400 px-2 comment-menu-button"
+                        onClick={() => setActiveCommentMenu(activeCommentMenu === comment.scheduleCommentId ? null : comment.scheduleCommentId)}
+                      >
+                        ⋮
+                      </button>
+                      {activeCommentMenu === comment.scheduleCommentId && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 py-1 comment-menu-items">
+                          <button 
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            onClick={() => {
+                              setSelectedComment(comment);
+                              setEditCommentContent(comment.content);
+                              setShowCommentEditModal(true);
+                              setActiveCommentMenu(null);
+                            }}
+                          >
+                            댓글 수정
+                          </button>
+                          <button 
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                            onClick={() => handleDeleteComment(comment.scheduleCommentId)}
+                          >
+                            댓글 삭제
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 댓글 입력 */}
             <div className="flex items-center space-x-2">
               <input
                 type="text"
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
                 placeholder="댓글을 남겨주세요."
                 className="flex-1 p-2 border rounded-full"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCommentSubmit();
+                  }
+                }}
               />
-              <button className="text-gray-500 px-4 py-2 rounded-full bg-gray-100">
+              <button 
+                onClick={handleCommentSubmit}
+                className="text-gray-500 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200"
+              >
                 보내기
               </button>
               <div className="relative" ref={menuRef}>
@@ -298,6 +464,41 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
                 className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600"
               >
                 전체 일정 삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 댓글 수정 모달 */}
+      {showCommentEditModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]"
+          onClick={() => setShowCommentEditModal(false)}
+        >
+          <div 
+            className="bg-white p-6 rounded-lg w-full max-w-2xl mx-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-semibold mb-4">댓글 수정</h2>
+            <textarea
+              value={editCommentContent}
+              onChange={(e) => setEditCommentContent(e.target.value)}
+              className="w-full p-3 border rounded-lg resize-none h-32 mb-4"
+              placeholder="댓글을 입력해주세요."
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowCommentEditModal(false)}
+                className="px-4 py-2 text-gray-500 hover:text-gray-700"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleEditComment}
+                className="bg-emerald-500 text-white px-6 py-2 rounded-lg hover:bg-emerald-600"
+              >
+                수정하기
               </button>
             </div>
           </div>
