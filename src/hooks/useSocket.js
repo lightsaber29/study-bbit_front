@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord, onSavingStarted, onMeetingSaved }) => {
+export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord, onSavingStarted, onSaveCanceled, onMeetingSaved }) => {
   const socketRef = useRef(null);
 
   // const domain = 'http://localhost:6081'; // local
@@ -25,6 +25,7 @@ export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts
       stopRecord: onStopRecord,
       resumeRecord: onResumeRecord,
       savingStarted: onSavingStarted,
+      saveCanceled: onSaveCanceled,
       meetingSaved: onMeetingSaved,
       error: (error) => {
         console.error('소켓 에러:', error);
