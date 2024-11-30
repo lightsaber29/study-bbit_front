@@ -144,15 +144,8 @@ const Header = () => {
     let retryCount = 0;
     
     const connectToSSE = async () => {
-      console.log('connectToSSE 함수 시작', { 
-        token: !!token, 
-        isSubscribed, 
-        isConnecting: isConnectingRef.current,
-        connectionStatus 
-      });
 
       try {
-        console.log('fetch 요청 시작');
         const response = await fetch("/api/noti/subscribe", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -165,18 +158,9 @@ const Header = () => {
           throw fetchError;
         });
 
-        console.log('fetch 응답 받음:', { 
-          status: response.status,
-          ok: response.ok,
-          headers: Object.fromEntries(response.headers.entries())
-        });
-
-        console.log('Reader 생성 시도 전');
         const reader = response.body.getReader();
-        console.log('Reader 생성 성공');
 
         while (isSubscribed) {
-          console.log('Reader.read 시도');
           const { value, done } = await reader.read().catch(readError => {
             console.error('Reader.read 에러:', readError);
             throw readError;
@@ -186,12 +170,8 @@ const Header = () => {
             console.log('Reader done, 연결 종료');
             break;
           }
-          console.log('청크 데이터 수신');
           const buffer = new TextDecoder().decode(value, { stream: true });
           const messages = buffer.split('\n\n');
-          const lastMessage = messages.pop() || '';
-
-          console.log('메시지 수신:', { messagesCount: messages.length });
 
           for (const message of messages) {
             if (!message.trim()) continue;
@@ -210,14 +190,11 @@ const Header = () => {
           setConnectionStatus('disconnected');
           isConnectingRef.current = false;
           
-          const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 30000);
-          console.log(`${backoffTime}ms 후 재연결 시도 예정 (시도 ${retryCount + 1})`);
-          
           retryCount++;
           reconnectTimeoutRef.current = setTimeout(() => {
             console.log('재연결 시도 시작');
             connectToSSE();
-          }, backoffTime);
+          }, 1000);
         } else {
           console.log('재연결 시도하지 않음:', { 
             isSubscribed, 
