@@ -144,13 +144,29 @@ const Header = () => {
     let retryCount = 0;
     
     const connectToSSE = async () => {
+      console.log('connectToSSE 함수 시작', { 
+        token: !!token, 
+        isSubscribed, 
+        isConnecting: isConnectingRef.current,
+        connectionStatus 
+      });
+
       // 이미 연결 시도 중이면 중복 실행 방지
-      if (!token || !isSubscribed || isConnectingRef.current) return;
+      if (!token || !isSubscribed || isConnectingRef.current) {
+        console.log('연결 시도 중단:', { 
+          noToken: !token, 
+          notSubscribed: !isSubscribed, 
+          isConnecting: isConnectingRef.current 
+        });
+        return;
+      }
       
       isConnectingRef.current = true;
       setConnectionStatus('connecting');
+      console.log('연결 시도 시작...', { retryCount });
 
       try {
+        console.log('fetch 요청 시작');
         const response = await fetch("/api/noti/subscribe", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -160,6 +176,11 @@ const Header = () => {
           },
         });
 
+        console.log('fetch 응답 받음:', { 
+          status: response.status,
+          ok: response.ok 
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -167,7 +188,7 @@ const Header = () => {
         retryCount = 0;
         setConnectionStatus('connected');
         isConnectingRef.current = false;
-        console.log("SSE connection established successfully");
+        console.log("SSE 연결 성공!");
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -175,11 +196,16 @@ const Header = () => {
 
         while (isSubscribed) {
           const { value, done } = await reader.read();
-          if (done) break;
+          if (done) {
+            console.log('Reader done, 연결 종료');
+            break;
+          }
 
           buffer += decoder.decode(value, { stream: true });
           const messages = buffer.split('\n\n');
           buffer = messages.pop() || '';
+
+          console.log('메시지 수신:', { messagesCount: messages.length });
 
           for (const message of messages) {
             if (!message.trim()) continue;
@@ -187,33 +213,47 @@ const Header = () => {
           }
         }
       } catch (error) {
-        console.error('SSE connection error:', error);
+        console.error('SSE 연결 에러:', error);
+        console.log('현재 상태:', { 
+          isSubscribed, 
+          connectionStatus, 
+          retryCount 
+        });
         
         if (isSubscribed && connectionStatus !== 'disconnected') {
           setConnectionStatus('disconnected');
           isConnectingRef.current = false;
           
           const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 30000);
-          console.log(`Retrying connection in ${backoffTime}ms... (attempt ${retryCount + 1})`);
+          console.log(`${backoffTime}ms 후 재연결 시도 예정 (시도 ${retryCount + 1})`);
           
           retryCount++;
           reconnectTimeoutRef.current = setTimeout(() => {
+            console.log('재연결 시도 시작');
             connectToSSE();
           }, backoffTime);
+        } else {
+          console.log('재연결 시도하지 않음:', { 
+            isSubscribed, 
+            connectionStatus 
+          });
         }
       }
     };
 
-    // 초기 연결 시도
+    console.log('useEffect 실행됨', { connectionStatus });
     if (connectionStatus === 'disconnected') {
+      console.log('disconnected 상태에서 연결 시도');
       connectToSSE();
     }
 
     return () => {
+      console.log('cleanup 함수 실행');
       isSubscribed = false;
       isConnectingRef.current = false;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
+        console.log('재연결 타이머 제거됨');
       }
     };
   }, [token, connectionStatus]);
