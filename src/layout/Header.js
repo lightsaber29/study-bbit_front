@@ -39,6 +39,7 @@ const Header = () => {
   const [showDMModal, setShowDMModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const dispatch = useDispatch();
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -137,84 +138,90 @@ const Header = () => {
   }, [showNotificationModal]);
 
   useEffect(() => {
+    let isSubscribed = true;
+    let retryCount = 0;
+    let retryTimeout = null;
+    
     const connectToSSE = async () => {
-      if (!token) {
-        console.log("No token available, SSE connection aborted");
-        return;
-      }
+      if (!token || !isSubscribed) return;
+      setConnectionStatus('connecting');
 
-      console.log("Attempting to connect to SSE...");
       try {
         const response = await fetch("/api/noti/subscribe", {
           headers: {
             Authorization: `Bearer ${token}`,
-          }
+            'Accept': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
         });
 
         if (!response.ok) {
-          console.error('Failed to connect to SSE:', response.status, response.statusText);
-          return;
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        setConnectionStatus('connected');
+        retryCount = 0;
         console.log("SSE connection established successfully");
+
         const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+        const decoder = new TextDecoder();
         let buffer = '';
 
-        while (true) {
+        while (isSubscribed) {
           const { value, done } = await reader.read();
-          if (done) {
-            console.log("SSE connection closed");
-            break;
-          }
+          if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
-          
-          // 완전한 메시지를 찾아 처리
           const messages = buffer.split('\n\n');
-          buffer = messages.pop() || ''; // 마지막 불완전한 메시지는 버퍼에 저장
+          buffer = messages.pop() || '';
 
           for (const message of messages) {
             if (!message.trim()) continue;
-
-            const lines = message.split('\n');
-            const parsedMessage = {};
-
-            for (const line of lines) {
-              if (line.startsWith('event:')) {
-                parsedMessage.type = line.slice(6).trim();
-              } else if (line.startsWith('data:')) {
-                try {
+            
+            try {
+              const lines = message.split('\n');
+              const parsedMessage = {};
+              
+              for (const line of lines) {
+                if (line.startsWith('event:')) {
+                  parsedMessage.type = line.slice(6).trim();
+                } else if (line.startsWith('data:')) {
                   parsedMessage.data = JSON.parse(line.slice(5).trim());
-                } catch (e) {
-                  console.error('Error parsing data:', e);
                 }
               }
-            }
 
-            if (parsedMessage.type && parsedMessage.data) {
-              handleEvent(parsedMessage);
+              if (parsedMessage.type && parsedMessage.data) {
+                handleEvent(parsedMessage);
+              }
+            } catch (e) {
+              console.error('Error processing message:', e);
             }
           }
         }
       } catch (error) {
-        console.error('Error during SSE connection:', error);
+        console.error('SSE connection error:', error);
+        setConnectionStatus('disconnected');
+        
+        if (isSubscribed) {
+          const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 30000);
+          console.log(`Retrying connection in ${backoffTime}ms... (attempt ${retryCount + 1})`);
+          
+          retryCount++;
+          retryTimeout = setTimeout(connectToSSE, backoffTime);
+        }
       }
     };
 
-    let cleanup = false;
-    
-    connectToSSE().catch(error => {
-      if (!cleanup) {
-        console.error('SSE connection error:', error);
-      }
-    });
+    connectToSSE();
 
     return () => {
-      cleanup = true;
-      console.log("Cleaning up SSE connection");
+      isSubscribed = false;
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
     };
-  }, [token, dispatch]);
+  }, [token, dispatch, connectionStatus]);
 
   const handleEvent = (event) => {
     console.log("Handling event:", event);
