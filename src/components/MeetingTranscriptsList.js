@@ -101,27 +101,15 @@ const MeetingTranscriptsList = ({
   };
 
   const handleDeleteClick = (e, id) => {
-    console.log("삭제 아이디", id);
-    e.stopPropagation();  // 부모 요소의 클릭 이벤트 전파 방지
+    e.stopPropagation();
     setSelectedId(id);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDelete = async () => {
-    try {
-      const response = await axios.delete(`/api/express/summary/${selectedId}`);
-      console.log("response :: ", response);
-      if (response.status !== 200) {
-        throw new Error('삭제 실패');
-      }
-
-      if (onDelete) {
-        onDelete(selectedId);
-      }
+  const handleDeleteConfirm = async () => {
+    const success = await onDelete(selectedId);
+    if (success) {
       setIsDeleteModalOpen(false);
-    } catch (error) {
-      console.error('삭제 중 오류 발생:', error);
-      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -228,7 +216,7 @@ const MeetingTranscriptsList = ({
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
+        onConfirm={handleDeleteConfirm}
         title="회의록 삭제"
       />
     </div>

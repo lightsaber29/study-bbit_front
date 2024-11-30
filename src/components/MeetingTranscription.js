@@ -211,14 +211,14 @@ const MeetingTranscription = ({ meetingId, userId }) => {
     }
   }, [meetingId, stopRecognition]);
 
-  const handleSaveMeeting = (meetingName) => {
+  const handleSaveMeeting = (meetingName, mode) => {
     console.log('회의록 저장 요청');
     socketRef.current.emit('saveMeeting', { 
       meetingId,
-      meetingName
+      meetingName,
+      mode
     });
     setShowNameModal(false);
-    // 방장에게도 저장 중 메시지 표시
     setStatusMessage('회의록을 저장하는 중입니다...');
     setShowStatusModal(true);
   };

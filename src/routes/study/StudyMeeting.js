@@ -26,11 +26,12 @@ const StudyMeeting = () => {
       const response = await axios.delete(`/api/express/summary/${deletedId}`);
       
       if (response.status === 200) {
-        const updatedResponse = await axios.get(`/api/express/meetings/${roomId}`);
-        if (updatedResponse) {
-          setTranscripts(updatedResponse.data.data);
-          setTotalPages(Math.ceil(updatedResponse.data.data.length / itemsPerPage));
-        }
+        const updatedTranscripts = transcripts.filter(
+          transcript => transcript.mm_summary_id !== deletedId
+        );
+        setTranscripts(updatedTranscripts);
+        setTotalPages(Math.ceil(updatedTranscripts.length / itemsPerPage));
+        
         setShowSuccessModal(true);
         setTimeout(() => {
           setShowSuccessModal(false);
