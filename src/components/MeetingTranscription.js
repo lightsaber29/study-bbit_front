@@ -25,7 +25,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   const { roomId } = useParams();
   const member = useSelector(selectMember);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
 
   meetingId = roomId;
   userId = member.nickname;
@@ -104,13 +104,16 @@ const MeetingTranscription = ({ meetingId, userId }) => {
     },
     onSavingStarted: () => {
       setIsSaving(true);
+      setStatusMessage('회의록을 저장하는 중입니다...');
     },
-    onMeetingSaved: ({ success }) => {
+    onSaveCanceled: () => {
+      setStatusMessage('회의록 저장이 취소되었습니다.');
+      setTimeout(() => setStatusMessage(null), 2000); // 2초 후 메시지 사라짐
+    },
+    onMeetingSaved: ({ success, message, error }) => {
       setIsSaving(false);
-      if (success) {
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 2000); // 2초 후 메시지 사라짐
-      }
+      setStatusMessage(success ? '회의록이 저장되었습니다.' : error);
+      setTimeout(() => setStatusMessage(null), 2000);
     }
   });
 
@@ -178,9 +181,13 @@ const MeetingTranscription = ({ meetingId, userId }) => {
 
     const confirmed = window.confirm('회의록을 저장하시겠습니까?');
     if (confirmed) {
+      // 저장 시작을 알리는 이벤트 발생
+      socketRef.current.emit('savingStarted', { meetingId });
       setShowNameModal(true);
     } else {
-      socketRef.current.emit('stopRecordMinute', { meetingId});
+      // 저장 취소를 알리는 이벤트 발생
+      socketRef.current.emit('saveCanceled', { meetingId });
+      socketRef.current.emit('stopRecordMinute', { meetingId });
     }
   }, [meetingId]);
   const handleSaveMeeting = (meetingName) => {
@@ -200,7 +207,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   
     if (isRecording) stopRecording();
   
-    const confirmed = window.confirm('회의를 종료하고 ���의록을 저장하시겠습니까?');
+    const confirmed = window.confirm('회의를 종료하고 회의록을 저장하시겠습니까?');
     if (confirmed) {
       setIsResettingTranscripts(true);
       socketRef.current.emit('saveMeeting', { meetingId, transcripts });
@@ -265,30 +272,18 @@ const MeetingTranscription = ({ meetingId, userId }) => {
         socketRef={socketRef}
       />
 
-      {/* 저장 중 오버레이 */}
-      {isSaving && (
+      {/* 상태 메시지 모달 */}
+      {statusMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center space-x-3">
-              <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <p className="text-lg">회의록을 저장하는 중입니다...</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 저장 성공 메시지 */}
-      {saveSuccess && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            <div className="flex items-center space-x-2">
-              <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              <p className="text-lg">회의록이 저장되었습니다.</p>
+              {isSaving && (
+                <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              <p className="text-lg">{statusMessage}</p>
             </div>
           </div>
         </div>
