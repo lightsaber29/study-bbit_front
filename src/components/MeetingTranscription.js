@@ -255,6 +255,10 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   //   return () => clearInterval(statusCheckInterval);
   // }, [isRecording, recognitionStatus, startRecognitionSession]);
 
+  const handleModalClose = () => {
+    setShowNameModal(false);
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -324,7 +328,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       {isHost && showNameModal && (
         <MeetingNameModal 
           isOpen={showNameModal}
-          onClose={() => setShowNameModal(false)}
+          onClose={handleModalClose}
           onSave={handleSaveMeeting}
           meetingId={meetingId}
           socketRef={socketRef}
