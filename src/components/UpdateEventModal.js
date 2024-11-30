@@ -2,18 +2,18 @@ import React, { useEffect, useRef } from 'react';
 import axios from 'api/axios';
 import useFormInput from 'hooks/useFormInput';
 
-const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
+const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) => {
   const { values, handleChange, setValues } = useFormInput({
-    title: '',
-    detail: '',
-    date: '',
-    startHour: '',
-    startMinute: '',
-    endHour: '',
-    endMinute: '',
-    repeatType: 'once',
-    selectedDays: [],
-    endDate: '',
+    title: event.title,
+    detail: event.detail || '',
+    date: event.startDate,
+    startHour: event.startTime.substring(0, 2),
+    startMinute: event.startTime.substring(3, 5),
+    endHour: event.endTime.substring(0, 2),
+    endMinute: event.endTime.substring(3, 5),
+    repeatType: editType === 'single' ? 'once' : (event.repeatFlag ? 'weekly' : 'once'),
+    selectedDays: editType === 'single' ? [] : (event.daysOfWeek ? event.daysOfWeek.split(',') : []),
+    endDate: editType === 'single' ? '' : (event.repeatEndDate || ''),
   });
 
   const titleRef = useRef(null);
@@ -69,8 +69,6 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
     
     if (startDateTime >= endDateTime) {
       alert('종료 시간은 시작 시간보다 늦어야 합니다.');
-      
-      // setValues를 사용하여 한 번에 모든 시간 값을 초기화
       setValues({
         ...values,
         startHour: '',
@@ -78,18 +76,16 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
         endHour: '',
         endMinute: ''
       });
-
       startHourRef.current?.focus();
       return;
     }
 
     try {
-      // 시작 시간과 종료 시간을 HH:mm 형식으로 변환
       const startTime = `${values.startHour.toString().padStart(2, '0')}:${values.startMinute.toString().padStart(2, '0')}`;
       const endTime = `${values.endHour.toString().padStart(2, '0')}:${values.endMinute.toString().padStart(2, '0')}`;
 
       const scheduleData = {
-        roomId,
+        roomId: event.roomId,
         title: values.title,
         startDate: values.date,
         startTime,
@@ -100,34 +96,64 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
         daysOfWeek: values.repeatType === 'weekly' ? values.selectedDays.join(',') : null,
         repeatEndDate: values.repeatType === 'weekly' ? values.endDate : null,
       };
-      console.log("before submit :: scheduleData: ", scheduleData);
 
-      const response = await axios.post('/api/schedule', scheduleData);
+      let endpoint;
+      switch (editType) {
+        case 'all':
+          endpoint = `/api/schedule/all/${event.scheduleCycleId}`;
+          break;
+        case 'upcoming':
+          endpoint = `/api/schedule/upcoming/${event.scheduleCycleId}`;
+          break;
+        case 'single':
+        default:
+          endpoint = `/api/schedule/single/${event.scheduleId}`;
+      }
 
+      const response = await axios.post(endpoint, scheduleData);
       console.log("response :: ", response);
       
       onSuccess?.();
       onClose();
-      alert('일정이 성공적으로 생성되었습니다.');
+      alert('일정이 성공적으로 수정되었습니다.');
     } catch (error) {
-      console.error('일정 생성 실패:', error);
-      const errorMessage = error.response?.data?.message || '일정 생성 중 오류가 발생했습니다.';
+      console.error('일정 수정 실패:', error);
+      const errorMessage = error.response?.data?.message || '일정 수정 중 오류가 발생했습니다.';
       alert(errorMessage);
     }
   };
 
   // 반복 타입 변경 핸들러
   const handleRepeatTypeChange = (type) => {
+    if (editType === 'single' && type === 'weekly') {
+      alert('단일 일정 수정 시에는 반복 설정을 변경할 수 없습니다.');
+      return;
+    }
+
     handleChange({
       target: {
         name: 'repeatType',
         value: type
       }
     });
+
+    if (type === 'once') {
+      setValues(prev => ({
+        ...prev,
+        repeatType: 'once',
+        selectedDays: [],
+        endDate: ''
+      }));
+    }
   };
 
   // 요일 선택 핸들러
   const handleDaySelect = (day) => {
+    if (editType === 'single') {
+      alert('단일 일정 수정 시에는 반복 요일을 선택할 수 없습니다.');
+      return;
+    }
+
     const newDays = values.selectedDays.includes(day)
       ? values.selectedDays.filter(d => d !== day)
       : [...values.selectedDays, day];
@@ -144,7 +170,7 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-lg mx-4">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-semibold">일정 추가</h2>
+          <h2 className="text-xl font-semibold">일정 수정</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -263,8 +289,9 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
                 type="button"
                 className={`flex-1 p-2 rounded-lg border ${
                   values.repeatType === 'once' ? 'bg-emerald-500 text-white' : 'bg-white'
-                }`}
+                } ${editType === 'single' ? 'cursor-default' : ''}`}
                 onClick={() => handleRepeatTypeChange('once')}
+                disabled={editType === 'single'}
               >
                 하루
               </button>
@@ -272,8 +299,9 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
                 type="button"
                 className={`flex-1 p-2 rounded-lg border ${
                   values.repeatType === 'weekly' ? 'bg-emerald-500 text-white' : 'bg-white'
-                }`}
+                } ${editType === 'single' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleRepeatTypeChange('weekly')}
+                disabled={editType === 'single'}
               >
                 주간 반복
               </button>
@@ -327,4 +355,4 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
   );
 };
 
-export default CreateEventModal; 
+export default UpdateEventModal; 
