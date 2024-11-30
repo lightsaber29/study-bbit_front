@@ -151,20 +151,6 @@ const Header = () => {
         connectionStatus 
       });
 
-      // 이미 연결 시도 중이면 중복 실행 방지
-      if (!token || !isSubscribed || isConnectingRef.current) {
-        console.log('연결 시도 중단:', { 
-          noToken: !token, 
-          notSubscribed: !isSubscribed, 
-          isConnecting: isConnectingRef.current 
-        });
-        return;
-      }
-      
-      isConnectingRef.current = true;
-      setConnectionStatus('connecting');
-      console.log('연결 시도 시작...', { retryCount });
-
       try {
         console.log('fetch 요청 시작');
         const response = await fetch("/api/noti/subscribe", {
@@ -181,11 +167,13 @@ const Header = () => {
 
         console.log('fetch 응답 받음:', { 
           status: response.status,
-          ok: response.ok 
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
         });
 
+        console.log('Reader 생성 시도 전');
         const reader = response.body.getReader();
-        console.log('Reader 생성됨');
+        console.log('Reader 생성 성공');
 
         while (isSubscribed) {
           console.log('Reader.read 시도');
