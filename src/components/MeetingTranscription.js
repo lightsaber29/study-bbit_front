@@ -103,12 +103,14 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       console.log('start ::', isRecording);
     },
     onSavingStarted: () => {
-      setIsSaving(true);
-      setStatusMessage('회의록을 저장하는 중입니다...');
+      if (!isHost) {
+        setIsSaving(true);
+        setStatusMessage('회의록을 저장하는 중입니다...');
+      }
     },
     onSaveCanceled: () => {
       setStatusMessage('회의록 저장이 취소되었습니다.');
-      setTimeout(() => setStatusMessage(null), 2000); // 2초 후 메시지 사라짐
+      setTimeout(() => setStatusMessage(null), 2000);
     },
     onMeetingSaved: ({ success, message, error }) => {
       setIsSaving(false);
@@ -192,6 +194,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   }, [meetingId]);
   const handleSaveMeeting = (meetingName) => {
     // setIsResettingTranscripts(true); //이것도 소켓으로 바꿔주기
+    console.log('회의록 저장 요청');
     socketRef.current.emit('saveMeeting', { 
       meetingId,
       meetingName
@@ -264,16 +267,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       
       {isResettingTranscripts && <LoadingOverlay />}
 
-      <MeetingNameModal 
-        isOpen={showNameModal}
-        onClose={() => setShowNameModal(false)}
-        onSave={handleSaveMeeting}
-        meetingId={meetingId}
-        socketRef={socketRef}
-      />
-
-      {/* 상태 메시지 모달 */}
-      {statusMessage && (
+      {!isHost && statusMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center space-x-3">
@@ -287,6 +281,16 @@ const MeetingTranscription = ({ meetingId, userId }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {isHost && showNameModal && (
+        <MeetingNameModal 
+          isOpen={showNameModal}
+          onClose={() => setShowNameModal(false)}
+          onSave={handleSaveMeeting}
+          meetingId={meetingId}
+          socketRef={socketRef}
+        />
       )}
     </div>
   );
