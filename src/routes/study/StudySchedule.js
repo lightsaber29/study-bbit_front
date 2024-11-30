@@ -16,12 +16,23 @@ const StudySchedule = () => {
   const [activeStartDate, setActiveStartDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateEvents, setSelectedDateEvents] = useState([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const getSchedules = async () => {
     try {
       const response = await axios.get(`/api/schedule/${roomId}`);
-      // console.log("getSchedules response :: ", response.data?.content);
       setSchedules(response.data?.content);
+      
+      if (selectedDate) {
+        const updatedDayEvents = response.data?.content.filter(schedule => {
+          const scheduleDate = new Date(schedule.startDate);
+          return scheduleDate.getDate() === selectedDate.getDate() &&
+                 scheduleDate.getMonth() === selectedDate.getMonth() &&
+                 scheduleDate.getFullYear() === selectedDate.getFullYear();
+        });
+        setSelectedDateEvents(updatedDayEvents);
+      }
     } catch (error) {
       console.error('일정 목록 조회 실패:', error);
       const errorMessage = error.response?.data?.message || '일정 목록 조회 중 오류가 발생했습니다.';
@@ -97,6 +108,19 @@ const StudySchedule = () => {
              scheduleDate.getFullYear() === date.getFullYear();
     });
     setSelectedDateEvents(dayEvents);
+  };
+
+  // 수정 버튼 클릭 핸들러 추가
+  const handleEditClick = (event) => {
+    setSelectedEvent(null); // 상세 모달 닫기
+    setEditingEvent(event); // 수정할 이벤트 설정
+    setShowEditModal(true); // 수정 모달 열기
+  };
+
+  // 수정 모달 닫기 핸들러
+  const handleEditModalClose = () => {
+    setShowEditModal(false);
+    setEditingEvent(null);
   };
 
   return (
@@ -202,6 +226,7 @@ const StudySchedule = () => {
           <EventDetailModal 
             event={selectedEvent}
             onClose={handleCloseModal}
+            onSuccess={getSchedules}
           />
         )}
       </div>
@@ -212,6 +237,28 @@ const StudySchedule = () => {
           roomId={roomId}
           onClose={() => setShowCreateModal(false)}
           onSuccess={getSchedules}
+        />
+      )}
+
+      {/* 일정 수정 모달 추가 */}
+      {showEditModal && (
+        <CreateEventModal 
+          roomId={roomId}
+          onClose={handleEditModalClose}
+          onSuccess={getSchedules}
+          initialData={{
+            id: editingEvent.scheduleId,
+            title: editingEvent.title,
+            detail: editingEvent.detail,
+            date: editingEvent.startDate.split('T')[0],
+            startHour: editingEvent.startTime.split(':')[0],
+            startMinute: editingEvent.startTime.split(':')[1],
+            endHour: editingEvent.endTime.split(':')[0],
+            endMinute: editingEvent.endTime.split(':')[1],
+            repeatType: editingEvent.repeatFlag ? 'weekly' : 'once',
+            selectedDays: editingEvent.daysOfWeek ? editingEvent.daysOfWeek.split(',') : [],
+            endDate: editingEvent.repeatEndDate || '',
+          }}
         />
       )}
     </div>
