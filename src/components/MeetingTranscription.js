@@ -26,6 +26,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   const member = useSelector(selectMember);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   meetingId = roomId;
   userId = member.nickname;
@@ -106,16 +107,26 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       if (!isHost) {
         setIsSaving(true);
         setStatusMessage('회의록을 저장하는 중입니다...');
+        setShowStatusModal(true);
       }
     },
     onSaveCanceled: () => {
+      setIsSaving(false);
       setStatusMessage('회의록 저장이 취소되었습니다.');
-      setTimeout(() => setStatusMessage(null), 2000);
+      setShowStatusModal(true);
+      setTimeout(() => {
+        setShowStatusModal(false);
+        setStatusMessage(null);
+      }, 2000);
     },
     onMeetingSaved: ({ success, message, error }) => {
       setIsSaving(false);
       setStatusMessage(success ? '회의록이 저장되었습니다.' : error);
-      setTimeout(() => setStatusMessage(null), 2000);
+      setShowStatusModal(true);
+      setTimeout(() => {
+        setShowStatusModal(false);
+        setStatusMessage(null);
+      }, 2000);
     }
   });
 
@@ -190,16 +201,26 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       // 저장 취소를 알리는 이벤트 발생
       socketRef.current.emit('saveCanceled', { meetingId });
       socketRef.current.emit('stopRecordMinute', { meetingId });
+      // 방장에게 취소 메시지 표시
+      setStatusMessage('회의록 저장이 취소되었습니다.');
+      setShowStatusModal(true);
+      setTimeout(() => {
+        setShowStatusModal(false);
+        setStatusMessage(null);
+      }, 2000);
     }
-  }, [meetingId]);
+  }, [meetingId, stopRecognition]);
+
   const handleSaveMeeting = (meetingName) => {
-    // setIsResettingTranscripts(true); //이것도 소켓으로 바꿔주기
     console.log('회의록 저장 요청');
     socketRef.current.emit('saveMeeting', { 
       meetingId,
       meetingName
     });
     setShowNameModal(false);
+    // 방장에게도 저장 중 메시지 표시
+    setStatusMessage('회의록을 저장하는 중입니다...');
+    setShowStatusModal(true);
   };
 
   const endMeeting = () => {
@@ -267,14 +288,31 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       
       {isResettingTranscripts && <LoadingOverlay />}
 
-      {!isHost && statusMessage && (
+      {!isHost && isSaving && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center space-x-3">
-              {isSaving && (
-                <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-lg">회의록을 저장하는 중입니다...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStatusModal && !isSaving && statusMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <div className="flex items-center space-x-3">
+              {statusMessage.includes('저장되었습니다') ? (
+                <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               )}
               <p className="text-lg">{statusMessage}</p>
