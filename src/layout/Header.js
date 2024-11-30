@@ -221,6 +221,7 @@ const Header = () => {
     
     switch (event.type) {
       case 'sendDm':
+      case 'sendMm':
         if (event.data) {
           const notification = {
             id: Date.now(),
