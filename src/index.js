@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import store, { persistor } from './store/index';
 import { PersistGate } from 'redux-persist/integration/react';
 import './styles/index.css';
+import './styles/tailwind.css';
 
 // 레이아웃을 관리할 컴포넌트
 const Layout = () => {

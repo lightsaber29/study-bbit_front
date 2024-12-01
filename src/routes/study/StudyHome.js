@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
 import { useSelector } from 'react-redux';
@@ -9,7 +7,6 @@ import { selectNickname } from 'store/memberSlice';
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [date, setDate] = useState(new Date());
   const { roomId } = useParams();
   const nickname = useSelector(selectNickname);
   const navigate = useNavigate();
@@ -21,36 +18,26 @@ const StudyHome = () => {
   const [isLeader, setIsLeader] = useState(false);
   const [isVideoMeeting, setIsVideoMeeting] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
+  const [refreshInterval, setRefreshInterval] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
+  const [animatingIndex, setAnimatingIndex] = useState(-1);
+  const [isKickModalOpen, setIsKickModalOpen] = useState(false);
+  const [kickReason, setKickReason] = useState('');
+  const [selectedMember, setSelectedMember] = useState(null);
 
-  const eventDates = [
-    new Date(2024, 10, 8), // 11월 8일
-    new Date(2024, 10, 21), // 11월 21일
-  ];
-
-  const tileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const isRedDot = eventDates.some(eventDate => 
-        eventDate.getDate() === date.getDate() && 
-        eventDate.getMonth() === date.getMonth()
-      );
-
-      const isSpecialDate = date.getDate() === 21 && date.getMonth() === 10; // 11월 21일
-
-      if (isRedDot) {
-        return (
-          <div className="flex justify-center -mt-1">
-            {isSpecialDate ? (
-              <div className="flex gap-1">
-                <div className="h-1 w-1 bg-red-500 rounded-full"></div>
-                <div className="h-1 w-1 bg-blue-500 rounded-full"></div>
-              </div>
-            ) : (
-              <div className="h-1 w-1 bg-red-500 rounded-full"></div>
-            )}
-          </div>
-        );
-      }
-    }
+  // ISO 8601 Duration 문자열을 분으로 변환하는 함수
+  const parseDuration = (duration) => {
+    if (!duration) return 0;
+    
+    const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!matches) return 0;
+    
+    const hours = parseInt(matches[1] || 0);
+    const minutes = parseInt(matches[2] || 0);
+    const seconds = parseInt(matches[3] || 0);
+    
+    return hours * 60 + minutes + Math.floor(seconds / 60);
   };
 
   const getRoomInfo = useCallback(async () => {
@@ -71,18 +58,70 @@ const StudyHome = () => {
   }, [roomId, navigate]);
 
   const getMembers = useCallback(async () => {
+    setIsUpdating(true);
     try {
       const response = await axios.get(`/api/room/member/${roomId}`);
-      setMembers(response.data);
+      const membersWithParsedTime = response.data.map(member => ({
+        ...member,
+        totalStudyTime: parseDuration(member.studyTime)
+      }));
       
-      const isCurrentUserLeader = response.data.some(
+      const sortedMembers = membersWithParsedTime.sort((a, b) => 
+        b.totalStudyTime - a.totalStudyTime
+      );
+      
+      // 순차적으로 멤버 업데이트
+      for (let i = 0; i < sortedMembers.length; i++) {
+        setTimeout(() => {
+          setAnimatingIndex(i);
+          if (i === sortedMembers.length - 1) {
+            // 마지막 애니메이션이 끝나면 상태 초기화
+            setTimeout(() => {
+              setAnimatingIndex(-1);
+              setIsUpdating(false);
+            }, 500);
+          }
+        }, i * 200); // 각 멤버마다 200ms 딜레이
+      }
+      
+      setMembers(sortedMembers);
+      setLastUpdateTime(new Date());
+      
+      const isCurrentUserLeader = sortedMembers.some(
         member => member.nickname === nickname && member.leaderLabel === '방장'
       );
       setIsLeader(isCurrentUserLeader);
     } catch (error) {
       console.error('멤버 목록 조회 실패:', error);
+      const notMember = error.response?.data?.message === '해당 스터디룸의 멤버만 조회할 수 있습니다.';
+      if (notMember) {
+        alert('잘못된 접근입니다.');
+        navigate('/');
+      }
+      setIsUpdating(false);
     }
   }, [roomId, nickname]);
+
+  // 주기적 업데이트를 위한 useEffect
+  useEffect(() => {
+    // 초기 데이터 로드
+    getMembers();
+
+    // 1분마다 데이터 갱신
+    const interval = setInterval(() => {
+      getMembers();
+    }, 60000); // 60초 = 1분
+    // }, 10000); // 10초
+
+    setRefreshInterval(interval);
+
+    // 컴포넌트 언마운트 시 인터벌 정리
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [getMembers]);
 
   const checkVideoMeeting = useCallback(async () => {
     try {
@@ -166,6 +205,33 @@ const StudyHome = () => {
     checkVideoMeeting();
     getDashboardData();
   }, [getRoomInfo, getMembers, checkVideoMeeting, getDashboardData]);
+
+  // 강퇴 핸들러 추가
+  const handleKickMember = async (memberNickname, memberId) => {
+    setSelectedMember({ nickname: memberNickname, id: memberId });
+    setIsKickModalOpen(true);
+  };
+
+  // 실제 강퇴 처리를 하는 새로운 함수
+  const processKickMember = async () => {
+    try {
+      console.log("banMemberId", selectedMember.id, "roomId", roomId, "kickReason", kickReason);
+      await axios.post("/api/room/member/ban", {
+        banMemberId: selectedMember.id,
+        roomId: roomId,
+        detail: kickReason || '사유 없음'
+      });
+      alert('멤버가 강퇴되었습니다.');
+      setIsKickModalOpen(false);
+      setKickReason('');
+      setSelectedMember(null);
+      getMembers(); // 멤버 목록 새로고침
+    } catch (error) {
+      console.error('멤버 강퇴 실패:', error);
+      const errorMessage = error.response?.data?.message || '멤버 강퇴 처리 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
 
   return (
     <div className="study-home max-w-3xl mx-auto p-4 pb-16">
@@ -253,20 +319,34 @@ const StudyHome = () => {
                   <h3 className="text-gray-600 mb-4">참여 멤버</h3>
                   <ul className="space-y-4">
                     {members.map((member) => (
-                      <li key={member.nickname} className="flex items-center">
-                        <div className="w-8 h-8 rounded-full">
-                          <img
-                            src={
-                              member.profileImageUrl 
-                                ? decodeURIComponent(member.profileImageUrl)
-                                : `${process.env.PUBLIC_URL}/images/default-profile.png`
-                            }
-                            alt={member.nickname} 
-                            className="w-full h-full rounded-full border-2 border-slate-600"
-                          />
+                      <li key={member.nickname} className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full">
+                            <img
+                              src={
+                                member.profileImageUrl 
+                                  ? decodeURIComponent(member.profileImageUrl)
+                                  : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                              }
+                              alt={member.nickname} 
+                              className="w-full h-full rounded-full border-2 border-slate-600"
+                            />
+                          </div>
+                          <span className="ml-2">{member.nickname}</span>
+                          {member.leaderLabel === '방장' && <span className="ml-2">👑</span>}
                         </div>
-                        <span className="ml-2">{member.nickname}</span>
-                        {member.leaderLabel === '방장' && <span className="ml-2">👑</span>}
+                        {isLeader && member.nickname !== nickname && (
+                          <button
+                            onClick={() => handleKickMember(member.nickname, member.memberId)}
+                            className="text-gray-500 hover:text-red-600 flex items-center gap-1 px-2 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all"
+                            title="강퇴하기"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                            </svg>
+                            <span className="text-xs">내보내기</span>
+                          </button>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -303,7 +383,7 @@ const StudyHome = () => {
           </div>
 
           {/* 공지사항 섹션 */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-100 hover:shadow-xl transition-shadow">
+          <div className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-100 transition-shadow">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -350,18 +430,81 @@ const StudyHome = () => {
               )}
             </div>
 
-            {/* Calendar 컴포넌트 */}
-            <div className="flex-1">
-              <Calendar
-                onChange={setDate}
-                value={date}
-                locale="ko-KR"
-                formatDay={(locale, date) => date.getDate()}
-                tileContent={tileContent}
-                showNeighboringMonth={true}
-                defaultActiveStartDate={new Date(2024, 10, 1)} // 2024년 11월
-                className="border-0 shadow-lg rounded-lg"
-              />
+            {/* 순공시간 랭킹 섹션 */}
+            <div className="flex-1 bg-white p-6 rounded-lg shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">순공시간 랭킹</h3>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span className={`inline-flex items-center ${isUpdating ? 'text-emerald-500' : ''}`}>
+                    <svg 
+                      className={`w-4 h-4 mr-1 ${isUpdating ? 'animate-spin' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                      />
+                    </svg>
+                    {isUpdating ? '업데이트 중...' : 
+                      `마지막 업데이트: ${lastUpdateTime.toLocaleTimeString()}`}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {members.map((member, index) => (
+                  <div 
+                    key={member.nickname} 
+                    className={`flex items-center justify-between p-2 rounded-lg overflow-hidden
+                      ${member.nickname === nickname ? 'bg-emerald-50' : 'hover:bg-gray-50'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`font-bold w-6 ${index < 3 ? 'text-emerald-500' : ''} 
+                        ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                        {index + 1}
+                      </span>
+                      <div className="relative">
+                        <img
+                          src={
+                            member.profileImageUrl
+                              ? decodeURIComponent(member.profileImageUrl)
+                              : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                          }
+                          alt={member.nickname}
+                          className={`w-8 h-8 rounded-full transition-transform hover:scale-110
+                            ${animatingIndex === index ? 'animate-slot' : ''}`}
+                        />
+                        {index < 3 && (
+                          <span className={`absolute -top-1 -right-1 text-sm
+                            ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                            {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                          </span>
+                        )}
+                      </div>
+                      <span className={`${member.nickname === nickname ? 'font-semibold' : ''}
+                        ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                        {member.nickname}
+                      </span>
+                      {member.leaderLabel === '방장' && 
+                        <span className={`ml-1 transform hover:scale-110 transition-transform
+                          ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                          👑
+                        </span>
+                      }
+                    </div>
+                    <div className={`flex items-center gap-2 ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                      <span className={`font-semibold ${
+                        member.nickname === nickname ? 'text-emerald-600' : ''
+                      }`}>
+                        {Math.floor(member.totalStudyTime / 60)}시간 {member.totalStudyTime % 60}분
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -390,6 +533,53 @@ const StudyHome = () => {
                 >
                   초대하기
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* 강퇴 모달 추가 */}
+          {isKickModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-96">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">멤버 강퇴</h3>
+                  <button onClick={() => {
+                    setIsKickModalOpen(false);
+                    setKickReason('');
+                    setSelectedMember(null);
+                  }}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="mb-4 text-gray-600">
+                  {selectedMember?.nickname}님을 강퇴하시겠습니까?
+                </p>
+                <textarea
+                  placeholder="강퇴 사유를 입력하세요"
+                  className="w-full p-2 border border-gray-300 rounded-lg mb-4 h-32 resize-none"
+                  value={kickReason}
+                  onChange={(e) => setKickReason(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <button
+                    className="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600"
+                    onClick={() => {
+                      setIsKickModalOpen(false);
+                      setKickReason('');
+                      setSelectedMember(null);
+                    }}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+                    onClick={processKickMember}
+                  >
+                    강퇴하기
+                  </button>
+                </div>
               </div>
             </div>
           )}
