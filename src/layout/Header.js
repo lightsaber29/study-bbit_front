@@ -4,7 +4,7 @@ import Button from '../components/Button';
 import ProfileModal from '../components/ProfileModal';
 import { useSelector } from 'react-redux';
 import { useRef } from 'react';
-import { BiBell, BiChat, BiSearch } from 'react-icons/bi';
+import { BiSearch } from 'react-icons/bi';
 import { selectMember } from 'store/memberSlice';
 import DMModal from '../components/DMModal';
 import NotificationModal from '../components/NotificationModal';
