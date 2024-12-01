@@ -22,7 +22,7 @@ const Home = () => {
   const [todayStudyMinutes, setTodayStudyMinutes] = useState(0);
   const [dailyGoalHours, setDailyGoalHours] = useState(0);
   const [dailyGoalMinutes, setDailyGoalMinutes] = useState(0);
-  const [dailyStudyData, setDailyStudyData] = useState({});
+  const [dailyStudyData, setDailyStudyData] = useState(new Map());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const token = useSelector(selectToken);
@@ -31,13 +31,17 @@ const Home = () => {
   const navigate = useNavigate();
 
   const parseDuration = (duration) => {
-    // ISO 8601 (PT00H00M00S) 형식의 문자열을 파싱
     if (!duration) {
       return { hours: 0, minutes: 0 };
     }
-    const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:\d+S)?/);
+    
+    const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!matches) {
+      return { hours: 0, minutes: 0 };
+    }
     const hours = matches[1] ? parseInt(matches[1]) : 0;
     const minutes = matches[2] ? parseInt(matches[2]) : 0;
+    
     return { hours, minutes };
   };
 
@@ -90,9 +94,30 @@ const Home = () => {
 
   const getDailyStudyData = async () => {
     try {
-      const response = await axios.get('/api/daily-study');
-      console.log("getDailyStudyData :: response.data", response.data);
-      setDailyStudyData(response.data);
+      // 목표 시간 가져오기
+      const goalResponse = await axios.get('/api/member/dailyGoal');
+      
+      const { hours: goalHours, minutes: goalMinutes } = parseDuration(goalResponse.data?.dailyGoal);
+      
+      setDailyGoalHours(goalHours);
+      setDailyGoalMinutes(goalMinutes);
+
+      // 순공시간 데이터 가져오기
+      const timeResponse = await axios.get('/api/daily-study');
+      console.log("getDailyStudyData :: response.data", timeResponse.data);
+      const studyMap = new Map();
+      
+      timeResponse.data?.content?.forEach(item => {
+        const { hours, minutes } = parseDuration(item.studyTime);
+        const totalMinutes = hours * 60 + minutes;
+        const totalGoalMinutes = goalHours * 60 + goalMinutes;
+        
+        const ratio = totalGoalMinutes > 0 ? totalMinutes / totalGoalMinutes : 0;
+        studyMap.set(item.studyDate, ratio);
+      });
+      
+      setDailyStudyData(studyMap);
+      console.log("Final studyMap:", [...studyMap.entries()]); // 디버깅용
     } catch (error) {
       console.error('성장 기록 조회 실패:', error);
     }
@@ -103,7 +128,6 @@ const Home = () => {
     if (token) {
       getMyStudyList();
       getTodayStudyTime();
-      getDailyGoalTime();
       getDailyStudyData();
     }
   }, []);
@@ -155,13 +179,13 @@ const Home = () => {
     setStartIndex(prev => Math.min(myStudyList.length - 4, prev + 4));
   };
 
-  const getDailyStudyColor = (value) => {
-    if (value === 0) return 'bg-gray-100';
-    if (value <= 1) return 'bg-emerald-50';
-    if (value <= 2) return 'bg-emerald-100';
-    if (value <= 3) return 'bg-emerald-200';
-    if (value <= 4) return 'bg-emerald-300';
-    return 'bg-emerald-400';
+  const getDailyStudyColor = (ratio) => {
+    if (ratio === 0) return 'bg-gray-100';
+    if (ratio <= 0.2) return 'bg-emerald-200';
+    if (ratio <= 0.4) return 'bg-emerald-300';
+    if (ratio <= 0.6) return 'bg-emerald-400';
+    if (ratio <= 0.8) return 'bg-emerald-500';
+    return 'bg-emerald-600';
   };
 
   return (
@@ -319,92 +343,94 @@ const Home = () => {
       )}
 
       {/* 성장 기록 섹션 */}
-      <div className="mb-8">
-        <div className="mb-4">
-          <h1 className="text-2xl font-semibold inline-flex items-center gap-2">
-            성장 기록 
-            <span role="img" aria-label="medal">🏅</span>
-          </h1>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex gap-8">
-            {/* 왼쪽: 그래프 영역 */}
-            <div className="flex-1">
-              {/* 월 표시 */}
-              <div className="flex mb-4 pl-8">
-                {['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map((month) => (
-                  <div key={month} className="flex-1 text-xs text-gray-400">
-                    {month}
+      {token && (
+        <div className="mb-8">
+          <div className="mb-4">
+            <h1 className="text-2xl font-semibold inline-flex items-center gap-2">
+              성장 기록 
+              <span role="img" aria-label="medal">🏅</span>
+            </h1>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex gap-8">
+              {/* 왼쪽: 그래프 영역 */}
+              <div className="flex-1">
+                {/* 월 표시 */}
+                <div className="flex mb-4 pl-8">
+                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
+                    <div key={month} className="flex-1 text-xs text-gray-400">
+                      {month}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex">
+                  <div className="flex flex-col justify-between text-xs text-gray-400 pr-2">
+                    <div>Mon</div>
+                    <div>Wed</div>
+                    <div>Fri</div>
                   </div>
-                ))}
-              </div>
 
-              <div className="flex">
-                <div className="flex flex-col justify-between text-xs text-gray-400 pr-2">
-                  <div>Mon</div>
-                  <div>Wed</div>
-                  <div>Fri</div>
+                  <div className="flex-1 grid grid-cols-52 gap-[2px]">
+                    {[...Array(364)].map((_, index) => {
+                      const date = new Date();
+                      date.setDate(date.getDate() - (363 - index));
+                      const dateString = date.toISOString().split('T')[0];
+                      const ratio = dailyStudyData.get(dateString) || 0;
+                      
+                      return (
+                        <div
+                          key={index}
+                          className={`aspect-square rounded-sm ${getDailyStudyColor(ratio)}`}
+                          title={`${dateString} - ${Math.round(ratio * 100)}% 달성`}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <div className="flex-1 grid grid-cols-52 gap-[2px]">
-                  {[...Array(364)].map((_, index) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (363 - index));
-                    
-                    return (
-                      <div
-                        key={index}
-                        className={`aspect-square rounded-sm ${
-                          getDailyStudyColor(dailyStudyData[index] || 0)
-                        }`}
-                        title={date.toLocaleDateString()}
-                      />
-                    );
-                  })}
+                <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-500">
+                  <span>0%</span>
+                  <div className="flex gap-[2px]">
+                    <div className="w-3 h-3 rounded-sm bg-gray-100"></div>
+                    <div className="w-3 h-3 rounded-sm bg-emerald-50"></div>
+                    <div className="w-3 h-3 rounded-sm bg-emerald-100"></div>
+                    <div className="w-3 h-3 rounded-sm bg-emerald-200"></div>
+                    <div className="w-3 h-3 rounded-sm bg-emerald-300"></div>
+                    <div className="w-3 h-3 rounded-sm bg-emerald-400"></div>
+                  </div>
+                  <span>100%</span>
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-500">
-                <span>Less</span>
-                <div className="flex gap-[2px]">
-                  <div className="w-3 h-3 rounded-sm bg-gray-100"></div>
-                  <div className="w-3 h-3 rounded-sm bg-emerald-50"></div>
-                  <div className="w-3 h-3 rounded-sm bg-emerald-100"></div>
-                  <div className="w-3 h-3 rounded-sm bg-emerald-200"></div>
-                  <div className="w-3 h-3 rounded-sm bg-emerald-300"></div>
-                  <div className="w-3 h-3 rounded-sm bg-emerald-400"></div>
-                </div>
-                <span>More</span>
+              {/* 오른쪽: 연도 선택 탭 */}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setSelectedYear(2024)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    selectedYear === 2024
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  2024
+                </button>
+                <button
+                  onClick={() => setSelectedYear(2023)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    selectedYear === 2023
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  2023
+                </button>
               </div>
-            </div>
-
-            {/* 오른쪽: 연도 선택 탭 */}
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => setSelectedYear(2024)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  selectedYear === 2024
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                2024
-              </button>
-              <button
-                onClick={() => setSelectedYear(2023)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  selectedYear === 2023
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                2023
-              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 공개 스터디 섹션 */}
       <div className="mb-8">
