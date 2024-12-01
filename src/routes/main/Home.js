@@ -298,7 +298,12 @@ const Home = () => {
       {/* 더보기 버튼 */}
       {!isLastPage && (
         <div className="flex justify-center mt-6">
-          <Button variant="plain" className='rounded-full' onClick={() => getStudyList(page)}>더보기</Button>
+          <Button 
+            variant="plain" 
+            className='rounded-full border border-gray-600 !text-gray-600 hover:!text-gray-800'
+          >
+            더보기
+          </Button>
         </div>
       )}
     </div>
