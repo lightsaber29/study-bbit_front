@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
+let socket = null; // 전역 socket 인스턴스
+
 export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord, onSavingStarted, onSaveCanceled, onMeetingSaved }) => {
   const socketRef = useRef(null);
 
@@ -8,12 +10,16 @@ export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts
   const domain = 'https://node.studybbit.site'; // dev
 
   useEffect(() => {
-    socketRef.current = io(domain, {
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000
-    });
+    // 소켓이 없을 때만 생성
+    if (!socket) {
+      socket = io(domain, {
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000
+      });
+    }
+    socketRef.current = socket;
 
     // 이벤트 핸들러들을 객체로 정의
     const eventHandlers = {
@@ -46,14 +52,22 @@ export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts
     // 클린업
     return () => {
       if (socketRef.current) {
-        // 모든 이벤트 리스너 제거
+        // 이벤트 리스너만 제거
         Object.keys(eventHandlers).forEach(event => {
           socketRef.current.off(event);
         });
-        socketRef.current.disconnect();
+        // disconnect는 하지 않음
       }
     };
-  }, [meetingId]);
+  }, [meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord, onSavingStarted, onSaveCanceled, onMeetingSaved]);
 
   return socketRef;
+};
+
+// 앱 종료 시 소켓 정리를 위한 함수 (필요한 경우)
+export const cleanupSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };
