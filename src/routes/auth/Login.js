@@ -56,9 +56,9 @@ const Login = () => {
       const token = res.headers['authorization'];
       if (token) {
         const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
-        console.log("selectMemberRes :: ", selectMemberRes);
         dispatch(setMember({
           ...selectMemberRes.data,
+          memberId: selectMemberRes.data.id,
           token: token.split(' ')[1]
         }));
         alert('로그인되었습니다.');
