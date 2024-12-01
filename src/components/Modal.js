@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import Button from './Button.js';
 import { useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
+import TemperatureModal from './TemperatureModal.js';
 
-const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, roomId, leaderImageUrl, leaderNickname, isPrivate }) => {
+const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, roomId, leaderImageUrl, leaderNickname, leaderId, isPrivate }) => {
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -66,8 +68,11 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
                 <p className="font-semibold">{participants} 명</p>
               </div>
               
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden">
+              <div
+                className="flex items-center space-x-4"
+                onClick={() => setIsTemperatureModalOpen(true)}
+              >
+                <div className="w-12 h-12 rounded-full overflow-hidden cursor-pointer">
                   <img 
                     src={
                       leaderImageUrl 
@@ -113,6 +118,12 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
         >
           입장하기
         </Button>
+
+        <TemperatureModal
+          isOpen={isTemperatureModalOpen}
+          onClose={() => setIsTemperatureModalOpen(false)}
+          leaderId={leaderId}
+        />
       </div>
     </div>
   );
