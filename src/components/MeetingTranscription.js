@@ -22,6 +22,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   const [isHost, setIsHost] = useState(false);
   const [isMikeOn, setIsMikeOn] = useState(true);
   const scrollRef = useRef(null);
+  const prevTranscriptsLength = useRef(0);
   const { roomId } = useParams();
   const member = useSelector(selectMember);
   const [isSaving, setIsSaving] = useState(false);
@@ -145,10 +146,13 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   }, [meetingId]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (transcripts.length > prevTranscriptsLength.current) {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
     }
-  }, [transcripts, currentTranscript]);
+    prevTranscriptsLength.current = transcripts.length;
+  }, [transcripts]);
 
   useEffect(() => {
     const handleOnline = () => {
