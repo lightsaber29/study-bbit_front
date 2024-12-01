@@ -186,7 +186,7 @@ const PostDetail = ({ post, getPosts }) => {
   };
 
   return (
-    <div className="p-4 border-b">
+    <div className="p-4 border-b hover:bg-gray-50 transition-colors duration-200">
       <div 
         className="cursor-pointer" 
         onClick={handlePostClick}

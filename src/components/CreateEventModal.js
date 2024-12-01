@@ -145,7 +145,10 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
       <div className="bg-white rounded-lg w-full max-w-lg mx-4">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-semibold">일정 추가</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button 
+            onClick={onClose} 
+            className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -262,7 +265,9 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
               <button
                 type="button"
                 className={`flex-1 p-2 rounded-lg border ${
-                  values.repeatType === 'once' ? 'bg-emerald-500 text-white' : 'bg-white'
+                  values.repeatType === 'once' 
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                    : 'bg-white hover:bg-gray-50'
                 }`}
                 onClick={() => handleRepeatTypeChange('once')}
               >
@@ -271,7 +276,9 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
               <button
                 type="button"
                 className={`flex-1 p-2 rounded-lg border ${
-                  values.repeatType === 'weekly' ? 'bg-emerald-500 text-white' : 'bg-white'
+                  values.repeatType === 'weekly' 
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                    : 'bg-white hover:bg-gray-50'
                 }`}
                 onClick={() => handleRepeatTypeChange('weekly')}
               >
@@ -289,8 +296,8 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
                       type="button"
                       className={`w-10 h-10 rounded-full ${
                         values.selectedDays.includes(day)
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-gray-100'
+                          ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                          : 'bg-gray-100 hover:bg-gray-200'
                       }`}
                       onClick={() => handleDaySelect(day)}
                     >
@@ -317,7 +324,7 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
 
           <button
             type="submit"
-            className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600"
+            className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
           >
             일정 설정
           </button>

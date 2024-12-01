@@ -9,7 +9,7 @@ const Card = ({
   isPrivate
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer">
       <div className="relative">
         <img
           src={

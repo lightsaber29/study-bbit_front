@@ -17,7 +17,10 @@ const MyStudyCard = ({
           내가 만든 스터디 또는 초대 받은 스터디가 등록됩니다.
         </div>
       ) : (
-        <div className="w-full h-60 rounded-lg bg-white shadow-md my-3" onClick={() => navigate(`/study/${roomId}`)}>
+        <div 
+          className="w-full h-60 rounded-lg bg-white shadow-md my-3 hover:shadow-lg transition-shadow duration-200 cursor-pointer" 
+          onClick={() => navigate(`/study/${roomId}`)}
+        >
           <div className="h-2/3 overflow-hidden">
             <img
               src={

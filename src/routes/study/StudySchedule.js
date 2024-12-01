@@ -193,11 +193,12 @@ const StudySchedule = () => {
               <div className="mt-4">
                 {selectedDateEvents.length > 0 ? (
                   selectedDateEvents.map((event) => (
-                    <div key={event.scheduleId} className="mb-4">
-                      <div 
-                        className="text-lg cursor-pointer hover:text-emerald-600"
-                        onClick={() => handleEventClick(event)}
-                      >
+                    <div 
+                      key={event.scheduleId} 
+                      className="mb-4 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer" 
+                      onClick={() => handleEventClick(event)}
+                    >
+                      <div className="text-lg">
                         {event.title}
                       </div>
                       <div className="text-gray-500">
