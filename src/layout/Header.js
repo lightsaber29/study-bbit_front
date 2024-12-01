@@ -4,12 +4,15 @@ import Button from '../components/Button';
 import ProfileModal from '../components/ProfileModal';
 import { useSelector } from 'react-redux';
 import { useRef } from 'react';
-import { BiBell, BiChat } from 'react-icons/bi';
+import { BiBell, BiChat, BiSearch } from 'react-icons/bi';
 import { selectMember } from 'store/memberSlice';
 import DMModal from '../components/DMModal';
 import NotificationModal from '../components/NotificationModal';
 import { useDispatch } from 'react-redux';
 import { addNotification } from 'store/notificationSlice';
+import { IoMdAdd } from 'react-icons/io';
+import { FaPaperPlane } from 'react-icons/fa';
+import { IoNotificationsOutline, IoClose } from 'react-icons/io5';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -274,43 +277,58 @@ const Header = () => {
         </Link>
         
         <div className="flex-1 mx-5 relative">
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="스터디, 페이지, 게시글 검색"
-              className={`absolute top-1/2 -translate-y-1/2 w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-md transition-all duration-300 ${
-                showSearch 
-                  ? 'opacity-100 visible pointer-events-auto' 
-                  : 'opacity-0 invisible pointer-events-none'
-              }`}
-              ref={searchInputRef}
-            />
+          <form onSubmit={handleSearch} className="flex items-center">
+            <div className={`
+              absolute right-0 flex items-center w-full
+              bg-gray-100 border border-gray-200 rounded-full
+              transition-all duration-300 ease-in-out
+              ${showSearch 
+                ? 'opacity-100 visible translate-x-0' 
+                : 'opacity-0 invisible translate-x-20'
+              }
+            `}>
+              <BiSearch size={20} className="text-gray-400 ml-3" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="스터디, 페이지, 게시글 검색"
+                className="w-full px-2 py-2 bg-transparent outline-none"
+                ref={searchInputRef}
+              />
+              {showSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSearch(false);
+                    setSearchQuery('');
+                  }}
+                  className="p-2 hover:bg-gray-200 rounded-full mr-1"
+                >
+                  <IoClose size={20} className="text-gray-500" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={handleSearchButtonClick}
+              className="p-2 hover:bg-gray-100 rounded-full ml-auto"
+            >
+              <BiSearch size={24} className="text-gray-600" />
+            </button>
           </form>
         </div>
         
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="default" 
-            onClick={handleSearchButtonClick}
-            className="flex items-center gap-2"
-          >
-            <span>찾기</span>
-            {showSearch && searchQuery && '🔍'}
-          </Button>
-          <Button variant="primary" className="text-white-700" onClick={() => navigate('/create')}>스터디 만들기</Button>
-          {/* <Button variant="secondary" className="text-white-700" onClick={() => navigate('/notice')}>공지사항</Button>
-          <Button variant="secondary" className="text-white-700" onClick={() => navigate('/question')}>질문하기</Button> */}
+        <div className="flex items-center space-x-2">
           
           {token ? (
             <div className="relative flex items-center space-x-4">
               <Button 
                 variant="primary" 
-                className="text-white-700"
-                onClick={() => navigate('/promotion')}
+                className="text-white-700 flex items-center gap-2 !py-1"
+                onClick={() => navigate('/create')}
               >
-                스터디 찾기
+                스터디 만들기 <IoMdAdd size={20} />
               </Button>
               
               {/* 알림 버튼 */}
@@ -318,16 +336,16 @@ const Header = () => {
                 className="p-2 hover:bg-gray-100 rounded-full relative notification-button"
                 onClick={() => setShowNotificationModal(!showNotificationModal)}
               >
-                <BiBell size={24} className="text-gray-600" />
+                <IoNotificationsOutline size={24} className="text-gray-600" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
-              
+
               {/* DM 버튼과 모달 */}
               <button 
                 className="p-2 hover:bg-gray-100 rounded-full dm-button relative"
                 onClick={() => setShowDMModal(!showDMModal)}
               >
-                <BiChat size={24} className="text-gray-600" />
+                <FaPaperPlane size={20} className="text-gray-600" />
               </button>
               <div className="dm-modal relative z-50">
                 <DMModal 
@@ -335,6 +353,7 @@ const Header = () => {
                   onClose={() => setShowDMModal(false)}
                 />
               </div>
+              
               
               {/* 프로필 버튼 */}
               <button 
