@@ -275,6 +275,7 @@ const Home = () => {
               maxParticipants={study.maxParticipants}
               profileImageUrl={study.profileImageUrl}
               detail={study.detail}
+              isPrivate={study.private}
             />
           </div>
         ))}
