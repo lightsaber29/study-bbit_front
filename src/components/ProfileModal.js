@@ -11,7 +11,13 @@ const ProfileModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const menuItems = [
-    { label: '내 프로필', onClick: () => navigate('/profile') },
+    { 
+      label: '내 프로필', 
+      onClick: () => {
+        onClose();  // 먼저 모달 닫기
+        navigate('/profile');  // 그 다음 페이지 이동
+      }
+    },
     // { label: '내 아이템', onClick: () => navigate('/items') }
   ];
 
