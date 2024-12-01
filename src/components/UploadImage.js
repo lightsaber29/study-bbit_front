@@ -20,6 +20,15 @@ const UploadImage = ({ onImageChange, previewImage, setPreviewImage }) => {
     fileInputRef.current.click();
   };
 
+  const handleDeleteImage = (e) => {
+    e.stopPropagation();
+    setPreviewImage(null);
+    onImageChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div>
       <div 
@@ -30,6 +39,16 @@ const UploadImage = ({ onImageChange, previewImage, setPreviewImage }) => {
           {previewImage ? (
             <div className="flex flex-col items-center justify-center w-full">
               <img src={previewImage} alt="Preview" className="max-w-xs rounded" />
+              <button
+                onClick={handleDeleteImage}
+                className="text-sm text-gray-500 mt-2 flex items-center gap-1 hover:text-red-500"
+                title="이미지 삭제"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                이미지 삭제
+              </button>
               <p className="text-sm text-center text-gray-500 mt-2">클릭하여 이미지 변경</p>
             </div>
           ) : (
