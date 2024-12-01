@@ -4,7 +4,7 @@ import Card from '../../components/Card';
 import MyStudyCard from '../../components/MyStudyCard';
 import Modal from '../../components/Modal';
 import { useSelector } from 'react-redux';
-import { selectToken } from 'store/memberSlice';
+import { selectToken, selectProfileImageUrl, selectNickname } from 'store/memberSlice';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,8 +22,12 @@ const Home = () => {
   const [todayStudyMinutes, setTodayStudyMinutes] = useState(0);
   const [dailyGoalHours, setDailyGoalHours] = useState(0);
   const [dailyGoalMinutes, setDailyGoalMinutes] = useState(0);
+  const [dailyStudyData, setDailyStudyData] = useState({});
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const token = useSelector(selectToken);
+  const profileImageUrl = useSelector(selectProfileImageUrl);
+  const nickname = useSelector(selectNickname);
   const navigate = useNavigate();
 
   const parseDuration = (duration) => {
@@ -84,12 +88,23 @@ const Home = () => {
     }
   }
 
+  const getDailyStudyData = async () => {
+    try {
+      const response = await axios.get('/api/daily-study');
+      console.log("getDailyStudyData :: response.data", response.data);
+      setDailyStudyData(response.data);
+    } catch (error) {
+      console.error('성장 기록 조회 실패:', error);
+    }
+  };
+
   useEffect(() => {
     getStudyList(page);
     if (token) {
       getMyStudyList();
       getTodayStudyTime();
       getDailyGoalTime();
+      getDailyStudyData();
     }
   }, []);
 
@@ -140,13 +155,77 @@ const Home = () => {
     setStartIndex(prev => Math.min(myStudyList.length - 4, prev + 4));
   };
 
+  const getDailyStudyColor = (value) => {
+    if (value === 0) return 'bg-gray-100';
+    if (value <= 1) return 'bg-emerald-50';
+    if (value <= 2) return 'bg-emerald-100';
+    if (value <= 3) return 'bg-emerald-200';
+    if (value <= 4) return 'bg-emerald-300';
+    return 'bg-emerald-400';
+  };
+
   return (
     <div>
-      {/* 내 스터디 & 내 목표 섹션 */}
+      {/* 프로필 & 목표 섹션 추가 */}
+      {token && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          {/* 프로필 영역 */}
+          <div className="flex items-center gap-4 mb-4">
+            <img 
+              src={
+                profileImageUrl
+                  ? decodeURIComponent(profileImageUrl)
+                  : `${process.env.PUBLIC_URL}/images/default-profile.png`
+              } 
+              alt="Profile" 
+              className="w-40 h-40 rounded-full border-2 border-slate-600"
+            />
+            <div className="w-full">
+              <h2 className="text-xl font-bold mb-4">{nickname} 님, 오늘도 응원합니다. 화이팅!</h2>
+              {/* 목표 시간 영역 */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">오늘의 목표 시간</span>
+                  <button 
+                    onClick={() => setIsGoalModalOpen(true)}
+                    className="text-gray-600 hover:bg-gray-200 p-1 rounded-full"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="text-lg mb-2">
+                  {todayStudyHours}시간 {todayStudyMinutes}분 / {dailyGoalHours}시간 {dailyGoalMinutes}분
+                </div>
+                {/* 프로그레스 바 */}
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-emerald-400 rounded-full transition-all duration-500 ease-out"
+                    style={{ 
+                      width: `${Math.min(
+                        ((todayStudyHours * 60 + todayStudyMinutes) / 
+                        (dailyGoalHours * 60 + dailyGoalMinutes)) * 100, 
+                        100
+                      )}%`,
+                      transition: 'width 1s ease-in-out'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* 내 스터디 섹션 */}
       {token && (
         <div className="gap-6 mb-8">
-          <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold mb-4">내 스터디</h2>
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold mb-2">내 스터디</h1>
+          </div>
+          <div className="p-4 rounded-lg shadow-md">
             <div className="relative">
               <div className="w-full overflow-hidden">
                 <div className="flex justify-between w-full gap-4">
@@ -195,24 +274,6 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold mb-4">내 목표</h2>
-            <div className="text-sm text-gray-600 mb-2">오늘 공부할 시간 / 내 목표 시간</div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="text-2xl font-bold">
-                {todayStudyHours}시간 {todayStudyMinutes}분 / {dailyGoalHours}시간 {dailyGoalMinutes}분
-              </div>
-              <button 
-                onClick={() => setIsGoalModalOpen(true)}
-                className="p-1 hover:bg-gray-200 rounded-full"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
           {/* 목표 시간 설정 모달 */}
           {isGoalModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -256,6 +317,94 @@ const Home = () => {
           )}
         </div>
       )}
+
+      {/* 성장 기록 섹션 */}
+      <div className="mb-8">
+        <div className="mb-4">
+          <h1 className="text-2xl font-semibold inline-flex items-center gap-2">
+            성장 기록 
+            <span role="img" aria-label="medal">🏅</span>
+          </h1>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex gap-8">
+            {/* 왼쪽: 그래프 영역 */}
+            <div className="flex-1">
+              {/* 월 표시 */}
+              <div className="flex mb-4 pl-8">
+                {['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map((month) => (
+                  <div key={month} className="flex-1 text-xs text-gray-400">
+                    {month}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex">
+                <div className="flex flex-col justify-between text-xs text-gray-400 pr-2">
+                  <div>Mon</div>
+                  <div>Wed</div>
+                  <div>Fri</div>
+                </div>
+
+                <div className="flex-1 grid grid-cols-52 gap-[2px]">
+                  {[...Array(364)].map((_, index) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (363 - index));
+                    
+                    return (
+                      <div
+                        key={index}
+                        className={`aspect-square rounded-sm ${
+                          getDailyStudyColor(dailyStudyData[index] || 0)
+                        }`}
+                        title={date.toLocaleDateString()}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-500">
+                <span>Less</span>
+                <div className="flex gap-[2px]">
+                  <div className="w-3 h-3 rounded-sm bg-gray-100"></div>
+                  <div className="w-3 h-3 rounded-sm bg-emerald-50"></div>
+                  <div className="w-3 h-3 rounded-sm bg-emerald-100"></div>
+                  <div className="w-3 h-3 rounded-sm bg-emerald-200"></div>
+                  <div className="w-3 h-3 rounded-sm bg-emerald-300"></div>
+                  <div className="w-3 h-3 rounded-sm bg-emerald-400"></div>
+                </div>
+                <span>More</span>
+              </div>
+            </div>
+
+            {/* 오른쪽: 연도 선택 탭 */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => setSelectedYear(2024)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  selectedYear === 2024
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                2024
+              </button>
+              <button
+                onClick={() => setSelectedYear(2023)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  selectedYear === 2023
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                2023
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* 공개 스터디 섹션 */}
       <div className="mb-8">
