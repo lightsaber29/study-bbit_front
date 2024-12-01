@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import UploadImage from 'components/UploadImage';
 import useFormInput from 'hooks/useFormInput';
@@ -26,6 +26,21 @@ const StudySettings = () => {
     }));
   };
 
+  const getRoomInfo = async () => {
+    try {
+      const response = await axios.get(`/api/room/${roomId}`);
+      console.log(response.data);
+      setValues(prev => ({
+        ...prev,
+        detail: response.data.detail
+      }));
+    } catch (error) {
+      console.error('스터디룸 상세 정보 조회 실패: ', error);
+      const errorMessage = error.response?.data?.message || '스터디룸 상세 정보 조회 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -34,6 +49,8 @@ const StudySettings = () => {
       if (image) {
         formData.append('roomImage', image);
         formData.append('roomImageChanged', 'true');
+      } else {
+        formData.append('roomImageChanged', 'false');
       }
       if (password) {
         formData.append('password', password);
@@ -42,7 +59,7 @@ const StudySettings = () => {
         formData.append('detail', detail);
       }
 
-      const response = await axios.post(`/api/room/${roomId}`, formData, {
+      await axios.post(`/api/room/${roomId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -70,6 +87,10 @@ const StudySettings = () => {
       }
     }
   };
+
+  useEffect(() => {
+    getRoomInfo();
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16">

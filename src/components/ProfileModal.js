@@ -58,7 +58,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Temperature Section */}
-        {/* <div className="space-y-3 bg-gray-50 p-6 rounded-2xl">
+        <div className="space-y-2 bg-gray-50 px-6 py-4 rounded-2xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-1">
               <span className="text-gray-600 font-medium">몰입온도</span>
@@ -99,7 +99,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
               }}
             />
           </div>
-        </div> */}
+        </div>
       </div>
 
       {/* 메뉴 항목들 */}

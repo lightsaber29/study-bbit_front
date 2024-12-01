@@ -24,6 +24,7 @@ const Home = () => {
   const [dailyGoalMinutes, setDailyGoalMinutes] = useState(0);
   const [dailyStudyData, setDailyStudyData] = useState(new Map());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [showProgress, setShowProgress] = useState(false);
 
   const token = useSelector(selectToken);
   const profileImageUrl = useSelector(selectProfileImageUrl);
@@ -71,7 +72,12 @@ const Home = () => {
   }
 
   const getTodayStudyTime = async () => {
-    const today = new Date().toISOString().split('T')[0];
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const today = `${year}-${month}-${day}`;
+    
     try {
       const response = await axios.get(`/api/daily-study/${today}`);
       const { hours, minutes } = parseDuration(response.data?.studyTime);
@@ -136,6 +142,15 @@ const Home = () => {
       })();
     }
   }, [selectedYear, token]);
+
+  useEffect(() => {
+    // 컴포넌트 마운트 후 약간의 지연을 주고 프로그레스 바를 표시
+    const timer = setTimeout(() => {
+      setShowProgress(true);
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCardClick = (study) => {
     const isMyStudy = myStudyList.some(myStudy => myStudy.id === study.id);
@@ -242,14 +257,13 @@ const Home = () => {
                 {/* 프로그레스 바 */}
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-emerald-400 rounded-full transition-all duration-500 ease-out"
+                    className="h-full bg-emerald-400 rounded-full transition-all duration-1000 ease-out"
                     style={{ 
-                      width: `${Math.min(
+                      width: showProgress ? `${Math.min(
                         ((todayStudyHours * 60 + todayStudyMinutes) / 
                         (dailyGoalHours * 60 + dailyGoalMinutes)) * 100, 
                         100
-                      )}%`,
-                      transition: 'width 1s ease-in-out'
+                      )}%` : '0%'
                     }}
                   />
                 </div>
@@ -264,7 +278,7 @@ const Home = () => {
       {token && (
         <div className="gap-6 mb-8">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold mb-2">내 스터디</h1>
+            <h1 className="text-2xl font-semibold">내 스터디</h1>
           </div>
           <div className="p-4 rounded-lg shadow-md">
             <div className="relative">
