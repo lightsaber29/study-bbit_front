@@ -75,7 +75,28 @@ const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
             {/* Temperature Section */}
             <div className="space-y-3 bg-gray-50 p-6 rounded-2xl">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 font-medium">몰입온도</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-600 font-medium">몰입온도</span>
+                  <div className="group relative">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="currentColor" 
+                      className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors cursor-help"
+                    >
+                      <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+                    </svg>
+                    <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 p-3 bg-gray-900/95 text-white text-xs rounded-lg z-10 shadow-xl backdrop-blur-sm w-[250px]">
+                      <p className="text-center leading-5">
+                        몰입온도는 스터디에 참여하면서 매겨진<br />
+                        출석률에 따라 만들어진 지표입니다.
+                      </p>
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-2">
+                        <div className="border-[6px] border-transparent border-t-gray-900/95"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className="flex items-center min-w-[4rem] justify-end">
                   <span className="text-xl font-bold text-gray-800">
                     {memberInfo?.flowTemperature || 0}
