@@ -302,8 +302,9 @@ const Home = () => {
       {!isLastPage && (
         <div className="flex justify-center mt-6">
           <Button 
-            variant="plain" 
+            variant="plain"
             className='rounded-full border border-gray-600 !text-gray-600 hover:!text-gray-800'
+            onClick={() => getStudyList(page)}
           >
             더보기
           </Button>
