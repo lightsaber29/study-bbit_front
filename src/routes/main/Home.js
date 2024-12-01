@@ -165,6 +165,8 @@ const Home = () => {
                           isEmpty={!study}
                           title={study?.name}
                           photoUrl={study?.profileImageUrl}
+                          participants={study?.participants}
+                          maxParticipants={study?.maxParticipants}
                           roomId={study?.id}
                         />
                       </div>
