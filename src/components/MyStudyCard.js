@@ -13,11 +13,11 @@ const MyStudyCard = ({
   return (
     <>
       {isEmpty ? (
-        <div className="w-full h-60 rounded-lg flex items-center justify-center text-gray-700 text-center p-4">
+        <div className="w-full h-60 rounded-lg bg-white shadow-md flex items-center justify-center text-gray-700 text-center p-4 my-3">
           내가 만든 스터디 또는 초대 받은 스터디가 등록됩니다.
         </div>
       ) : (
-        <div className="w-full h-60 rounded-lg" onClick={() => navigate(`/study/${roomId}`)}>
+        <div className="w-full h-60 rounded-lg bg-white shadow-md my-3" onClick={() => navigate(`/study/${roomId}`)}>
           <div className="h-2/3 overflow-hidden">
             <img
               src={
@@ -30,7 +30,7 @@ const MyStudyCard = ({
             />
           </div>
           <div className="h-1/3 p-4">
-            <h3 className="text-sm font-medium line-clamp-2">{title}</h3>
+            <h3 className="text-sm font-medium line-clamp-1">{title}</h3>
             <div className="flex justify-end mt-1">
               <div className="text-sm text-gray-600 flex items-center">
                 <svg 
