@@ -272,8 +272,9 @@ const Header = () => {
   return (
     <div className="flex flex-col border-b shadow-sm">
       <div className="h-14 flex items-center p-4 bg-white">
-        <Link to='' className="text-2xl font-bold text-gray-800">
-          Study-bbit🐰
+        <Link to='' className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="Study-bbit Logo" className="w-10 h-10" />
+          study-bbit
         </Link>
         
         <div className="flex-1 mx-5 relative">
@@ -325,7 +326,7 @@ const Header = () => {
             <div className="relative flex items-center space-x-4">
               <Button 
                 variant="primary" 
-                className="text-white-700 flex items-center gap-2 !py-1"
+                className="text-white-700 flex items-center gap-1 !py-1 !px-3"
                 onClick={() => navigate('/create')}
               >
                 스터디 만들기 <IoMdAdd size={20} />
