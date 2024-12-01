@@ -261,12 +261,7 @@ const Home = () => {
 
       {/* 공개 스터디 섹션 */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">공개 스터디</h2>
-        <div className="flex space-x-4 mb-4">
-          <Button variant="primary">전체</Button>
-          <Button variant="default">신규 스터디</Button>
-          <Button variant="default">참여한 스터디</Button>
-        </div>
+        <h1 className="text-2xl font-semibold mb-2">전체 스터디</h1>
       </div>
 
       {/* 스터디 카드 리스트 */}
