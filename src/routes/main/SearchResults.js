@@ -5,8 +5,6 @@ import Card from '../../components/Card';
 import Modal from '../../components/Modal';
 
 const SearchResults = () => {
-  const [activeTab, setActiveTab] = useState('전체');
-  const [filterType, setFilterType] = useState('관심 설정');
   const location = useLocation();
   const searchQuery = new URLSearchParams(location.search).get('query');
   const [page, setPage] = useState(0);
@@ -14,9 +12,6 @@ const SearchResults = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [selectedStudy, setSelectedStudy] = useState(null);
   const [isLastPage, setIsLastPage] = useState(false);
-
-  const tabs = ['전체', '신규 스터디', '전체 스터디'];
-  const filters = ['관심 설정', '비공개 참여 가능한 방'];
 
   const getSearchResults = useCallback(async (page) => {
     try {
@@ -48,41 +43,6 @@ const SearchResults = () => {
       <div className="mb-8">
         <h1 className="text-xl font-bold mb-2">"{searchQuery}" 검색 결과</h1>
         <p className="text-gray-600">총 {totalElements}개 스터디</p>
-      </div>
-
-      {/* 탭 메뉴 */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex gap-4">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-full ${
-                activeTab === tab
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-4">
-          {filters.map(filter => (
-            <button
-              key={filter}
-              onClick={() => setFilterType(filter)}
-              className={`px-4 py-2 rounded-full border ${
-                filterType === filter
-                  ? 'border-blue-500 text-blue-500'
-                  : 'border-gray-300 text-gray-700'
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* 스터디룸 그리드 */}
