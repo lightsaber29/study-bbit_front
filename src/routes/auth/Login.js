@@ -56,6 +56,7 @@ const Login = () => {
       const token = res.headers['authorization'];
       if (token) {
         const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
+        console.log("selectMemberRes :: ", selectMemberRes);
         dispatch(setMember({
           ...selectMemberRes.data,
           token: token.split(' ')[1]
