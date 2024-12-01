@@ -40,7 +40,6 @@ const Home = () => {
   const getStudyList = async (page) => {
     try {
       const response = await axios.get(`/api/room?page=${page}&size=8`);
-      // console.log('getStudyList response.data :: ', response);
       setStudyList(prevList => [...prevList, ...response.data.content]);
       setPage(page + 1);
       setIsLastPage(response.data.last);
@@ -54,7 +53,6 @@ const Home = () => {
   const getMyStudyList = async () => {
     try {
       const response = await axios.get('/api/member/mystudy?size=20');
-      // console.log('getMyStudyList response.data :: ', response);
       setMyStudyList(response.data?.myRooms);
     } catch (error) {
       console.error('내 스터디 목록 조회 실패: ', error);
@@ -67,7 +65,6 @@ const Home = () => {
     const today = new Date().toISOString().split('T')[0];
     try {
       const response = await axios.get(`/api/daily-study/${today}`);
-      // console.log('getTodayStudyTime response.data :: ', response);
       const { hours, minutes } = parseDuration(response.data?.studyTime);
       setTodayStudyHours(hours);
       setTodayStudyMinutes(minutes);
@@ -79,7 +76,6 @@ const Home = () => {
   const getDailyGoalTime = async () => {
     try {
       const response = await axios.get('/api/member/dailyGoal');
-      console.log('getDailyGoalTime response.data :: ', response);
       const { hours, minutes } = parseDuration(response.data?.dailyGoal);
       setDailyGoalHours(hours);
       setDailyGoalMinutes(minutes);
@@ -165,6 +161,8 @@ const Home = () => {
                           isEmpty={!study}
                           title={study?.name}
                           photoUrl={study?.profileImageUrl}
+                          participants={study?.participants}
+                          maxParticipants={study?.maxParticipants}
                           roomId={study?.id}
                         />
                       </div>
@@ -261,12 +259,7 @@ const Home = () => {
 
       {/* 공개 스터디 섹션 */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">공개 스터디</h2>
-        <div className="flex space-x-4 mb-4">
-          <Button variant="primary">전체</Button>
-          <Button variant="default">신규 스터디</Button>
-          <Button variant="default">참여한 스터디</Button>
-        </div>
+        <h1 className="text-2xl font-semibold mb-2">전체 스터디</h1>
       </div>
 
       {/* 스터디 카드 리스트 */}
@@ -280,6 +273,7 @@ const Home = () => {
               maxParticipants={study.maxParticipants}
               profileImageUrl={study.profileImageUrl}
               detail={study.detail}
+              isPrivate={study.private}
             />
           </div>
         ))}
@@ -303,7 +297,13 @@ const Home = () => {
       {/* 더보기 버튼 */}
       {!isLastPage && (
         <div className="flex justify-center mt-6">
-          <Button variant="plain" className='rounded-full' onClick={() => getStudyList(page)}>더보기</Button>
+          <Button 
+            variant="plain"
+            className='rounded-full border border-gray-600 !text-gray-600 hover:!text-gray-800'
+            onClick={() => getStudyList(page)}
+          >
+            더보기
+          </Button>
         </div>
       )}
     </div>

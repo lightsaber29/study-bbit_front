@@ -193,7 +193,15 @@ const PostDetail = ({ post, getPosts }) => {
       >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+            <img 
+              src={
+                post.createdByProfileUrl
+                  ? decodeURIComponent(post.createdByProfileUrl)
+                  : `${process.env.PUBLIC_URL}/images/default-profile.png`
+              }
+              alt="Profile" 
+              className="w-10 h-10 bg-gray-200 rounded-full mr-3"
+            />
             <div>
               <div className="font-semibold">{post.createdBy}</div>
               <div className="text-gray-500 text-sm">
@@ -262,7 +270,15 @@ const PostDetail = ({ post, getPosts }) => {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                <img 
+                  src={
+                    postDetail.createdByProfileUrl
+                      ? decodeURIComponent(postDetail.createdByProfileUrl)
+                      : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                  }
+                  alt="Profile" 
+                  className="w-10 h-10 bg-gray-200 rounded-full mr-3"
+                />
                 <div>
                   <div className="font-semibold">{postDetail.createdBy}</div>
                   <div className="text-gray-500 text-sm">
@@ -293,7 +309,15 @@ const PostDetail = ({ post, getPosts }) => {
               <div className="space-y-4">
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-2">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+                  <img 
+                    src={
+                      comment.createdByProfileUrl
+                        ? decodeURIComponent(comment.createdByProfileUrl)
+                        : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                    }
+                    alt="Profile" 
+                    className="w-10 h-10 bg-gray-200 rounded-full mr-3"
+                  />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">{comment.createdBy}</span>

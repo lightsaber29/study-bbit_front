@@ -12,7 +12,6 @@ const StudyBoard = () => {
   const getPosts = async () => {
     try {
       const response = await axios.get(`/api/room-board/${roomId}`);
-      console.log('getPosts response :: ', response);
       const allPosts = response.data?.content || [];
       const noticeList = allPosts.filter(post => post.notice);
       const regularPosts = allPosts.filter(post => !post.notice);

@@ -75,7 +75,6 @@ const Profile = () => {
   const handleWithdraw = () => {
     if (window.confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       // 회원 탈퇴 API 호출
-      console.log('회원 탈퇴 처리');
       navigate('/');
     }
   };

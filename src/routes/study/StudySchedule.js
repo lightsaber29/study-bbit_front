@@ -70,7 +70,6 @@ const StudySchedule = () => {
 
   // 일정 클릭 핸들러
   const handleEventClick = (event) => {
-    console.log('Selected event:', event);
     setSelectedEvent(event);
   };
 
