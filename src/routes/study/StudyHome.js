@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
 import { useSelector } from 'react-redux';
 import { selectNickname } from 'store/memberSlice';
+import TemperatureModal from 'components/TemperatureModal';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
@@ -25,6 +26,8 @@ const StudyHome = () => {
   const [isKickModalOpen, setIsKickModalOpen] = useState(false);
   const [kickReason, setKickReason] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
+  const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState(null);
 
   // ISO 8601 Duration 문자열을 분으로 변환하는 함수
   const parseDuration = (duration) => {
@@ -233,6 +236,12 @@ const StudyHome = () => {
     }
   };
 
+  // 멤버 클릭 핸들러 추가
+  const handleMemberClick = (memberId) => {
+    setSelectedMemberId(memberId);
+    setIsTemperatureModalOpen(true);
+  };
+
   return (
     <div className="study-home max-w-3xl mx-auto p-4 pb-16">
       {isLoading ? (
@@ -317,10 +326,13 @@ const StudyHome = () => {
                 {/* 참여 멤버 섹션 */}
                 <div className="mt-6">
                   <h3 className="text-gray-600 mb-4">참여 멤버</h3>
-                  <ul className="space-y-4">
+                  <ul className="space-y-2">
                     {members.map((member) => (
                       <li key={member.nickname} className="flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div 
+                          className="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded-lg flex-1"
+                          onClick={() => handleMemberClick(member.memberId)}
+                        >
                           <div className="w-8 h-8 rounded-full">
                             <img
                               src={
@@ -337,7 +349,10 @@ const StudyHome = () => {
                         </div>
                         {isLeader && member.nickname !== nickname && (
                           <button
-                            onClick={() => handleKickMember(member.nickname, member.memberId)}
+                            onClick={(e) => {
+                              e.stopPropagation(); // 상위 onClick 이벤트 전파 방지
+                              handleKickMember(member.nickname, member.memberId);
+                            }}
                             className="text-gray-500 hover:text-red-600 flex items-center gap-1 px-2 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all"
                             title="강퇴하기"
                           >
@@ -458,8 +473,9 @@ const StudyHome = () => {
                 {members.map((member, index) => (
                   <div 
                     key={member.nickname} 
-                    className={`flex items-center justify-between p-2 rounded-lg overflow-hidden
+                    className={`flex items-center justify-between p-2 rounded-lg overflow-hidden cursor-pointer
                       ${member.nickname === nickname ? 'bg-emerald-50' : 'hover:bg-gray-50'}`}
+                    onClick={() => handleMemberClick(member.memberId)}
                   >
                     <div className="flex items-center gap-3">
                       <span className={`font-bold w-6 ${index < 3 ? 'text-emerald-500' : ''} 
@@ -583,6 +599,13 @@ const StudyHome = () => {
               </div>
             </div>
           )}
+
+          {/* TemperatureModal 추가 */}
+          <TemperatureModal
+            isOpen={isTemperatureModalOpen}
+            onClose={() => setIsTemperatureModalOpen(false)}
+            leaderId={selectedMemberId}
+          />
 
         </>
       ) : (
