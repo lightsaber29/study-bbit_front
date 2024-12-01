@@ -185,10 +185,6 @@ const PostDetail = ({ post, getPosts }) => {
     }
   };
 
-  useEffect(() => {
-    console.log("post: ", post);
-  }, [post]);
-
   return (
     <div className="p-4 border-b">
       <div 

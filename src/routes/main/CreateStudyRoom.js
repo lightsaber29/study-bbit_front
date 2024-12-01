@@ -97,21 +97,6 @@ const CreateStudyRoom = () => {
         formData.append('roomImage', values.image);
       }
 
-      // FormData 내용 확인을 위한 코드
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
-      // 또는 개별 필드 확인
-      console.log('name:', formData.get('name'));
-      console.log('roomUrl:', formData.get('roomUrl'));
-      console.log('detail:', formData.get('detail'));
-      console.log('participants:', formData.get('participants'));
-      console.log('maxParticipants:', formData.get('maxParticipants'));
-      console.log('isPrivate:', formData.get('isPrivate'));
-      console.log('password:', formData.get('password'));
-      console.log('roomImage:', formData.get('roomImage'));
-
       await axios.post('/api/room', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',

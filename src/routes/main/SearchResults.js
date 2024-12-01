@@ -34,7 +34,6 @@ const SearchResults = () => {
 
   const handleCardClick = (study) => {
     setSelectedStudy(study);
-    // console.log('study :: ', study);
   };
 
   useEffect(() => {

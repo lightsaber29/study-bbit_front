@@ -57,7 +57,6 @@ const StudyHome = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`/api/room/${roomId}`);
-      console.log("getRoomInfo:", response.data);
       setRoomInfo(response.data);
       setIsValidRoom(true);
     } catch (error) {
@@ -74,7 +73,6 @@ const StudyHome = () => {
   const getMembers = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/member/${roomId}`);
-      console.log("멤버 목록 조회 성공:", response.data);
       setMembers(response.data);
       
       const isCurrentUserLeader = response.data.some(
@@ -156,7 +154,6 @@ const StudyHome = () => {
   const getDashboardData = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/dashboard/${roomId}`);
-      console.log("Dashboard data:", response.data);
       setDashboardData(response.data);
     } catch (error) {
       console.error('대시보드 데이터 조회 실패:', error);

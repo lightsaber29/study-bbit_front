@@ -35,7 +35,6 @@ const Signup = () => {
 
     try {
       const response = await axios.get(`/api/member/isExist/${nickname}`);
-      console.log("닉네임 중복 확인 응답:", response);
       if (response.data) {
         alert('이미 사용 중인 닉네임입니다.');
         setIsNicknameAvailable(false);

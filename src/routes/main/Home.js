@@ -40,7 +40,6 @@ const Home = () => {
   const getStudyList = async (page) => {
     try {
       const response = await axios.get(`/api/room?page=${page}&size=8`);
-      // console.log('getStudyList response.data :: ', response);
       setStudyList(prevList => [...prevList, ...response.data.content]);
       setPage(page + 1);
       setIsLastPage(response.data.last);
@@ -54,7 +53,6 @@ const Home = () => {
   const getMyStudyList = async () => {
     try {
       const response = await axios.get('/api/member/mystudy?size=20');
-      // console.log('getMyStudyList response.data :: ', response);
       setMyStudyList(response.data?.myRooms);
     } catch (error) {
       console.error('내 스터디 목록 조회 실패: ', error);
@@ -67,7 +65,6 @@ const Home = () => {
     const today = new Date().toISOString().split('T')[0];
     try {
       const response = await axios.get(`/api/daily-study/${today}`);
-      // console.log('getTodayStudyTime response.data :: ', response);
       const { hours, minutes } = parseDuration(response.data?.studyTime);
       setTodayStudyHours(hours);
       setTodayStudyMinutes(minutes);
@@ -79,7 +76,6 @@ const Home = () => {
   const getDailyGoalTime = async () => {
     try {
       const response = await axios.get('/api/member/dailyGoal');
-      console.log('getDailyGoalTime response.data :: ', response);
       const { hours, minutes } = parseDuration(response.data?.dailyGoal);
       setDailyGoalHours(hours);
       setDailyGoalMinutes(minutes);

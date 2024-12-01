@@ -48,7 +48,6 @@ const StudySettings = () => {
         },
       });
       
-      console.log('스터디룸 수정 성공:', response.data);
       alert('스터디룸 설정이 변경되었습니다.');
       navigate(-1);
     } catch (error) {
