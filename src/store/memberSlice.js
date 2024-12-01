@@ -10,7 +10,8 @@ const memberSlice = createSlice({
     role: null,
     nickname: null,
     token: null,
-    profileImageUrl: null
+    profileImageUrl: null,
+    createdAt: null
   },
   reducers: {
     setMember: (state, action) => {
@@ -20,6 +21,7 @@ const memberSlice = createSlice({
       state.nickname = action.payload.nickname;
       state.token = action.payload.token;
       state.profileImageUrl = action.payload.profileImageUrl;
+      state.createdAt = action.payload.createdAt;
     },
     clearMember: (state) => {
       state.memberId = null;
@@ -28,6 +30,7 @@ const memberSlice = createSlice({
       state.nickname = null;
       state.token = null;
       state.profileImageUrl = null;
+      state.createdAt = null;
     },
   },
 });
@@ -40,4 +43,5 @@ export const selectRole = (state) => state.member.role;
 export const selectNickname = (state) => state.member.nickname;
 export const selectEmail = (state) => state.member.email;
 export const selectProfileImageUrl = (state) => state.member.profileImageUrl;
+export const selectMemberCreatedAt = (state) => state.member.createdAt;
 export default memberSlice.reducer;
