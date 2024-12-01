@@ -20,6 +20,7 @@ const StudyHome = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isLeader, setIsLeader] = useState(false);
   const [isVideoMeeting, setIsVideoMeeting] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
 
   const eventDates = [
     new Date(2024, 10, 8), // 11월 8일
@@ -56,6 +57,7 @@ const StudyHome = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`/api/room/${roomId}`);
+      console.log("getRoomInfo:", response.data);
       setRoomInfo(response.data);
       setIsValidRoom(true);
     } catch (error) {
@@ -72,6 +74,7 @@ const StudyHome = () => {
   const getMembers = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/member/${roomId}`);
+      console.log("멤버 목록 조회 성공:", response.data);
       setMembers(response.data);
       
       const isCurrentUserLeader = response.data.some(
@@ -150,11 +153,22 @@ const StudyHome = () => {
     }
   };
 
+  const getDashboardData = useCallback(async () => {
+    try {
+      const response = await axios.get(`/api/room/dashboard/${roomId}`);
+      console.log("Dashboard data:", response.data);
+      setDashboardData(response.data);
+    } catch (error) {
+      console.error('대시보드 데이터 조회 실패:', error);
+    }
+  }, [roomId]);
+
   useEffect(() => {
     getRoomInfo();
     getMembers();
     checkVideoMeeting();
-  }, [getRoomInfo, getMembers, checkVideoMeeting]);
+    getDashboardData();
+  }, [getRoomInfo, getMembers, checkVideoMeeting, getDashboardData]);
 
   return (
     <div className="study-home max-w-3xl mx-auto p-4 pb-16">
@@ -282,16 +296,27 @@ const StudyHome = () => {
             </div>
           </div>
 
-          {/* 새 게시글 작성 섹션 */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <div className="mb-4">
-              <div className="flex items-center mb-2">
-                <span className="text-red-500 mr-2">📢</span>
-                <span className="font-medium">[중요공지]</span>
+          {/* 공지사항 섹션 */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <span className="text-xl">📢</span>
+                </div>
               </div>
-              <p className="text-gray-700">12월 19일에 스터디원 비대면 회식이 있습니다. 참석이 가능하신 분은 내용을 읽어보시고 참석 여부를 남겨주세요. 그리고 그외 다...</p>
+              <div className="flex-1">
+                <div className="flex items-center mb-3">
+                  <h3 className="font-bold text-lg text-gray-900">공지사항</h3>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  {dashboardData?.noticeContent ? (
+                    <p className="text-gray-700 whitespace-pre-line">{dashboardData.noticeContent}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">등록된 공지사항이 없습니다.</p>
+                  )}
+                </div>
+              </div>
             </div>
-            
           </div>
           <div className="flex justify-between gap-8">
             {/* 기존 회의 버튼 섹션 */}
