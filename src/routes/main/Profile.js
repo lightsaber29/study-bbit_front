@@ -51,6 +51,8 @@ const Profile = () => {
       if (image) {
         formData.append('memberProfile', image);
         formData.append('profileChanged', true);
+      } else {
+        formData.append('profileChanged', false);
       }
       formData.append('nickname', nickname);
       if (newPassword) {
