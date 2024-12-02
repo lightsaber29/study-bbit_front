@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import UpdateEventModal from './UpdateEventModal';
 import axios from 'api/axios';
+import TemperatureModal from './TemperatureModal';
 
 const EventDetailModal = ({ event, onClose, onSuccess }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -18,6 +19,8 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
   const [editCommentContent, setEditCommentContent] = useState('');
   const [selectedComment, setSelectedComment] = useState(null);
   const commentMenuRef = useRef();
+  const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -261,20 +264,32 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
               <div className="space-y-4 mb-4">
                 {comments.map((comment) => (
                   <div key={comment.scheduleCommentId} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <img 
-                        src={
-                          comment.profileImageUrl
-                            ? decodeURIComponent(comment.profileImageUrl)
-                            : `${process.env.PUBLIC_URL}/images/default-profile.png`
-                        }
-                        alt="Profile" 
-                        className="w-8 h-8 bg-gray-200 rounded-full"
-                      />
-                    </div>
+                    <img 
+                      src={
+                        comment.profileImageUrl
+                          ? decodeURIComponent(comment.profileImageUrl)
+                          : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                      }
+                      alt="Profile" 
+                      className="w-8 h-8 bg-gray-200 rounded-full cursor-pointer transition-transform hover:scale-110"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedMemberId(comment.memberId);
+                        setIsTemperatureModalOpen(true);
+                      }}
+                    />
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <span className="font-medium">{comment.memberNickname}</span>
+                        <span 
+                          className="font-medium cursor-pointer hover:text-emerald-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedMemberId(comment.memberId);
+                            setIsTemperatureModalOpen(true);
+                          }}
+                        >
+                          {comment.memberNickname}
+                        </span>
                         <span className="text-sm text-gray-500">{formatDate(comment.createdAt)}</span>
                       </div>
                       <p className="text-gray-700">{comment.content}</p>
@@ -504,6 +519,13 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
           </div>
         </div>
       )}
+
+      {/* Add TemperatureModal */}
+      <TemperatureModal
+        isOpen={isTemperatureModalOpen}
+        onClose={() => setIsTemperatureModalOpen(false)}
+        leaderId={selectedMemberId}
+      />
     </>
   );
 };
