@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import axios from 'api/axios';
 import { useParams } from 'react-router-dom';
+import TemperatureModal from './TemperatureModal.js';
 
 const PostDetail = ({ post, getPosts }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -18,6 +19,8 @@ const PostDetail = ({ post, getPosts }) => {
   const [selectedComment, setSelectedComment] = useState(null);
   const commentMenuRef = useRef();
   const { roomId } = useParams();
+  const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -200,10 +203,22 @@ const PostDetail = ({ post, getPosts }) => {
                   : `${process.env.PUBLIC_URL}/images/default-profile.png`
               }
               alt="Profile" 
-              className="w-10 h-10 bg-gray-200 rounded-full mr-3"
+              className="w-10 h-10 bg-gray-200 rounded-full mr-3 cursor-pointer transition-transform hover:scale-110"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsTemperatureModalOpen(true);
+              }}
             />
             <div>
-              <div className="font-semibold">{post.createdBy}</div>
+              <div 
+                className="font-semibold cursor-pointer hover:text-emerald-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsTemperatureModalOpen(true);
+                }}
+              >
+                {post.createdByNickname}
+              </div>
               <div className="text-gray-500 text-sm">
                 {formatDate(post.createdAt)}
               </div>
@@ -277,10 +292,22 @@ const PostDetail = ({ post, getPosts }) => {
                       : `${process.env.PUBLIC_URL}/images/default-profile.png`
                   }
                   alt="Profile" 
-                  className="w-10 h-10 bg-gray-200 rounded-full mr-3"
+                  className="w-10 h-10 bg-gray-200 rounded-full mr-3 cursor-pointer transition-transform hover:scale-110"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsTemperatureModalOpen(true);
+                  }}
                 />
                 <div>
-                  <div className="font-semibold">{postDetail.createdBy}</div>
+                  <div 
+                    className="font-semibold cursor-pointer hover:text-emerald-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsTemperatureModalOpen(true);
+                    }}
+                  >
+                    {postDetail.createdByNickname}
+                  </div>
                   <div className="text-gray-500 text-sm">
                     {formatDate(postDetail.createdAt)}
                   </div>
@@ -309,18 +336,32 @@ const PostDetail = ({ post, getPosts }) => {
               <div className="space-y-4">
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-2">
-                  <img 
-                    src={
-                      comment.createdByProfileUrl
-                        ? decodeURIComponent(comment.createdByProfileUrl)
-                        : `${process.env.PUBLIC_URL}/images/default-profile.png`
-                    }
-                    alt="Profile" 
-                    className="w-10 h-10 bg-gray-200 rounded-full mr-3"
-                  />
+                    <img 
+                      src={
+                        comment.createdByProfileUrl
+                          ? decodeURIComponent(comment.createdByProfileUrl)
+                          : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                      }
+                      alt="Profile" 
+                      className="w-10 h-10 bg-gray-200 rounded-full mr-3 cursor-pointer transition-transform hover:scale-110"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsTemperatureModalOpen(true);
+                        setSelectedMemberId(comment.memberId);
+                      }}
+                    />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm">{comment.createdBy}</span>
+                        <span 
+                          className="font-semibold text-sm cursor-pointer hover:text-emerald-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsTemperatureModalOpen(true);
+                            setSelectedMemberId(comment.memberId);
+                          }}
+                        >
+                          {comment.createdByNickname}
+                        </span>
                         <span className="text-xs text-gray-500">
                           {formatDate(comment.createdAt)}
                         </span>
@@ -459,6 +500,13 @@ const PostDetail = ({ post, getPosts }) => {
           </div>
         </div>
       )}
+
+      {/* Add TemperatureModal */}
+      <TemperatureModal
+        isOpen={isTemperatureModalOpen}
+        onClose={() => setIsTemperatureModalOpen(false)}
+        leaderId={post.memberId}
+      />
     </div>
   );
 };

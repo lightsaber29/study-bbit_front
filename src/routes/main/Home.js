@@ -126,13 +126,15 @@ const Home = () => {
   useEffect(() => {
     const currentYear = new Date().getFullYear();
     setSelectedYear(currentYear);
-    
     getStudyList(page);
+  }, []);
+
+  useEffect(() => {
     if (isLogin) {
       getMyStudyList();
       getTodayStudyTime();
     }
-  }, []);
+  }, [isLogin]);
 
   useEffect(() => {
     if (isLogin && selectedYear) {

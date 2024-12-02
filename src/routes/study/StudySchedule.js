@@ -123,7 +123,7 @@ const StudySchedule = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16">
+    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)]">
       {/* 새 게시글 작성 섹션 */}
       <div className="bg-white rounded-lg shadow mb-6">
         {/* 상단 헤더 */}
@@ -209,7 +209,7 @@ const StudySchedule = () => {
                       </div>
                       <div className="mt-2 flex items-center text-gray-500">
                         <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
-                        <span>기본 캘린더 · {event.creatorName}</span>
+                        <span>기본 캘린더 · {event.createdByNickname}</span>
                       </div>
                     </div>
                   ))

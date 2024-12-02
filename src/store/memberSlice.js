@@ -25,6 +25,10 @@ const memberSlice = createSlice({
       state.flowTemperature = action.payload.flowTemperature;
       state.isLogin = true;
     },
+    setUpdatedProfile: (state, action) => {
+      state.nickname = action.payload.nickname;
+      state.profileImageUrl = action.payload.profileImageUrl;
+    },
     clearMember: (state) => {
       state.memberId = null;
       state.email = null;
@@ -38,7 +42,7 @@ const memberSlice = createSlice({
   },
 });
 
-export const { setMember, clearMember } = memberSlice.actions;
+export const { setMember, setUpdatedProfile, clearMember } = memberSlice.actions;
 export const selectMember = (state) => state.member;
 export const selectMemberId = (state) => state.member.memberId;
 export const selectRole = (state) => state.member.role;
