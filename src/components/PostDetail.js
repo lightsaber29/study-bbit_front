@@ -203,7 +203,7 @@ const PostDetail = ({ post, getPosts }) => {
               className="w-10 h-10 bg-gray-200 rounded-full mr-3"
             />
             <div>
-              <div className="font-semibold">{post.createdBy}</div>
+              <div className="font-semibold">{post.createdByNickname}</div>
               <div className="text-gray-500 text-sm">
                 {formatDate(post.createdAt)}
               </div>
@@ -280,7 +280,7 @@ const PostDetail = ({ post, getPosts }) => {
                   className="w-10 h-10 bg-gray-200 rounded-full mr-3"
                 />
                 <div>
-                  <div className="font-semibold">{postDetail.createdBy}</div>
+                  <div className="font-semibold">{postDetail.createdByNickname}</div>
                   <div className="text-gray-500 text-sm">
                     {formatDate(postDetail.createdAt)}
                   </div>
@@ -320,7 +320,7 @@ const PostDetail = ({ post, getPosts }) => {
                   />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm">{comment.createdBy}</span>
+                        <span className="font-semibold text-sm">{comment.createdByNickname}</span>
                         <span className="text-xs text-gray-500">
                           {formatDate(comment.createdAt)}
                         </span>
