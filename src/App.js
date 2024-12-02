@@ -7,7 +7,22 @@ import routes from './routes';
 import Loading from './components/Loading';
 
 function App() {
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await axios.get('/api/member');
+        if (response.data) {
+          dispatch(setMember(response.data));
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    checkLoginStatus();
+  }, [dispatch]);
 
   return (
     <div className="max-w-screen-lg container mx-auto p-6">
