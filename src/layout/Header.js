@@ -44,7 +44,6 @@ const Header = () => {
   const dispatch = useDispatch();
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const reconnectTimeoutRef = useRef(null);
-  const isConnectingRef = useRef(false);
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -153,14 +152,21 @@ const Header = () => {
         });
 
         eventSource.onopen = () => {
-          // console.log('SSE 연결 성공');
           setConnectionStatus('connected');
           retryCount = 0;
         };
 
-        eventSource.onmessage = (event) => {
-          handleEvent(event.data);
-        };
+        eventSource.addEventListener('sendDm', (event) => {
+          // console.log("DM 이벤트 수신:", event);
+          const data = JSON.parse(event.data);
+          handleEvent({ type: 'sendDm', data });
+        });
+
+        eventSource.addEventListener('sendMm', (event) => {
+          // console.log("MM 이벤트 수신:", event);
+          const data = JSON.parse(event.data);
+          handleEvent({ type: 'sendMm', data });
+        });
 
         eventSource.onerror = (error) => {
           // console.error('SSE 연결 에러:', error);
