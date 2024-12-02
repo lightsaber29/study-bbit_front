@@ -4,7 +4,7 @@ import Card from '../../components/Card';
 import MyStudyCard from '../../components/MyStudyCard';
 import Modal from '../../components/Modal';
 import { useSelector } from 'react-redux';
-import { selectToken, selectProfileImageUrl, selectNickname, selectMemberCreatedAt } from 'store/memberSlice';
+import { selectIsLogin, selectProfileImageUrl, selectNickname, selectMemberCreatedAt } from 'store/memberSlice';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,7 +26,7 @@ const Home = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showProgress, setShowProgress] = useState(false);
 
-  const token = useSelector(selectToken);
+  const isLogin = useSelector(selectIsLogin);
   const profileImageUrl = useSelector(selectProfileImageUrl);
   const nickname = useSelector(selectNickname);
   const memberCreatedAt = useSelector(selectMemberCreatedAt);
@@ -128,20 +128,20 @@ const Home = () => {
     setSelectedYear(currentYear);
     
     getStudyList(page);
-    if (token) {
+    if (isLogin) {
       getMyStudyList();
       getTodayStudyTime();
     }
   }, []);
 
   useEffect(() => {
-    if (token && selectedYear) {
+    if (isLogin && selectedYear) {
       (async () => {
         const { goalHours, goalMinutes } = await getDailyGoalTime();
         await getDailyStudyData(goalHours, goalMinutes, selectedYear);
       })();
     }
-  }, [selectedYear, token]);
+  }, [selectedYear, isLogin]);
 
   useEffect(() => {
     // 컴포넌트 마운트 후 약간의 지연을 주고 프로그레스 바를 표시
@@ -223,7 +223,7 @@ const Home = () => {
   return (
     <div>
       {/* 프로필 & 목표 섹션 추가 */}
-      {token && (
+      {isLogin && (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           {/* 프로필 영역 */}
           <div className="flex items-center gap-4 mb-4">
@@ -275,7 +275,7 @@ const Home = () => {
       )}
 
       {/* 내 스터디 섹션 */}
-      {token && (
+      {isLogin && (
         <div className="gap-6 mb-8">
           <div className="mb-8">
             <h1 className="text-2xl font-semibold">내 스터디</h1>
@@ -374,7 +374,7 @@ const Home = () => {
       )}
 
       {/* 성장 기록 섹션 */}
-      {token && (
+      {isLogin && (
         <div className="mb-8">
           <div className="mb-4">
             <h1 className="text-2xl font-semibold inline-flex items-center gap-2">

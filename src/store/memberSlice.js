@@ -9,10 +9,10 @@ const memberSlice = createSlice({
     email: null,
     role: null,
     nickname: null,
-    token: null,
     profileImageUrl: null,
     createdAt: null,
-    flowTemperature: null
+    flowTemperature: null,
+    isLogin: false
   },
   reducers: {
     setMember: (state, action) => {
@@ -20,20 +20,20 @@ const memberSlice = createSlice({
       state.email = action.payload.email;
       state.role = action.payload.role;
       state.nickname = action.payload.nickname;
-      state.token = action.payload.token;
       state.profileImageUrl = action.payload.profileImageUrl;
       state.createdAt = action.payload.createdAt;
       state.flowTemperature = action.payload.flowTemperature;
+      state.isLogin = true;
     },
     clearMember: (state) => {
       state.memberId = null;
       state.email = null;
       state.role = null;
       state.nickname = null;
-      state.token = null;
       state.profileImageUrl = null;
       state.createdAt = null;
       state.flowTemperature = null;
+      state.isLogin = false;
     },
   },
 });
@@ -41,11 +41,11 @@ const memberSlice = createSlice({
 export const { setMember, clearMember } = memberSlice.actions;
 export const selectMember = (state) => state.member;
 export const selectMemberId = (state) => state.member.memberId;
-export const selectToken = (state) => state.member.token;
 export const selectRole = (state) => state.member.role;
 export const selectNickname = (state) => state.member.nickname;
 export const selectEmail = (state) => state.member.email;
 export const selectProfileImageUrl = (state) => state.member.profileImageUrl;
 export const selectMemberCreatedAt = (state) => state.member.createdAt;
 export const selectFlowTemperature = (state) => state.member.flowTemperature;
+export const selectIsLogin = (state) => state.member.isLogin;
 export default memberSlice.reducer;

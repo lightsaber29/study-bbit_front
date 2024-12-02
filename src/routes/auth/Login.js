@@ -52,21 +52,20 @@ const Login = () => {
       return;
     }
     try {
-      const res = await axios.post('/api/member/login', values);
-      const token = res.headers['authorization'];
-      if (token) {
-        const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
-        dispatch(setMember({
-          ...selectMemberRes.data,
-          memberId: selectMemberRes.data.id,
-          token: token.split(' ')[1]
-        }));
-        alert('로그인되었습니다.');
-        resetForm();
-        navigate('/');
-      } else {
-        alert('로그인 중 오류가 발생했습니다. 다시 시도 해 주세요.');
-      }
+      const res = await axios.post('/api/member/login', values, {
+        withCredentials: true
+      });
+      console.log("login res :: ", res);
+      const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
+      console.log("selectMemberRes :: ", selectMemberRes);
+      dispatch(setMember({
+        ...selectMemberRes.data,
+        role: res.data.role,
+        memberId: selectMemberRes.data.id,
+      }));
+      alert('로그인되었습니다.');
+      resetForm();
+      navigate('/');
     } catch (error) {
       console.error('로그인 실패:', error);
       // const errorMessage = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';

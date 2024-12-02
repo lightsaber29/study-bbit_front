@@ -53,7 +53,7 @@ const Header = () => {
   const shouldShowNav = location.pathname.startsWith('/study');
 
   const member = useSelector(selectMember);
-  const token = member.token;
+  const isLogin = member.isLogin;
   const profileImageUrl = member.profileImageUrl
 
   const handleProfileClick = (e) => {
@@ -142,87 +142,87 @@ const Header = () => {
     };
   }, [showNotificationModal]);
 
-  useEffect(() => {
-    let isSubscribed = true;
-    let retryCount = 0;
+  // useEffect(() => {
+  //   let isSubscribed = true;
+  //   let retryCount = 0;
     
-    const connectToSSE = async () => {
+  //   const connectToSSE = async () => {
 
-      try {
-        const response = await fetch("/api/noti/subscribe", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Accept': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
-        }).catch(fetchError => {
-          console.error('Fetch 자체 에러:', fetchError);
-          throw fetchError;
-        });
+  //     try {
+  //       const response = await fetch("/api/noti/subscribe", {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           'Accept': 'text/event-stream',
+  //           'Cache-Control': 'no-cache',
+  //           'Connection': 'keep-alive',
+  //         },
+  //       }).catch(fetchError => {
+  //         console.error('Fetch 자체 에러:', fetchError);
+  //         throw fetchError;
+  //       });
 
-        const reader = response.body.getReader();
+  //       const reader = response.body.getReader();
 
-        while (isSubscribed) {
-          const { value, done } = await reader.read().catch(readError => {
-            console.error('Reader.read 에러:', readError);
-            throw readError;
-          });
+  //       while (isSubscribed) {
+  //         const { value, done } = await reader.read().catch(readError => {
+  //           console.error('Reader.read 에러:', readError);
+  //           throw readError;
+  //         });
           
-          if (done) {
-            console.log('Reader done, 연결 종료');
-            break;
-          }
-          const buffer = new TextDecoder().decode(value, { stream: true });
-          const messages = buffer.split('\n\n');
+  //         if (done) {
+  //           console.log('Reader done, 연결 종료');
+  //           break;
+  //         }
+  //         const buffer = new TextDecoder().decode(value, { stream: true });
+  //         const messages = buffer.split('\n\n');
 
-          for (const message of messages) {
-            if (!message.trim()) continue;
-            handleMessage(message);
-          }
-        }
-      } catch (error) {
-        console.error('SSE 연결 에러:', error);
-        console.log('현재 상태:', { 
-          isSubscribed, 
-          connectionStatus, 
-          retryCount 
-        });
+  //         for (const message of messages) {
+  //           if (!message.trim()) continue;
+  //           handleMessage(message);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('SSE 연결 에러:', error);
+  //       console.log('현재 상태:', { 
+  //         isSubscribed, 
+  //         connectionStatus, 
+  //         retryCount 
+  //       });
         
-        if (isSubscribed) {
-          setConnectionStatus('disconnected');
-          isConnectingRef.current = false;
+  //       if (isSubscribed) {
+  //         setConnectionStatus('disconnected');
+  //         isConnectingRef.current = false;
           
-          retryCount++;
-          reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('재연결 시도 시작');
-            connectToSSE();
-          }, 1000);
-        } else {
-          console.log('재연결 시도하지 않음:', { 
-            isSubscribed, 
-            connectionStatus 
-          });
-        }
-      }
-    };
+  //         retryCount++;
+  //         reconnectTimeoutRef.current = setTimeout(() => {
+  //           console.log('재연결 시도 시작');
+  //           connectToSSE();
+  //         }, 1000);
+  //       } else {
+  //         console.log('재연결 시도하지 않음:', { 
+  //           isSubscribed, 
+  //           connectionStatus 
+  //         });
+  //       }
+  //     }
+  //   };
 
-    console.log('useEffect 실행됨', { connectionStatus });
-    if (connectionStatus === 'disconnected') {
-      console.log('disconnected 상태에서 연결 시도');
-      connectToSSE();
-    }
+  //   console.log('useEffect 실행됨', { connectionStatus });
+  //   if (connectionStatus === 'disconnected') {
+  //     console.log('disconnected 상태에서 연결 시도');
+  //     connectToSSE();
+  //   }
 
-    return () => {
-      console.log('cleanup 함수 실행');
-      isSubscribed = false;
-      isConnectingRef.current = false;
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        console.log('재연결 타이머 제거됨');
-      }
-    };
-  }, [token, connectionStatus]);
+  //   return () => {
+  //     console.log('cleanup 함수 실행');
+  //     isSubscribed = false;
+  //     isConnectingRef.current = false;
+  //     if (reconnectTimeoutRef.current) {
+  //       clearTimeout(reconnectTimeoutRef.current);
+  //       console.log('재연결 타이머 제거됨');
+  //     }
+  //   };
+  // }, [token, connectionStatus]);
 
   const handleMessage = (message) => {
     try {
@@ -322,7 +322,7 @@ const Header = () => {
         
         <div className="flex items-center space-x-2">
           
-          {token ? (
+          {isLogin ? (
             <div className="relative flex items-center space-x-4">
               <Button 
                 variant="primary" 
