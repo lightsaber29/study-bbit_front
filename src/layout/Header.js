@@ -142,130 +142,91 @@ const Header = () => {
     };
   }, [showNotificationModal]);
 
-  // useEffect(() => {
-  //   let isSubscribed = true;
-  //   let retryCount = 0;
+  useEffect(() => {
+    let isSubscribed = true;
+    let retryCount = 0;
     
-  //   const connectToSSE = async () => {
+    const connectToSSE = async () => {
+      try {
+        const eventSource = new EventSource("/api/noti/subscribe", {
+          withCredentials: true
+        });
 
-  //     try {
-  //       const response = await fetch("/api/noti/subscribe", {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           'Accept': 'text/event-stream',
-  //           'Cache-Control': 'no-cache',
-  //           'Connection': 'keep-alive',
-  //         },
-  //       }).catch(fetchError => {
-  //         console.error('Fetch 자체 에러:', fetchError);
-  //         throw fetchError;
-  //       });
+        eventSource.onopen = () => {
+          // console.log('SSE 연결 성공');
+          setConnectionStatus('connected');
+          retryCount = 0;
+        };
 
-  //       const reader = response.body.getReader();
+        eventSource.onmessage = (event) => {
+          handleEvent(event.data);
+        };
 
-  //       while (isSubscribed) {
-  //         const { value, done } = await reader.read().catch(readError => {
-  //           console.error('Reader.read 에러:', readError);
-  //           throw readError;
-  //         });
+        eventSource.onerror = (error) => {
+          // console.error('SSE 연결 에러:', error);
+          eventSource.close();
+          setConnectionStatus('disconnected');
           
-  //         if (done) {
-  //           console.log('Reader done, 연결 종료');
-  //           break;
-  //         }
-  //         const buffer = new TextDecoder().decode(value, { stream: true });
-  //         const messages = buffer.split('\n\n');
+          if (isSubscribed) {
+            retryCount++;
+            reconnectTimeoutRef.current = setTimeout(() => {
+              // console.log('재연결 시도 시작');
+              connectToSSE();
+            }, 1000);
+          }
+        };
 
-  //         for (const message of messages) {
-  //           if (!message.trim()) continue;
-  //           handleMessage(message);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('SSE 연결 에러:', error);
-  //       console.log('현재 상태:', { 
-  //         isSubscribed, 
-  //         connectionStatus, 
-  //         retryCount 
-  //       });
-        
-  //       if (isSubscribed) {
-  //         setConnectionStatus('disconnected');
-  //         isConnectingRef.current = false;
-          
-  //         retryCount++;
-  //         reconnectTimeoutRef.current = setTimeout(() => {
-  //           console.log('재연결 시도 시작');
-  //           connectToSSE();
-  //         }, 1000);
-  //       } else {
-  //         console.log('재연결 시도하지 않음:', { 
-  //           isSubscribed, 
-  //           connectionStatus 
-  //         });
-  //       }
-  //     }
-  //   };
-
-  //   console.log('useEffect 실행됨', { connectionStatus });
-  //   if (connectionStatus === 'disconnected') {
-  //     console.log('disconnected 상태에서 연결 시도');
-  //     connectToSSE();
-  //   }
-
-  //   return () => {
-  //     console.log('cleanup 함수 실행');
-  //     isSubscribed = false;
-  //     isConnectingRef.current = false;
-  //     if (reconnectTimeoutRef.current) {
-  //       clearTimeout(reconnectTimeoutRef.current);
-  //       console.log('재연결 타이머 제거됨');
-  //     }
-  //   };
-  // }, [token, connectionStatus]);
-
-  const handleMessage = (message) => {
-    try {
-      const lines = message.split('\n');
-      const parsedMessage = {};
-      
-      for (const line of lines) {
-        if (line.startsWith('event:')) {
-          parsedMessage.type = line.slice(6).trim();
-        } else if (line.startsWith('data:')) {
-          parsedMessage.data = JSON.parse(line.slice(5).trim());
+        return () => {
+          eventSource.close();
+        };
+      } catch (error) {
+        console.error('SSE 초기 연결 에러:', error);
+        if (isSubscribed) {
+          setConnectionStatus('disconnected');
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connectToSSE();
+          }, 1000);
         }
       }
+    };
 
-      if (parsedMessage.type && parsedMessage.data) {
-        handleEvent(parsedMessage);
-      }
-    } catch (e) {
-      console.error('Error processing message:', e);
+    console.log(
+      `[${new Date().toLocaleTimeString()}] useEffect 실행됨`,
+      { connectionStatus },
+      ":: 재시도 횟수:", retryCount
+    );
+    if (connectionStatus === 'disconnected') {
+      // console.log('disconnected 상태에서 연결 시도');
+      connectToSSE();
     }
-  };
+
+    return () => {
+      // console.log('cleanup 함수 실행');
+      isSubscribed = false;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        // console.log('재연결 타이머 제거됨');
+      }
+    };
+  }, [connectionStatus]);  // token 의존성 제거
 
   const handleEvent = (event) => {
     console.log("Handling event:", event);
     
-    switch (event.type) {
-      case 'sendDm':
-      case 'sendMm':
-        if (event.data) {
-          const notification = {
-            id: Date.now(),
-            content: event.data.content,
-            createdAt: event.data.createdAt,
-            read: false,
-            link: event.data.url
-          };
-          
-          console.log("Dispatching notification:", notification);
-          dispatch(addNotification(notification));
-        }
-        break;
-      default:
-        console.log("Unhandled event type:", event.type);
+    if (['sendDm', 'sendMm'].includes(event.type)) {
+      const notification = {
+        id: Date.now(),
+        content: event.data.content,
+        createdAt: event.data.createdAt,
+        read: false,
+        link: event.data.url
+      };
+      
+      dispatch(addNotification(notification));
+    } else if (event.type === 'connect') {
+      console.log("Connected to SSE");
+    } else {
+      console.log("Unhandled event type:", event.type);
     }
   };
 
