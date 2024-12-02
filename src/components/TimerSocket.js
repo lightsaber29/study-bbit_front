@@ -16,6 +16,7 @@ const TimerSocket = () => {
   const [showModal, setShowModal] = useState(false);
   const [statusMessage, setStatusMessage] = useState('대기');
   const [isTimeUp, setIsTimeUp] = useState(false);
+  const [startTimestamp, setStartTimestamp] = useState(null);
 
   const { roomId } = useParams();
   const member = useSelector(selectMember);
@@ -104,11 +105,16 @@ const TimerSocket = () => {
   const handleStartTimer = () => {
     socketRef.current.emit('timerStart', { meetingId });
     setIsTimerOn(true);
+    setStartTimestamp(Date.now() - ((maxTime - time) * 1000));
   };
 
   const handlePauseTimer = () => {
     socketRef.current.emit('timerPause', { meetingId });
     setIsTimerOn(false);
+    const currentTime = Date.now();
+    const elapsedSeconds = Math.floor((currentTime - startTimestamp) / 1000);
+    setTime(maxTime - elapsedSeconds);
+    setStartTimestamp(null);
   };
 
   const handleResetTimer = () => {
@@ -135,19 +141,27 @@ const TimerSocket = () => {
     let intervalId;
 
     if (timerOn && time > 0) {
+      if (!startTimestamp) {
+        setStartTimestamp(Date.now());
+      }
+
       intervalId = setInterval(() => {
-        setTime((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(intervalId);
-            setIsTimerOn(false);
-            setStatusMessage('종료');
-            setIsTimeUp(true);
-            modalControl();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
+        const currentTime = Date.now();
+        const elapsedSeconds = Math.floor((currentTime - startTimestamp) / 1000);
+        const remainingTime = maxTime - elapsedSeconds;
+
+        if (remainingTime <= 0) {
+          clearInterval(intervalId);
+          setIsTimerOn(false);
+          setStatusMessage('종료');
+          setIsTimeUp(true);
+          setTime(0);
+          setStartTimestamp(null);
+          alert('시간이 다 되었습니다!');
+        } else {
+          setTime(remainingTime);
+        }
+      }, 100);
     }
 
     return () => {
@@ -155,7 +169,7 @@ const TimerSocket = () => {
         clearInterval(intervalId);
       }
     };
-  }, [timerOn, time]);
+  }, [timerOn, startTimestamp, maxTime]);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -320,7 +334,7 @@ const TimerSocket = () => {
                         style={{
                           fontSize: '2rem',
                           position: 'relative',
-                          top: '-15px', // 위로 ��동
+                          top: '-15px', // 위로 이동
                           color: '#333',
                         }}
                       >
@@ -391,12 +405,7 @@ const TimerSocket = () => {
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {isHost && (
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '10px',
-            marginLeft: '15px' 
-          }}>
+          <>
             {!isSetTimer && !timerOn && (
               <button
                 onClick={() => {
@@ -405,14 +414,11 @@ const TimerSocket = () => {
                 }}
                 style={{
                   padding: '8px 16px',
-                  borderRadius: '20px',
+                  borderRadius: '4px',
                   backgroundColor: '#4CAF50',
                   color: 'white',
                   border: 'none',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
               >
                 타이머 설정
@@ -496,7 +502,7 @@ const TimerSocket = () => {
                 종료
               </button>
             )}
-          </div>
+          </>
         )}
         
         {isSetTimer && (
@@ -514,16 +520,6 @@ const TimerSocket = () => {
                 })}
               />
             </div>
-            {!isHost && (
-              <span style={{ fontSize: '1.2rem', fontWeight: 'bold', textDecoration: timerOn ? 'none' : 'underline', textDecorationColor: '#FF9800' }}>
-                {formatTime(time)}
-              </span>
-            )}
-            {!isHost && (
-              <span style={{ padding: '8px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
-                상태: {statusMessage}
-              </span>
-            )}
           </>
         )}
       </div>

@@ -59,7 +59,7 @@ export const useSocket = ({ meetingId, onTranscriptUpdate, onPreviousTranscripts
         // disconnect는 하지 않음
       }
     };
-  }, [meetingId, onTranscriptUpdate, onPreviousTranscripts, onMeetingEnd, onTranscriptsReset, onStopRecord, onResumeRecord, onStartRecord, onSavingStarted, onSaveCanceled, onMeetingSaved]);
+  }, []);
 
   return socketRef;
 };
