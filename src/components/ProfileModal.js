@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearMember, selectMember } from 'store/memberSlice';
+import axios from 'api/axios';
 
 const ProfileModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -21,11 +22,20 @@ const ProfileModal = ({ isOpen, onClose }) => {
     // { label: '내 아이템', onClick: () => navigate('/items') }
   ];
 
-  const handleLogout = () => {
-    dispatch(clearMember());
-    alert('로그아웃 되었습니다.');
-    onClose();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/member/logout', {
+        withCredentials: true
+      });
+      dispatch(clearMember());
+      onClose();
+      navigate('/');
+      alert('로그아웃 되었습니다.');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+      const errorMessage = error.response?.data?.message || '로그아웃 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
   };
 
   return (
