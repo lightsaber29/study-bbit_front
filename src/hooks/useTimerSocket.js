@@ -2,10 +2,10 @@
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-export const useTimerSocket = ({ meetingId, onTimerStart, onTimerPause, onTimerReset, onTimerSet, onModalSet }) => {
+export const useTimerSocket = ({ meetingId, onTimerStart, onTimerPause, onTimerReset, onTimerSet, onModalSet, onTimerEnd }) => {
   const socketRef = useRef(null);
-//   const domain = 'http://localhost:6081'; // local
-  const domain = 'https://node.studybbit.site'; // dev
+  const domain = 'http://localhost:6081'; // local
+  // const domain = 'https://node.studybbit.site'; // dev
 
   useEffect(() => {
     socketRef.current = io(domain);
@@ -16,6 +16,7 @@ export const useTimerSocket = ({ meetingId, onTimerStart, onTimerPause, onTimerR
     socketRef.current.on('timerReset', onTimerReset);
     socketRef.current.on('timerSet', onTimerSet);
     socketRef.current.on('modalSet', onModalSet);
+    socketRef.current.on('timerEnd', onTimerEnd);
 
     return () => {
       if (socketRef.current) {

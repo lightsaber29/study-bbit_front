@@ -173,7 +173,7 @@ export function PageClientImpl(props: {
             <RecordingIndicator />
           </LiveKitRoom>
           <div style={{ margin: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <span>공부시간 측정</span>
+            {/* <span>공부시간 측정</span> */}
             <StudyTimer />
             <TimerSocket />
           </div>
