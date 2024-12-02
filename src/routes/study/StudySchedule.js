@@ -209,7 +209,7 @@ const StudySchedule = () => {
                       </div>
                       <div className="mt-2 flex items-center text-gray-500">
                         <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
-                        <span>기본 캘린더 · {event.creatorName}</span>
+                        <span>기본 캘린더 · {event.createdByNickname}</span>
                       </div>
                     </div>
                   ))
