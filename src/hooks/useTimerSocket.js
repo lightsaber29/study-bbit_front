@@ -4,8 +4,8 @@ import { io } from 'socket.io-client';
 
 export const useTimerSocket = ({ meetingId, onTimerStart, onTimerPause, onTimerReset, onTimerSet, onModalSet, onTimerEnd }) => {
   const socketRef = useRef(null);
-  const domain = 'http://localhost:6081'; // local
-  // const domain = 'https://node.studybbit.site'; // dev
+  // const domain = 'http://localhost:6081'; // local
+  const domain = 'https://node.studybbit.site'; // dev
 
   useEffect(() => {
     socketRef.current = io(domain);
