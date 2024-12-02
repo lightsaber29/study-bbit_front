@@ -195,7 +195,8 @@ const Header = () => {
       { connectionStatus },
       ":: 재시도 횟수:", retryCount
     );
-    if (connectionStatus === 'disconnected') {
+    
+    if (isLogin && connectionStatus === 'disconnected') {
       // console.log('disconnected 상태에서 연결 시도');
       connectToSSE();
     }
@@ -208,7 +209,7 @@ const Header = () => {
         // console.log('재연결 타이머 제거됨');
       }
     };
-  }, [connectionStatus]);  // token 의존성 제거
+  }, [connectionStatus, isLogin]);
 
   const handleEvent = (event) => {
     console.log("Handling event:", event);

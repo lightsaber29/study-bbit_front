@@ -11,16 +11,20 @@ function App() {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      try {
-        const response = await axios.get('/api/member');
-        if (response.data) {
-          dispatch(setMember({
-            ...response.data,
-            memberId: response.data.id 
-          }));
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        try {
+          const response = await axios.get('/api/member');
+          if (response.data) {
+            dispatch(setMember({
+              ...response.data,
+              memberId: response.data.id 
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to fetch user data:', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
       }
     };
 
