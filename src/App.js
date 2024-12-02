@@ -14,7 +14,10 @@ function App() {
       try {
         const response = await axios.get('/api/member');
         if (response.data) {
-          dispatch(setMember(response.data));
+          dispatch(setMember({
+            ...response.data,
+            memberId: response.data.id 
+          }));
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);

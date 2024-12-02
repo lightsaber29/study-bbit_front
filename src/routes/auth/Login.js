@@ -60,7 +60,6 @@ const Login = () => {
       console.log("selectMemberRes :: ", selectMemberRes);
       dispatch(setMember({
         ...selectMemberRes.data,
-        role: res.data.role,
         memberId: selectMemberRes.data.id,
       }));
       alert('로그인되었습니다.');
