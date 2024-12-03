@@ -24,7 +24,9 @@ import type {
   import { CustomChat } from './CustomChat.tsx';
   import { CustomControlBar } from './CustomControlBar.tsx';
   //import { useWarnAboutMissingStyles } from '../hooks/useWarnAboutMissingStyles';
-  
+  import { ScheduleAction, ScheduleWidgetState } from '../../types/types.ts';
+import { CustomSchedule } from './CustomSchedule.tsx';
+
   /**
    * @public
    */
@@ -66,6 +68,10 @@ import type {
       unreadMessages: 0,
       showSettings: false,
     });
+    const [scheduleWidgetState, setScheduleWidgetState] = React.useState<ScheduleWidgetState>({
+      showSchedule: false,
+      showSettings: false,
+    });
     const lastAutoFocusedScreenShareTrack = React.useRef<TrackReferenceOrPlaceholder | null>(null);
   
     const tracks = useTracks(
@@ -79,6 +85,14 @@ import type {
     const widgetUpdate = (state: WidgetState) => {
       log.debug('updating widget state', state);
       setWidgetState(state);
+      
+      // 'toggle_schedule' 메시지 처리
+      if ('msg' in state && state.msg === 'toggle_schedule') {
+        setScheduleWidgetState(prevState => ({
+          ...prevState,
+          showSchedule: !prevState.showSchedule
+        }));
+      }
     };
   
     const layoutContext = useCreateLayoutContext();
@@ -131,7 +145,17 @@ import type {
   
     //useWarnAboutMissingStyles();
   
+    const handleScheduleChange = React.useCallback((action: ScheduleAction) => {
+      if (action.type === 'TOGGLE_SCHEDULE') {
+        setScheduleWidgetState(prev => ({
+          ...prev,
+          showSchedule: !prev.showSchedule
+        }));
+      }
+    }, []);
+  
     return (
+      // <div data-theme="huddle" className="lk-video-conference" {...props}>
       <div className="lk-video-conference" {...props}>
         {isWeb() && (
           <LayoutContextProvider
@@ -156,13 +180,22 @@ import type {
                   </FocusLayoutContainer>
                 </div>
               )}
-              <CustomControlBar controls={{ chat: true, settings: !!SettingsComponent }} />
+              <CustomControlBar controls={{
+                chat: true,
+                settings: !!SettingsComponent,
+                schedule: true,
+              }} onScheduleToggle={handleScheduleChange} />
             </div>
             <CustomChat
               style={{ display: widgetState.showChat ? 'grid' : 'none' }}
               messageFormatter={chatMessageFormatter}
               messageEncoder={chatMessageEncoder}
               messageDecoder={chatMessageDecoder}
+            />
+            <CustomSchedule 
+              scheduleState={scheduleWidgetState}
+              onScheduleChange={handleScheduleChange}
+              style={{ display: scheduleWidgetState.showSchedule ? 'block' : 'none' }}
             />
             {SettingsComponent && (
               <div

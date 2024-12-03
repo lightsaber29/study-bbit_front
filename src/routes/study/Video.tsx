@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageClientImpl } from './PageClientImpl.tsx';
+import { PageClientImpl } from '../../components/custom-livekit/PageClientImpl.tsx';
 import { isVideoCodec } from '../../types/types.ts';
 import '@livekit/components-styles'
 import { useParams } from 'react-router-dom';
@@ -18,14 +18,16 @@ function VideoTest() {
   const hq = searchParams.hq === 'true' ? true : false;
 
   return (
-    <div>
-      <PageClientImpl
-        roomName={roomId}
-        nickname={nickname}
-        region={searchParams.region}
-        hq={hq}
-        codec={codec}
-      />
+    <div className="fixed inset-0 bg-[#111] overflow-y-auto">
+      <main data-lk-theme="default" className="w-full h-full">
+        <PageClientImpl
+          roomName={roomId}
+          nickname={nickname}
+          region={searchParams.region}
+          hq={hq}
+          codec={codec}
+        />
+      </main>
     </div>
   );
 };

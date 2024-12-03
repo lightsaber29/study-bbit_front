@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@livekit/components-react": "^2.6.7",
+    "@livekit/components-react": "^2.6.9",
     "@livekit/components-styles": "^1.1.4",
     "@livekit/krisp-noise-filter": "^0.2.12",
     "@reduxjs/toolkit": "^1.9.0",
@@ -27,6 +27,7 @@
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
     "socket.io-client": "^4.8.1",
+    "tinykeys": "^3.0.0",
     "typescript": "^4.9.5"
   },
   "scripts": {
