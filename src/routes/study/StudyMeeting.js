@@ -132,7 +132,7 @@ const StudyMeeting = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)]">
+    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
       <MeetingTranscriptsList
         transcripts={getCurrentPageTranscripts()}
         openMeetingId={openMeetingId}
