@@ -45,7 +45,7 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
         <div className="p-4 max-h-96 overflow-y-auto">
           <div className="flex items-center space-x-3 mb-4">
             <img
-              src={message.senderProfileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`}
+              src={message.senderProfileUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
               alt={message.isSent ? message.receiverNickname : message.senderNickname}
               className="w-10 h-10 rounded-full object-cover"
             />

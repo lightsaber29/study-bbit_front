@@ -123,7 +123,7 @@ const StudySchedule = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)]">
+    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
       {/* 새 게시글 작성 섹션 */}
       <div className="bg-white rounded-lg shadow mb-6">
         {/* 상단 헤더 */}

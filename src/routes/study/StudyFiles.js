@@ -319,7 +319,7 @@ const StudyFiles = () => {
   );
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)]">
+    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
       {/* 검색바와 버튼들 */}
       <div className="flex gap-4 mb-6">
         <div className="flex-1">

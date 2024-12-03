@@ -5,26 +5,29 @@ import axios from 'api/axios';
 import { setMember } from 'store/memberSlice';
 import routes from './routes';
 import Loading from './components/Loading';
+import { setNotifications } from 'store/notificationSlice';
 
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        try {
-          const response = await axios.get('/api/member');
-          if (response.data) {
-            dispatch(setMember({
-              ...response.data,
-              memberId: response.data.id 
-            }));
+      try {
+        const memberResponse = await axios.get('/api/member');
+        
+        if (memberResponse.data) {
+          dispatch(setMember({
+            ...memberResponse.data,
+            memberId: memberResponse.data.id 
+          }));
+
+          const notiResponse = await axios.get('/api/noti?size=20');
+          if (notiResponse.data?.content) {
+            dispatch(setNotifications(notiResponse.data.content));
           }
-        } catch (error) {
-          console.error('Failed to fetch user data:', error);
         }
+      } catch (error) {
+        console.log("not logged in");
       }
     };
 
@@ -32,7 +35,7 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="max-w-screen-lg container mx-auto p-6">
+    <div className="max-w-screen-lg container mx-auto p-6 pt-16">
       <Suspense fallback={<Loading />}>
         <Routes>
           {routes.map((route) => (

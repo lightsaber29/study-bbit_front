@@ -5,6 +5,7 @@ import useFormInput from 'hooks/useFormInput';
 import axios from 'api/axios';
 import { useDispatch } from 'react-redux';
 import { setMember } from 'store/memberSlice';
+import { setNotifications } from 'store/notificationSlice';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -52,22 +53,26 @@ const Login = () => {
       return;
     }
     try {
-      const res = await axios.post('/api/member/login', values, {
-        withCredentials: true
-      });
-      console.log("login res :: ", res);
+      const res = await axios.post('/api/member/login', values);
+
+      // 회원정보 조회
       const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
-      console.log("selectMemberRes :: ", selectMemberRes);
       dispatch(setMember({
         ...selectMemberRes.data,
         memberId: selectMemberRes.data.id,
       }));
+
+      // 알림 조회
+      const notiResponse = await axios.get('/api/noti?size=20');
+      if (notiResponse.data?.content) {
+        dispatch(setNotifications(notiResponse.data.content));
+      }
+
       alert('로그인되었습니다.');
       resetForm();
       navigate('/');
     } catch (error) {
       console.error('로그인 실패:', error);
-      // const errorMessage = error.response?.data?.message || '로그인 중 오류가 발생했습니다.';
       const errorMessage = error.response?.data || '로그인 중 오류가 발생했습니다.';
       alert(errorMessage);
       handleChange({
