@@ -1,24 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectNotifications, markAsRead, removeNotification } from '../store/notificationSlice';
 
-const NotificationSkeleton = () => (
-  <div className="p-4">
-    <div className="flex items-center space-x-3">
-      <div className="flex-1">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/3 animate-pulse"></div>
-      </div>
-      <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse"></div>
-    </div>
-  </div>
-);
-
 const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
   const notifications = useSelector(selectNotifications);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -108,9 +94,7 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
       </div>
 
       <div className="divide-y divide-gray-100">
-        {loading ? (
-          <NotificationSkeleton />
-        ) : notifications.length > 0 ? (
+        {notifications.length > 0 ? (
           notifications.map((notification) => (
             <div
               key={notification.id}
