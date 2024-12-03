@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { decodePassphrase } from '../../lib/client-utils.ts';
 //import { DebugMode } from './lib/Debug.tsx';
-import { RecordingIndicator } from '../../components/RecordingIndicator.tsx';
-import { SettingsMenu } from '../../components/SettingsMenu.tsx';
+import { RecordingIndicator } from '../../components/custom-livekit/RecordingIndicator.tsx';
+import { SettingsMenu } from '../../components/custom-livekit/SettingsMenu.tsx';
 import { ConnectionDetails } from '../../types/types.ts';
 import {
   formatChatMessageLinks,
@@ -13,8 +13,8 @@ import {
 } from '@livekit/components-react';
 import axios from 'api/axios';
 
-import { CustomPreJoin } from '../../custom-livekit/CustomPrejoin.tsx';
-import { CustomVideoConference } from '../../custom-livekit/CustomVideoConference.tsx';
+import { CustomPreJoin } from '../../components/custom-livekit/CustomPrejoin.tsx';
+import { CustomVideoConference } from '../../components/custom-livekit/CustomVideoConference.tsx';
 import {
   ExternalE2EEKeyProvider,
   RoomOptions,

@@ -3,7 +3,7 @@ import { useRoomContext } from '@livekit/components-react';
 import { setLogLevel, LogLevel, RemoteTrackPublication, setLogExtension } from 'livekit-client';
 // @ts-ignore
 import { tinykeys } from 'tinykeys';
-import { datadogLogs } from '@datadog/browser-logs';
+// import { datadogLogs } from '@datadog/browser-logs';  // 주석처리
 
 import styles from '../styles/Debug.module.css';
 
@@ -13,34 +13,14 @@ export const useDebugMode = ({ logLevel }: { logLevel?: LogLevel }) => {
   React.useEffect(() => {
     setLogLevel(logLevel ?? 'debug');
 
+    // Datadog 관련 코드 주석처리
+    /*
     if (process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN && process.env.NEXT_PUBLIC_DATADOG_SITE) {
       console.log('setting up datadog logs');
-      datadogLogs.init({
-        clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN,
-        site: process.env.NEXT_PUBLIC_DATADOG_SITE,
-        forwardErrorsToLogs: true,
-        sessionSampleRate: 100,
-      });
-
-      setLogExtension((level, msg, context) => {
-        switch (level) {
-          case LogLevel.debug:
-            datadogLogs.logger.debug(msg, context);
-            break;
-          case LogLevel.info:
-            datadogLogs.logger.info(msg, context);
-            break;
-          case LogLevel.warn:
-            datadogLogs.logger.warn(msg, context);
-            break;
-          case LogLevel.error:
-            datadogLogs.logger.error(msg, context);
-            break;
-          default:
-            break;
-        }
-      });
+      datadogLogs.init({...});
+      setLogExtension((level, msg, context) => {...});
     }
+    */
 
     // @ts-expect-error
     window.__lk_room = room;

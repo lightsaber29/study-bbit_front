@@ -21,3 +21,7 @@
 .tabs > .tab[aria-pressed='true'] {
   border-color: var(--lk-accent-bg);
 }
+
+.tab {
+  /* Your tab button styles */
+}
