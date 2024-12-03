@@ -346,6 +346,7 @@ const Header = () => {
                 <NotificationModal 
                   isOpen={showNotificationModal}
                   onClose={() => setShowNotificationModal(false)}
+                  onShowDM={setShowDMModal}
                 />
               </div>
             </div>

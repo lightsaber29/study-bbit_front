@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectNotifications } from '../store/notificationSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectNotifications, markAsRead, removeNotification } from '../store/notificationSlice';
 
 const NotificationSkeleton = () => (
   <div className="p-4">
@@ -16,42 +16,30 @@ const NotificationSkeleton = () => (
   </div>
 );
 
-const NotificationModal = ({ isOpen, onClose }) => {
+const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
   const notifications = useSelector(selectNotifications);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoading(true);
-      try {
-        // const response = await axios.get('/api/notifications');
-        // setNotifications(response.data?.content || []);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchNotifications();
-    }
-  }, [isOpen]);
+  const dispatch = useDispatch();
 
   if (!isOpen) return null;
 
   const handleNotificationClick = (notification) => {
-    // 알림 읽음 처리
-    axios.patch(`/api/notifications/${notification.id}/read`)
-      .then(() => {
-        // 알림 타입에 따라 적절한 페이지로 이동
-        if (notification.link) {
-          navigate(notification.link);
-        }
-        onClose();
-      })
-      .catch(error => console.error('Error marking notification as read:', error));
+    dispatch(markAsRead(notification.id));
+    if (notification.url === '/dm') {
+      onShowDM(true);
+    }
+    onClose();
+  };
+
+  const handleDelete = async (e, notificationId) => {
+    e.stopPropagation();
+    try {
+      await axios.delete(`/api/noti/${notificationId}`);
+      dispatch(removeNotification(notificationId));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   };
 
   return (
@@ -62,9 +50,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
 
       <div className="divide-y divide-gray-100">
         {loading ? (
-          <>
-            <NotificationSkeleton />
-          </>
+          <NotificationSkeleton />
         ) : notifications.length > 0 ? (
           notifications.map((notification) => (
             <div
@@ -79,9 +65,19 @@ const NotificationModal = ({ isOpen, onClose }) => {
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>
                 </div>
-                {!notification.read && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                )}
+                <div className="flex items-center space-x-2">
+                  {!notification.read && (
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  )}
+                  <button
+                    onClick={(e) => handleDelete(e, notification.id)}
+                    className="text-gray-400 hover:text-red-500 p-1"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           ))
