@@ -10,8 +10,8 @@
     "forceConsistentCasingInFileNames": true, // 파일 대소문자 일관성 검사
     "noEmit": true,                 // 실제 파일 생성 방지
     "esModuleInterop": true,        // CommonJS 모듈 호환
-    "module": "esnext",             // 최신 ES 모듈 사용
-    "moduleResolution": "node",     // Node.js 방식으로 모듈 해석
+    "module": "Node16",             // Changed from "esnext" to "Node16"
+    "moduleResolution": "node16",     // Node.js 방식으로 모듈 해석
     "resolveJsonModule": true,      // JSON 파일 import 가능
     "isolatedModules": true,        // 각 파일을 개별적으로 트랜스파일
     "allowImportingTsExtensions": true // .tsx 확장자 import 허용
