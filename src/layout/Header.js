@@ -14,6 +14,8 @@ import { IoMdAdd } from 'react-icons/io';
 import { FaPaperPlane } from 'react-icons/fa';
 import { IoNotificationsOutline, IoClose } from 'react-icons/io5';
 import { selectNotifications } from '../store/notificationSlice';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -218,12 +220,22 @@ const Header = () => {
     };
   }, [connectionStatus, isLogin]);
 
+  // 알림 권한 요청 및 확인을 위한 useEffect 추가
+  useEffect(() => {
+    if (isLogin && 'Notification' in window) {
+      console.log("Current notification permission:", Notification.permission);
+      Notification.requestPermission().then(permission => {
+        console.log("Updated notification permission:", permission);
+      });
+    }
+  }, [isLogin]);
+
   const handleEvent = (event) => {
     console.log("Handling event:", event);
     
     if (['sendDm', 'sendMm'].includes(event.type)) {
       const notification = {
-        id: Date.now(),
+        id: event.data.notificationId,
         content: event.data.content,
         createdAt: event.data.createdAt,
         read: false,
@@ -231,6 +243,52 @@ const Header = () => {
       };
       
       dispatch(addNotification(notification));
+
+      // 토스트 알림
+      toast(
+        <div onClick={() => navigate(event.data.url)} className="cursor-pointer">
+          <strong>새로운 알림</strong>
+          <p className="text-sm">{event.data.content}</p>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: {
+            background: '#ffffff',
+            color: '#333333',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+          },
+          progressStyle: {
+            background: '#10b981'
+          },
+        }
+      );
+
+      // 브라우저 알림
+      if (Notification.permission === 'granted' && document.visibilityState === 'hidden') {
+        const title = '새로운 알림';
+        const options = {
+          body: event.data.content,
+          icon: `${process.env.PUBLIC_URL}/images/logo.png`,
+          tag: event.type,
+          requireInteraction: true
+        };
+
+        const browserNotification = new Notification(title, options);
+        
+        browserNotification.onclick = () => {
+          window.focus();
+          if (event.data.url) {
+            navigate(event.data.url);
+          }
+          browserNotification.close();
+        };
+      }
     } else if (event.type === 'connect') {
       console.log("Connected to SSE");
     } else {
@@ -384,6 +442,19 @@ const Header = () => {
           ))}
         </nav>
       )}
+      
+      <ToastContainer
+        position="bottom-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };
