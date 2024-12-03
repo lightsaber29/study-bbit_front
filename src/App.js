@@ -5,6 +5,7 @@ import axios from 'api/axios';
 import { setMember } from 'store/memberSlice';
 import routes from './routes';
 import Loading from './components/Loading';
+import { setNotifications } from 'store/notificationSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -19,6 +20,11 @@ function App() {
             ...memberResponse.data,
             memberId: memberResponse.data.id 
           }));
+
+          const notiResponse = await axios.get('/api/noti?size=20');
+          if (notiResponse.data?.content) {
+            dispatch(setNotifications(notiResponse.data.content));
+          }
         }
       } catch (error) {
         console.log("not logged in");

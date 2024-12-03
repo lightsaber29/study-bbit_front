@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearMember, selectMember } from 'store/memberSlice';
+import { clearNotifications } from 'store/notificationSlice';
 import axios from 'api/axios';
 
 const ProfileModal = ({ isOpen, onClose }) => {
@@ -26,6 +27,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
     try {
       await axios.post('/api/member/logout');
       dispatch(clearMember());
+      dispatch(clearNotifications());
       onClose();
       navigate('/');
       alert('로그아웃 되었습니다.');
