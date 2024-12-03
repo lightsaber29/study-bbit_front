@@ -43,10 +43,66 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    if (notifications.length === 0) return;
+    try {
+      await axios.post('/api/noti');
+      notifications.forEach(notification => {
+        dispatch(markAsRead(notification.id));
+      });
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (notifications.length === 0) return;
+    try {
+      await axios.delete('/api/noti');
+      notifications.forEach(notification => {
+        dispatch(removeNotification(notification.id));
+      });
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+    }
+  };
+
   return (
     <div className="fixed top-14 right-4 z-50 w-80 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
       <div className="p-4 border-b border-gray-200">
-        <h3 className="font-semibold text-lg">알림</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">알림</h3>
+          <div className="flex space-x-2">
+            <div className="relative group">
+              <button
+                onClick={handleMarkAllAsRead}
+                className="p-1.5 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+                </svg>
+              </button>
+              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                전체 읽음
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+              </div>
+            </div>
+            <div className="relative group">
+              <button
+                onClick={handleDeleteAll}
+                className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                전체 삭제
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="divide-y divide-gray-100">
