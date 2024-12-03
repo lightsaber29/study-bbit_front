@@ -56,7 +56,7 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
+              className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-emerald-50' : ''}`}
               onClick={() => handleNotificationClick(notification)}
             >
               <div className="flex items-center space-x-3">
@@ -68,7 +68,7 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
                 </div>
                 <div className="flex items-center space-x-2">
                   {!notification.read && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                   )}
                   <button
                     onClick={(e) => handleDelete(e, notification.id)}
