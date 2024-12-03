@@ -52,9 +52,7 @@ const Login = () => {
       return;
     }
     try {
-      const res = await axios.post('/api/member/login', values, {
-        withCredentials: true
-      });
+      const res = await axios.post('/api/member/login', values);
       console.log("login res :: ", res);
       const selectMemberRes = await axios.get(`/api/member/${res.data.memberId}`);
       console.log("selectMemberRes :: ", selectMemberRes);

@@ -24,9 +24,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/member/logout', {
-        withCredentials: true
-      });
+      await axios.post('/api/member/logout');
       dispatch(clearMember());
       onClose();
       navigate('/');
