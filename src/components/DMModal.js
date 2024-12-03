@@ -27,7 +27,7 @@ const DMModal = ({ isOpen, onClose }) => {
       try {
         const endpoint = activeTab === 'received' ? '/api/dm/received' : '/api/dm/sent';
         const response = await axios.get(endpoint);
-        // console.log("fetchMessages response :: ", response);
+        console.log("fetchMessages response :: ", response);
         setMessages(response.data?.content);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -93,7 +93,7 @@ const DMModal = ({ isOpen, onClose }) => {
                 >
                   <div className="flex items-center space-x-3">
                     <img
-                      src={message.senderProfileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`}
+                      src={message.senderProfileUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
                       alt={message.senderNickname}
                       className="w-10 h-10 rounded-full object-cover"
                     />
@@ -119,7 +119,7 @@ const DMModal = ({ isOpen, onClose }) => {
                 >
                   <div className="flex items-center space-x-3">
                     <img
-                      src={message.receiverProfileImage || `${process.env.PUBLIC_URL}/images/default_profile.png`}
+                      src={message.receiverProfileUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
                       alt={message.receiverNickname}
                       className="w-10 h-10 rounded-full object-cover"
                     />
