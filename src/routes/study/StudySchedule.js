@@ -6,6 +6,7 @@ import CreateEventModal from '../../components/CreateEventModal';
 import '../../styles/StudySchedule.css';
 import axios from 'api/axios';
 import { useParams } from 'react-router-dom';
+import { formatDateTime } from 'utils/dateUtil';
 
 const StudySchedule = () => {
   const { roomId } = useParams();
@@ -19,13 +20,13 @@ const StudySchedule = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
 
-  const getSchedules = async () => {
+  const getSchedules = async (date) => {
     try {
-      const response = await axios.get(`/api/schedule/${roomId}`);
-      setSchedules(response.data?.content);
+      const response = await axios.get(`/api/schedule/${roomId}?month=${formatDateTime(date, 'YYYY-MM')}`);
+      setSchedules(response.data);
       
-      if (selectedDate) {
-        const updatedDayEvents = response.data?.content.filter(schedule => {
+      if (response.data.length > 0 && selectedDate) {
+        const updatedDayEvents = response.data.filter(schedule => {
           const scheduleDate = new Date(schedule.startDate);
           return scheduleDate.getDate() === selectedDate.getDate() &&
                  scheduleDate.getMonth() === selectedDate.getMonth() &&
@@ -44,23 +45,20 @@ const StudySchedule = () => {
     getSchedules();
   }, []);
 
-  // 월 이동 핸들러 수정
-  const handlePrevMonth = () => {
-    const newDate = new Date(date.getFullYear(), date.getMonth() - 1);
+  const updateDate = (offset) => {
+    const newDate = new Date(date.getFullYear(), date.getMonth() + offset);
     setDate(newDate);
     setActiveStartDate(newDate);
+    getSchedules(newDate);
   };
 
-  const handleNextMonth = () => {
-    const newDate = new Date(date.getFullYear(), date.getMonth() + 1);
-    setDate(newDate);
-    setActiveStartDate(newDate);
-  };
-
+  const handlePrevMonth = () => updateDate(-1);
+  const handleNextMonth = () => updateDate(1);
   const handleToday = () => {
     const today = new Date();
     setDate(today);
     setActiveStartDate(today);
+    getSchedules(today);
   };
 
   // 현재 표시되는 년월을 포맷팅하는 함수
@@ -78,7 +76,6 @@ const StudySchedule = () => {
     setSelectedEvent(null);
   };
 
-  // Calendar의 tileContent 부분 수정
   const tileContent = ({ date }) => {
     const matchingSchedules = schedules.filter(schedule => {
       const scheduleDate = new Date(schedule.startDate);
@@ -97,7 +94,7 @@ const StudySchedule = () => {
     }
   };
 
-  // 날짜 클릭 핸들러 추가
+  // 날짜 클릭 핸들러
   const handleDayClick = (date) => {
     setSelectedDate(date);
     const dayEvents = schedules.filter(schedule => {
@@ -107,13 +104,6 @@ const StudySchedule = () => {
              scheduleDate.getFullYear() === date.getFullYear();
     });
     setSelectedDateEvents(dayEvents);
-  };
-
-  // 수정 버튼 클릭 핸들러 추가
-  const handleEditClick = (event) => {
-    setSelectedEvent(null); // 상세 모달 닫기
-    setEditingEvent(event); // 수정할 이벤트 설정
-    setShowEditModal(true); // 수정 모달 열기
   };
 
   // 수정 모달 닫기 핸들러
