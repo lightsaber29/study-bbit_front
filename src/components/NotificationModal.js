@@ -29,6 +29,8 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
     dispatch(markAsRead(notification.id));
     if (notification.url === '/dm') {
       onShowDM(true);
+    } else {
+      navigate(notification.url);
     }
     onClose();
   };
