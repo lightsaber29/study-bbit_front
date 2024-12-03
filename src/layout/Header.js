@@ -13,6 +13,7 @@ import { addNotification } from 'store/notificationSlice';
 import { IoMdAdd } from 'react-icons/io';
 import { FaPaperPlane } from 'react-icons/fa';
 import { IoNotificationsOutline, IoClose } from 'react-icons/io5';
+import { selectNotifications } from '../store/notificationSlice';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -53,6 +54,9 @@ const Header = () => {
   const member = useSelector(selectMember);
   const isLogin = member.isLogin;
   const profileImageUrl = member.profileImageUrl
+
+  const notifications = useSelector(selectNotifications);
+  const hasUnreadNotifications = notifications.some(notification => !notification.read);
 
   const handleProfileClick = (e) => {
     e.stopPropagation();
@@ -303,7 +307,9 @@ const Header = () => {
                 onClick={() => setShowNotificationModal(!showNotificationModal)}
               >
                 <IoNotificationsOutline size={24} className="text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                {hasUnreadNotifications && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
               </button>
 
               {/* DM 버튼과 모달 */}
