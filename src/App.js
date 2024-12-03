@@ -11,20 +11,17 @@ function App() {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        try {
-          const response = await axios.get('/api/member');
-          if (response.data) {
-            dispatch(setMember({
-              ...response.data,
-              memberId: response.data.id 
-            }));
-          }
-        } catch (error) {
-          console.error('Failed to fetch user data:', error);
+      try {
+        const memberResponse = await axios.get('/api/member');
+        
+        if (memberResponse.data) {
+          dispatch(setMember({
+            ...memberResponse.data,
+            memberId: memberResponse.data.id 
+          }));
         }
+      } catch (error) {
+        console.log("not logged in");
       }
     };
 
