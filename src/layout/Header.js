@@ -21,7 +21,6 @@ const NAV_ITEMS = [
   { path: '/meeting', label: '회의록' },
   { path: '/files', label: '자료실' },
   { path: '/schedule', label: '일정' }
-  // { path: '/settings', label: '설정' }
 ];
 
 // 네비게이션 링크 스타일 유틸리티
@@ -147,9 +146,7 @@ const Header = () => {
     
     const connectToSSE = async () => {
       try {
-        const eventSource = new EventSource("/api/noti/subscribe", {
-          withCredentials: true
-        });
+        const eventSource = new EventSource("/api/noti/subscribe");
 
         eventSource.onopen = () => {
           setConnectionStatus('connected');
