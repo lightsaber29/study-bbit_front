@@ -130,6 +130,7 @@ const TimerSocket = () => {
     setMaxTime(0);
     setStatusMessage('대기');
     setIsTimeUp(false);
+    setIsTimerOn(false);
   };
 
   const handleRestartTimer = () => {
@@ -405,8 +406,15 @@ const TimerSocket = () => {
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {isHost && (
-          <>
-            {!isSetTimer && !timerOn && (
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            gap: '10px',
+            marginLeft: '15px' 
+          }}>
+            {/* 타이머 설정 버튼: 타이머가 설정되지 않은 상태일 때만 표시 */}
+            {!isSetTimer && (
               <button
                 onClick={() => {
                   handleSetTimer();
@@ -414,20 +422,25 @@ const TimerSocket = () => {
                 }}
                 style={{
                   padding: '8px 16px',
-                  borderRadius: '4px',
+                  borderRadius: '20px',
                   backgroundColor: '#4CAF50',
                   color: 'white',
                   border: 'none',
                   cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
               >
                 타이머 설정
               </button>
             )}
-            
-            {isSetTimer && !isTimeUp && (
+
+            {/* 타이머가 설정된 경우의 버튼들 */}
+            {isSetTimer && (
               <>
-                {!timerOn && (
+                {/* 시작 버튼: 타이머가 실행중이지 않고, 일시정지 상태이거나 리셋된 상태일 때 */}
+                {!timerOn && time > 0 && (
                   <button
                     onClick={handleStartTimer}
                     style={{
@@ -446,6 +459,7 @@ const TimerSocket = () => {
                   </button>
                 )}
                 
+                {/* 중지 버튼: 타이머 실행 중일 때만 */}
                 {timerOn && (
                   <button
                     onClick={handlePauseTimer}
@@ -465,6 +479,7 @@ const TimerSocket = () => {
                   </button>
                 )}
                 
+                {/* 리셋 버튼: 타이머가 설정된 상태에서 항상 */}
                 <button
                   onClick={handleResetTimer}
                   style={{
@@ -481,28 +496,27 @@ const TimerSocket = () => {
                 >
                   리셋
                 </button>
+
+                {/* 종료 버튼: 타이머가 설정된 상태에서 항상 */}
+                <button
+                  onClick={handleEndTimer}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    backgroundColor: '#9E9E9E',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  종료
+                </button>
               </>
             )}
-            
-            {(isTimeUp || !timerOn) && isSetTimer && (
-              <button
-                onClick={handleEndTimer}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  backgroundColor: '#9E9E9E',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}
-              >
-                종료
-              </button>
-            )}
-          </>
+          </div>
         )}
         
         {isSetTimer && (
