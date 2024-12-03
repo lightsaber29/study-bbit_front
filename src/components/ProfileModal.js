@@ -14,13 +14,12 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { 
-      label: '내 프로필', 
+      label: '내 프로필',
       onClick: () => {
-        onClose();  // 먼저 모달 닫기
-        navigate('/profile');  // 그 다음 페이지 이동
+        onClose();
+        navigate('/profile');
       }
     },
-    // { label: '내 아이템', onClick: () => navigate('/items') }
   ];
 
   const handleLogout = async () => {
@@ -104,7 +103,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
             <div 
               className={`h-full ${getTemperatureColor(member.flowTemperature || 0)} rounded-full transition-all duration-500 ease-out`}
               style={{ 
-                width: `${((member.flowTemperature || 0) / 100) * 100}%`,
+                width: `${Math.min(100, Math.max(0, ((member.flowTemperature || 0) / 100) * 100))}%`,
                 transition: 'width 1s ease-in-out'
               }}
             />

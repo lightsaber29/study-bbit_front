@@ -109,7 +109,7 @@ const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
                 <div 
                   className={`h-full ${getTemperatureColor(memberInfo?.flowTemperature || 0)} rounded-full transition-all duration-500 ease-out`}
                   style={{ 
-                    width: `${((memberInfo?.flowTemperature || 0) / 100) * 100}%`,
+                    width: `${Math.min(100, Math.max(0, ((memberInfo?.flowTemperature || 0) / 100) * 100))}%`,
                     transition: 'width 1s ease-in-out'
                   }}
                 />
