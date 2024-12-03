@@ -239,14 +239,14 @@ const Header = () => {
         content: event.data.content,
         createdAt: event.data.createdAt,
         read: false,
-        link: event.data.url
+        url: event.data.url
       };
       
       dispatch(addNotification(notification));
 
       // 토스트 알림
       toast(
-        <div onClick={() => navigate(event.data.url)} className="cursor-pointer">
+        <div>
           <strong>새로운 알림</strong>
           <p className="text-sm">{event.data.content}</p>
         </div>,
@@ -283,9 +283,6 @@ const Header = () => {
         
         browserNotification.onclick = () => {
           window.focus();
-          if (event.data.url) {
-            navigate(event.data.url);
-          }
           browserNotification.close();
         };
       }

@@ -1,34 +1,26 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectNotifications, markAsRead, removeNotification } from '../store/notificationSlice';
-
-const NotificationSkeleton = () => (
-  <div className="p-4">
-    <div className="flex items-center space-x-3">
-      <div className="flex-1">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/3 animate-pulse"></div>
-      </div>
-      <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse"></div>
-    </div>
-  </div>
-);
+import { useState } from 'react';
 
 const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
   const notifications = useSelector(selectNotifications);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [deletingIds, setDeletingIds] = useState(new Set());
 
   if (!isOpen) return null;
 
   const handleNotificationClick = async (notification) => {
+    console.log('notification: ', notification);
     await axios.post(`/api/noti/${notification.id}`);
     dispatch(markAsRead(notification.id));
     if (notification.url === '/dm') {
+      console.log('dm');
       onShowDM(true);
+    } else {
+      navigate(notification.url);
     }
     onClose();
   };
@@ -36,10 +28,25 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
   const handleDelete = async (e, notificationId) => {
     e.stopPropagation();
     try {
-      await axios.delete(`/api/noti/${notificationId}`);
-      dispatch(removeNotification(notificationId));
+      setDeletingIds(prev => new Set([...prev, notificationId]));
+      
+      // 애니메이션을 위한 지연
+      setTimeout(async () => {
+        await axios.delete(`/api/noti/${notificationId}`);
+        dispatch(removeNotification(notificationId));
+        setDeletingIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(notificationId);
+          return newSet;
+        });
+      }, 300); // 애니메이션 시간과 동일하게 설정
     } catch (error) {
       console.error('Error deleting notification:', error);
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        return newSet;
+      });
     }
   };
 
@@ -58,12 +65,19 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
   const handleDeleteAll = async () => {
     if (notifications.length === 0) return;
     try {
-      await axios.delete('/api/noti');
-      notifications.forEach(notification => {
-        dispatch(removeNotification(notification.id));
-      });
+      const notificationIds = notifications.map(notification => notification.id);
+      setDeletingIds(new Set(notificationIds));
+      
+      setTimeout(async () => {
+        await axios.delete('/api/noti');
+        notifications.forEach(notification => {
+          dispatch(removeNotification(notification.id));
+        });
+        setDeletingIds(new Set());
+      }, 300);
     } catch (error) {
       console.error('Error deleting all notifications:', error);
+      setDeletingIds(new Set());
     }
   };
 
@@ -82,7 +96,7 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
                 </svg>
               </button>
-              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap z-[60]">
                 전체 읽음
                 <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
               </div>
@@ -96,7 +110,7 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
-              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap z-[60]">
                 전체 삭제
                 <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
               </div>
@@ -106,13 +120,17 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
       </div>
 
       <div className="divide-y divide-gray-100">
-        {loading ? (
-          <NotificationSkeleton />
-        ) : notifications.length > 0 ? (
+        {notifications.length > 0 ? (
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-emerald-50' : ''}`}
+              className={`p-4 hover:bg-gray-50 cursor-pointer ${
+                !notification.read ? 'bg-emerald-50' : ''
+              } transition-all duration-300 ${
+                deletingIds.has(notification.id) 
+                  ? 'opacity-0 translate-x-full h-0 p-0 overflow-hidden' 
+                  : 'opacity-100 translate-x-0'
+              }`}
               onClick={() => handleNotificationClick(notification)}
             >
               <div className="flex items-center space-x-3">
