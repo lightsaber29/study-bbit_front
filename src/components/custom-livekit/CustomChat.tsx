@@ -34,6 +34,7 @@ export function CustomChat({
 }: ChatProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const ulRef = React.useRef<HTMLUListElement>(null);
+  const layoutContext = useMaybeLayoutContext();
 
   const chatOptions: ChatOptions = React.useMemo(() => {
     return { messageDecoder, messageEncoder, channelTopic };
@@ -41,7 +42,6 @@ export function CustomChat({
 
   const { send, chatMessages, isSending } = useChat(chatOptions);
 
-  const layoutContext = useMaybeLayoutContext();
   const lastReadMsgAt = React.useRef<ChatMessage['timestamp']>(0);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -86,14 +86,29 @@ export function CustomChat({
   }, [chatMessages, layoutContext?.widget]);
 
   return (
-    <div {...props} className="lk-chat">
+    <div {...props} className="lk-chat" style={{ 
+      width: '30vw',
+      height: '100%',
+      display: layoutContext?.widget.state?.showChat ? 'flex' : 'none',
+      flexDirection: 'column'
+    }}>
       <div className="lk-chat-header">
         <ChatToggle className="lk-close-button">
           <ChatCloseIcon />
         </ChatToggle>
       </div>
 
-      <ul className="lk-list lk-chat-messages" ref={ulRef}>
+      <ul 
+        className="lk-list lk-chat-messages" 
+        ref={ulRef}
+        style={{
+          height: 'calc(100vh - 250px)',
+          overflowY: 'auto',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#CBD5E0 #EDF2F7',
+          width: '100%',
+        }}
+      >
         {props.children
           ? chatMessages.map((msg, idx) =>
               cloneSingleChild(props.children, {
@@ -104,14 +119,13 @@ export function CustomChat({
             )
           : chatMessages.map((msg, idx, allMsg) => {
               const hideName = idx >= 1 && allMsg[idx - 1].from === msg.from;
-              // If the time delta between two messages is bigger than 60s show timestamp.
               const hideTimestamp = idx >= 1 && msg.timestamp - allMsg[idx - 1].timestamp < 60_000;
 
               return (
                 <ChatEntry
                   key={msg.id ?? idx}
                   hideName={hideName}
-                  hideTimestamp={hideName === false ? false : hideTimestamp} // If we show the name always show the timestamp as well.
+                  hideTimestamp={hideName === false ? false : hideTimestamp}
                   entry={msg}
                   messageFormatter={messageFormatter}
                 />

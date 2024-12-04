@@ -26,3 +26,15 @@ export type ConnectionDetails = {
   participantName: string;
   participantToken: string;
 };
+
+export type ScheduleWidgetState = {
+  showSchedule: boolean;
+  showSettings?: boolean;
+};
+
+export type ScheduleAction = {
+  type: 'TOGGLE_SCHEDULE';
+} | {
+  type: 'SET_SCHEDULE';
+  show: boolean;
+};

@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { decodePassphrase } from '../../lib/client-utils.ts';
-//import { DebugMode } from './lib/Debug.tsx';
-import { RecordingIndicator } from '../../components/RecordingIndicator.tsx';
-import { SettingsMenu } from '../../components/SettingsMenu.tsx';
+import { RecordingIndicator } from './RecordingIndicator.tsx';
+import { SettingsMenu } from './SettingsMenu.tsx';
 import { ConnectionDetails } from '../../types/types.ts';
+import { DebugMode } from './Debug.tsx';
 import {
   formatChatMessageLinks,
   LiveKitRoom,
@@ -13,8 +13,8 @@ import {
 } from '@livekit/components-react';
 import axios from 'api/axios';
 
-import { CustomPreJoin } from '../../custom-livekit/CustomPrejoin.tsx';
-import { CustomVideoConference } from '../../custom-livekit/CustomVideoConference.tsx';
+import { CustomPreJoin } from './CustomPrejoin.tsx';
+import { CustomVideoConference } from './CustomVideoConference.tsx';
 import {
   ExternalE2EEKeyProvider,
   RoomOptions,
@@ -25,9 +25,9 @@ import {
   RoomConnectOptions,
 } from 'livekit-client';
 import '@livekit/components-styles'
-import MeetingMinutes from './MeetingMinutes.js';
-import { StudyTimer } from '../../components/StudyTimer';
-import TimerSocket from '../../components/TimerSocket';
+import MeetingMinutes from '../../routes/study/MeetingMinutes.js';
+import { StudyTimer } from '../StudyTimer.tsx';
+import TimerSocket from '../TimerSocket.js';
 
 // const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/express/connection-details';
 const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
@@ -142,7 +142,9 @@ export function PageClientImpl(props: {
   }), []);
 
   return (
-    <main style={{ height: '100%' }}>
+    <main style={{ height: '100%' }} data-lk-theme="default">
+    {/* <main style={{ height: '100%' }} data-lk-theme="custom"> */}
+    {/* <main style={{ height: '100%' }}> */}
       {connectionDetails === undefined || preJoinChoices === undefined ? (
         <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
           <CustomPreJoin
@@ -154,6 +156,7 @@ export function PageClientImpl(props: {
       ) : (
         <div>
           <LiveKitRoom
+            // data-lk-theme="custom"
             connect={e2eeSetupComplete}
             room={room}
             token={connectionDetails.participantToken}
@@ -167,9 +170,10 @@ export function PageClientImpl(props: {
           >
             <CustomVideoConference
               chatMessageFormatter={formatChatMessageLinks}
-              SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
+              // SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
+              SettingsComponent={SettingsMenu}
             />
-            {/* <DebugMode /> */}
+            <DebugMode />
             <RecordingIndicator />
           </LiveKitRoom>
           <div style={{ margin: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>

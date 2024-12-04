@@ -151,7 +151,14 @@ const StudyHome = () => {
 
       // 화상채팅 페이지 열기
       const videoUrl = `/study/${roomId}/video?hideLayout=true`;
-      const windowFeatures = 'width=1200,height=700';
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+      const windowWidth = Math.floor(screenWidth * 0.8); // 화면 너비의 80%
+      const windowHeight = Math.floor(screenHeight * 0.8); // 화면 높이의 80%
+      const left = Math.floor((screenWidth - windowWidth) / 2); // 중앙 정렬
+      const top = Math.floor((screenHeight - windowHeight) / 2); // 중앙 정렬
+
+      const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`;
       window.open(videoUrl, '_blank', windowFeatures);
     } catch (error) {
       console.error('화상 회의 접속 중 오류:', error);

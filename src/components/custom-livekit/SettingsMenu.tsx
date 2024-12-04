@@ -8,8 +8,8 @@ import {
   useRoomContext,
   useIsRecording,
 } from '@livekit/components-react';
-import { useKrispNoiseFilter } from '@livekit/components-react/krisp';
-import styles from '../styles/SettingsMenu.module.css';
+import { KrispNoiseFilter, NoiseFilterOptions } from '@livekit/krisp-noise-filter';
+import styles from '../../styles/SettingsMenu.module.css';
 
 /**
  * @alpha
@@ -38,8 +38,10 @@ export function SettingsMenu(props: SettingsMenuProps) {
   );
   const [activeTab, setActiveTab] = React.useState(tabs[0]);
 
-  const { isNoiseFilterEnabled, setNoiseFilterEnabled, isNoiseFilterPending } =
-    useKrispNoiseFilter();
+  const krispProcessor = KrispNoiseFilter();
+
+  const isNoiseFilterEnabled = krispProcessor.isEnabled();
+  const setNoiseFilterEnabled = (enabled: boolean) => krispProcessor.setEnabled(enabled);
 
   React.useEffect(() => {
     // enable Krisp by default
@@ -150,7 +152,6 @@ export function SettingsMenu(props: SettingsMenuProps) {
                 id="noise-filter"
                 onChange={(ev) => setNoiseFilterEnabled(ev.target.checked)}
                 checked={isNoiseFilterEnabled}
-                disabled={isNoiseFilterPending}
               ></input>
             </section>
           </>

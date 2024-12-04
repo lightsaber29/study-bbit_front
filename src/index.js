@@ -16,11 +16,11 @@ const Layout = () => {
   const hideLayout = new URLSearchParams(location.search).get('hideLayout') === 'true';
 
   return (
-    <>
+    <div className={hideLayout ? '' : 'max-w-screen-lg container mx-auto p-6'}>
       {!hideLayout && <Header />}
       <App />
       {!hideLayout && <Footer />}
-    </>
+    </div>
   );
 };
 

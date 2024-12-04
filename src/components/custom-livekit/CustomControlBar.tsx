@@ -12,6 +12,9 @@ import { supportsScreenSharing } from '@livekit/components-core';
 import { mergeProps } from './custom-addon/utils.ts';
 import { StartMediaButton } from '@livekit/components-react';
 import { CustomSettingsMenuToggle } from './CustomSettingsMenuToggle.tsx'
+import { NotesIcon } from './icons/NotesIcon.tsx';
+import { CustomScheduleToggle } from './CustomScheduleToggle';
+import { ScheduleAction } from '../../types/types';
 
 /** @public */
 export type CustomControlBarControls = {
@@ -21,6 +24,7 @@ export type CustomControlBarControls = {
   screenShare?: boolean;
   leave?: boolean;
   settings?: boolean;
+  schedule?: boolean;
 };
 
 /** @public */
@@ -35,6 +39,7 @@ export interface CustomControlBarProps extends React.HTMLAttributes<HTMLDivEleme
    * @alpha
    */
   saveUserChoices?: boolean;
+  onScheduleToggle?: React.Dispatch<ScheduleAction>;
 }
 
 /**
@@ -58,6 +63,7 @@ export function CustomControlBar({
   controls,
   saveUserChoices = true,
   onDeviceError,
+  onScheduleToggle,
   ...props
 }: CustomControlBarProps) {
   const [isChatOpen, setIsChatOpen] = React.useState(false);
@@ -72,7 +78,7 @@ export function CustomControlBar({
   const defaultVariation = isTooLittleSpace ? 'minimal' : 'verbose';
   variation ??= defaultVariation;
 
-  const visibleControls = { leave: true, ...controls };
+  const visibleControls = { leave: true, schedule: true, ...controls };
 
   const localPermissions = useLocalParticipantPermissions();
 
@@ -183,6 +189,12 @@ export function CustomControlBar({
           {showIcon && <ChatIcon />}
           {showText && '채팅'}
         </ChatToggle>
+      )}
+      {visibleControls.schedule && (
+        <CustomScheduleToggle onScheduleToggle={onScheduleToggle}>
+          {showIcon && <NotesIcon />}
+          {showText && '출석부'}
+        </CustomScheduleToggle>
       )}
       {visibleControls.settings && (
         <CustomSettingsMenuToggle>
