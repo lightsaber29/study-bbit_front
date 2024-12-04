@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'api/axios';
+import TemperatureModal from './TemperatureModal';
 
 const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
   const [replyContent, setReplyContent] = useState('');
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,12 +67,16 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
         <div className="p-4 max-h-96 overflow-y-auto">
           <div className="flex items-center space-x-3 mb-4">
             <img
-              src={message.senderProfileUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
+              src={(message.isSent ? message.receiverProfileUrl : message.senderProfileUrl) || `${process.env.PUBLIC_URL}/images/default-profile.png`}
               alt={message.isSent ? message.receiverNickname : message.senderNickname}
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-10 h-10 rounded-full object-cover cursor-pointer transition-transform hover:scale-110"
+              onClick={() => setIsTemperatureModalOpen(true)}
             />
             <div>
-              <p className="font-medium text-gray-900">
+              <p 
+                className="font-medium text-gray-900 cursor-pointer hover:text-emerald-600"
+                onClick={() => setIsTemperatureModalOpen(true)}
+              >
                 {message.isSent ? message.receiverNickname : message.senderNickname}
               </p>
               <p className="text-sm text-gray-500">{message.timestamp}</p>
@@ -111,6 +117,13 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
           </div>
         )}
       </div>
+
+      {/* Add TemperatureModal */}
+      <TemperatureModal
+        isOpen={isTemperatureModalOpen}
+        onClose={() => setIsTemperatureModalOpen(false)}
+        leaderId={message.isSent ? message.receiverId : message.senderId}
+      />
     </div>
   );
 };
