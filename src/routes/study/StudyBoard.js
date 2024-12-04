@@ -1,27 +1,61 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import PostDetail from '../../components/PostDetail';
 import axios from 'api/axios';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectRoomName } from 'store/roomSlice';
+
+// 로딩 스피너 컴포넌트 추가
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center p-4">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+    <span className="ml-2 text-gray-500">게시글을 불러오는 중...</span>
+  </div>
+);
 
 const StudyBoard = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [notices, setNotices] = useState([]);
   const [newPost, setNewPost] = useState('');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const lastPostRef = useRef();
   const { roomId } = useParams();
+  const roomName = useSelector(selectRoomName);
 
-  const getPosts = async () => {
+  useEffect(() => {
+    if (!roomName) {
+      navigate(`/study/${roomId}`);
+    }
+  }, [roomName, navigate, roomId]);
+
+  const getPosts = async (pageNum = 0) => {
+    if (loading || (!hasMore && pageNum !== 0)) return;
+    
     try {
-      const response = await axios.get(`/api/room-board/${roomId}`);
+      setLoading(true);
+      const response = await axios.get(`/api/room-board/${roomId}?page=${pageNum}`);
       const allPosts = response.data?.content || [];
       const noticeList = allPosts.filter(post => post.notice);
       const regularPosts = allPosts.filter(post => !post.notice);
       
-      setNotices(noticeList);
-      setPosts(regularPosts);
+      if (pageNum === 0) {
+        setNotices(noticeList);
+        setPosts(regularPosts);
+      } else {
+        setPosts(prev => [...prev, ...regularPosts]);
+      }
+
+      setHasMore(!response.data.last);
+      setPage(pageNum);
     } catch (error) {
       console.error('스터디홈 게시판 목록 조회 실패: ', error);
       const errorMessage = error.response?.data?.message || '스터디홈 게시판 목록 조회 중 오류가 발생했습니다.';
       alert(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,7 +72,7 @@ const StudyBoard = () => {
       });
       setNewPost('');
       alert('게시글이 작성되었습니다.');
-      getPosts();
+      getPosts(0); // 첫 페이지부터 다시 로드
     } catch (error) {
       console.error('게시글 작성 실패: ', error);
       const errorMessage = error.response?.data?.message || '게시글 작성 중 오류가 발생했습니다.';
@@ -46,12 +80,39 @@ const StudyBoard = () => {
     }
   };
 
+  // Intersection Observer 설정
+  const observerCallback = useCallback(entries => {
+    const [entry] = entries;
+    if (entry.isIntersecting && hasMore && !loading) {
+      getPosts(page + 1);
+    }
+  }, [hasMore, loading, page]);
+
   useEffect(() => {
-    getPosts();
-  }, []);
+    const observer = new IntersectionObserver(observerCallback, {
+      root: null,
+      rootMargin: '20px',
+      threshold: 0.5,
+    });
+    
+    if (lastPostRef.current) {
+      observer.observe(lastPostRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [observerCallback]);
+
+  useEffect(() => {
+    getPosts(0);
+  }, [roomId]);
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
+    <div className="study-board max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="p-2 w-10 h-10"></div>
+        <h1 className="text-xl font-bold">{roomName}</h1>
+        <div className="w-8"></div>
+      </div>
       {/* 새 게시글 작성 섹션 */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="flex flex-col space-y-4">
@@ -82,7 +143,7 @@ const StudyBoard = () => {
             <PostDetail
               key={notice.roomBoardId}
               post={notice}
-              getPosts={getPosts}
+              getPosts={() => getPosts(0)}
             />
           ))
         ) : (
@@ -95,13 +156,22 @@ const StudyBoard = () => {
       {/* 게시글 목록 */}
       <div className="bg-white rounded-lg shadow">
         {posts && posts.length > 0 ? (
-          posts.map(post => (
-            <PostDetail
-              key={post.roomBoardId} 
-              post={post} 
-              getPosts={getPosts} 
-            />
-          ))
+          <>
+            {posts.map((post, index) => (
+              <div
+                key={post.roomBoardId}
+                ref={index === posts.length - 1 ? lastPostRef : null}
+              >
+                <PostDetail
+                  post={post}
+                  getPosts={() => getPosts(0)}
+                />
+              </div>
+            ))}
+            {loading && <LoadingSpinner />}
+          </>
+        ) : loading ? (
+          <LoadingSpinner />
         ) : (
           <div className="p-4 text-center text-gray-500">
             게시글이 없습니다.

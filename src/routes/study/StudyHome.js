@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectNickname } from 'store/memberSlice';
 import TemperatureModal from 'components/TemperatureModal';
+import { setRoomName } from 'store/roomSlice';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
@@ -28,6 +29,7 @@ const StudyHome = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
+  const dispatch = useDispatch();
 
   // ISO 8601 Duration 문자열을 분으로 변환하는 함수
   const parseDuration = (duration) => {
@@ -48,6 +50,7 @@ const StudyHome = () => {
     try {
       const response = await axios.get(`/api/room/${roomId}`);
       setRoomInfo(response.data);
+      dispatch(setRoomName(response.data.name));
       setIsValidRoom(true);
     } catch (error) {
       console.error('스터디룸 상세 정보 조회 실패: ', error);
@@ -58,7 +61,7 @@ const StudyHome = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [roomId, navigate]);
+  }, [roomId, navigate, dispatch]);
 
   const getMembers = useCallback(async () => {
     setIsUpdating(true);
@@ -468,107 +471,111 @@ const StudyHome = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-between gap-8">
-            {/* 기존 회의 버튼 섹션 */}
-            <div className="flex flex-col items-center space-y-3 flex-1">
-              {isVideoMeeting ? (
-                <>
-                  <div className="text-emerald-500 font-semibold">회의중</div>
-                  <button
-                    className="w-full max-w-md bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
-                    onClick={handleVideoMeeting}
-                  >
-                    회의 참가하기
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="text-gray-500">회의 없음</div>
-                  <button
-                    className="w-full max-w-md bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
-                    onClick={handleVideoMeeting}
-                  >
-                    화상 회의 시작하기
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* 순공시간 랭킹 섹션 */}
-            <div className="flex-1 bg-white p-6 rounded-lg shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">순공시간 랭킹</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <span className={`inline-flex items-center ${isUpdating ? 'text-emerald-500' : ''}`}>
-                    <svg 
-                      className={`w-4 h-4 mr-1 ${isUpdating ? 'animate-spin' : ''}`} 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
+          <div className="flex justify-center w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+              {/* 기존 회의 버튼 섹션 */}
+              <div className="flex flex-col items-center space-y-3">
+                {isVideoMeeting ? (
+                  <>
+                    <div className="text-emerald-500 font-semibold">회의중</div>
+                    <button
+                      className="w-full bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
+                      onClick={handleVideoMeeting}
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-                      />
-                    </svg>
-                    {isUpdating ? '업데이트 중...' : 
-                      `마지막 업데이트: ${lastUpdateTime.toLocaleTimeString()}`}
-                  </span>
-                </div>
+                      회의 참가하기
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-gray-500">회의 없음</div>
+                    <button
+                      className="w-full bg-emerald-500 text-white py-3 px-6 rounded-full hover:bg-emerald-600 transition-colors font-bold text-lg"
+                      onClick={handleVideoMeeting}
+                    >
+                      화상 회의 시작하기
+                    </button>
+                  </>
+                )}
               </div>
-              <div className="space-y-4">
-                {members.map((member, index) => (
-                  <div 
-                    key={member.nickname} 
-                    className={`flex items-center justify-between p-2 rounded-lg overflow-hidden cursor-pointer
-                      ${member.nickname === nickname ? 'bg-emerald-50' : 'hover:bg-gray-50'}`}
-                    onClick={() => handleMemberClick(member.memberId)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`font-bold w-6 ${index < 3 ? 'text-emerald-500' : ''} 
-                        ${animatingIndex === index ? 'animate-slot' : ''}`}>
-                        {index + 1}
-                      </span>
-                      <div className="relative">
-                        <img
-                          src={
-                            member.profileImageUrl
-                              ? decodeURIComponent(member.profileImageUrl)
-                              : `${process.env.PUBLIC_URL}/images/default-profile.png`
-                          }
-                          alt={member.nickname}
-                          className={`w-8 h-8 rounded-full transition-transform hover:scale-110
-                            ${animatingIndex === index ? 'animate-slot' : ''}`}
+
+              {/* 순공시간 랭킹 섹션 */}
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold truncate">순공시간 랭킹</h3>
+                  <div className="flex items-center text-sm text-gray-500 ml-2">
+                    <span className={`inline-flex items-center truncate ${isUpdating ? 'text-emerald-500' : ''}`}>
+                      <svg 
+                        className={`w-4 h-4 mr-1 flex-shrink-0 ${isUpdating ? 'animate-spin' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
                         />
-                        {index < 3 && (
-                          <span className={`absolute -top-1 -right-1 text-sm
-                            ${animatingIndex === index ? 'animate-slot' : ''}`}>
-                            {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                          </span>
-                        )}
-                      </div>
-                      <span className={`${member.nickname === nickname ? 'font-semibold' : ''}
-                        ${animatingIndex === index ? 'animate-slot' : ''}`}>
-                        {member.nickname}
+                      </svg>
+                      <span className="truncate">
+                        {isUpdating ? '업데이트 중...' : 
+                          `마지막 업데이트: ${lastUpdateTime.toLocaleTimeString()}`}
                       </span>
-                      {member.leaderLabel === '방장' && 
-                        <span className={`ml-1 transform hover:scale-110 transition-transform
-                          ${animatingIndex === index ? 'animate-slot' : ''}`}>
-                          👑
-                        </span>
-                      }
-                    </div>
-                    <div className={`flex items-center gap-2 ${animatingIndex === index ? 'animate-slot' : ''}`}>
-                      <span className={`font-semibold ${
-                        member.nickname === nickname ? 'text-emerald-600' : ''
-                      }`}>
-                        {Math.floor(member.totalStudyTime / 60)}시간 {member.totalStudyTime % 60}분
-                      </span>
-                    </div>
+                    </span>
                   </div>
-                ))}
+                </div>
+                <div className="space-y-4">
+                  {members.map((member, index) => (
+                    <div 
+                      key={member.nickname} 
+                      className={`flex items-center justify-between p-2 rounded-lg overflow-hidden cursor-pointer
+                        ${member.nickname === nickname ? 'bg-emerald-50' : 'hover:bg-gray-50'}`}
+                      onClick={() => handleMemberClick(member.memberId)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`font-bold w-6 ${index < 3 ? 'text-emerald-500' : ''} 
+                          ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                          {index + 1}
+                        </span>
+                        <div className="relative">
+                          <img
+                            src={
+                              member.profileImageUrl
+                                ? decodeURIComponent(member.profileImageUrl)
+                                : `${process.env.PUBLIC_URL}/images/default-profile.png`
+                            }
+                            alt={member.nickname}
+                            className={`w-8 h-8 rounded-full transition-transform hover:scale-110
+                              ${animatingIndex === index ? 'animate-slot' : ''}`}
+                          />
+                          {index < 3 && (
+                            <span className={`absolute -top-1 -right-1 text-sm
+                              ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                              {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                            </span>
+                          )}
+                        </div>
+                        <span className={`${member.nickname === nickname ? 'font-semibold' : ''}
+                          ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                          {member.nickname}
+                        </span>
+                        {member.leaderLabel === '방장' && 
+                          <span className={`ml-1 transform hover:scale-110 transition-transform
+                            ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                            👑
+                          </span>
+                        }
+                      </div>
+                      <div className={`flex items-center gap-2 ${animatingIndex === index ? 'animate-slot' : ''}`}>
+                        <span className={`font-semibold ${
+                          member.nickname === nickname ? 'text-emerald-600' : ''
+                        }`}>
+                          {Math.floor(member.totalStudyTime / 60)}시간 {member.totalStudyTime % 60}분
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

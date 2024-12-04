@@ -16,9 +16,11 @@ const Layout = () => {
   const hideLayout = new URLSearchParams(location.search).get('hideLayout') === 'true';
 
   return (
-    <div className={hideLayout ? '' : 'max-w-screen-lg container mx-auto p-6'}>
+    <div className="min-h-screen flex flex-col">
       {!hideLayout && <Header />}
-      <App />
+      <main className="flex-grow max-w-screen-lg container mx-auto p-6 pt-20">
+        <App />
+      </main>
       {!hideLayout && <Footer />}
     </div>
   );

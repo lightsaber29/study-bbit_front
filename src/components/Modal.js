@@ -30,7 +30,8 @@ const Modal = ({ isOpen, onClose, name, participants, detail, profileImageUrl, r
       navigate(`/study/${roomId}`);
     } catch (error) {
       console.log('error :: ', error);
-      setError(error.response?.data?.message || '입장에 실패했습니다.');
+      alert(error.response?.data?.message || '스터디룸 입장에 실패했습니다.');
+      onClose();
     }
   };
 

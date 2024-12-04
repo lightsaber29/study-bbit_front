@@ -35,19 +35,17 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="max-w-screen-lg container mx-auto p-6 pt-16">
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-            />
-          ))}
-        </Routes>
-      </Suspense>
-    </div>
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        {routes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+      </Routes>
+    </Suspense>
   );
 }
 
