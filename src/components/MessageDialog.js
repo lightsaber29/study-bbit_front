@@ -4,6 +4,7 @@ import axios from 'api/axios';
 const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
   const [replyContent, setReplyContent] = useState('');
   const [sending, setSending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,15 +28,34 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('이 메시지를 삭제하시겠습니까?')) return;
+    
+    setDeleting(true);
+    try {
+      await axios.delete(`/api/dm/${message.id}`);
+      alert('메시지가 삭제되었습니다.');
+      onClose();
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      const errorMessage = error.response?.data?.message || '메시지 삭제에 실패했습니다.';
+      alert(errorMessage);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg w-full max-w-lg mx-4">
         {/* 헤더 */}
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="font-semibold text-lg">메시지 상세</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <span className="sr-only">닫기</span>
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-100 rounded-md transition-colors duration-200"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -70,10 +90,18 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
                 rows="3"
                 placeholder="답장을 입력하세요..."
               />
-              <div className="mt-2 flex justify-end">
+              <div className="mt-2 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleting ? '삭제 중...' : '삭제하기'}
+                </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!replyContent.trim() || sending}
                 >
                   {sending ? '전송 중...' : '답장 보내기'}
