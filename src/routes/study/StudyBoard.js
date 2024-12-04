@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import PostDetail from '../../components/PostDetail';
 import axios from 'api/axios';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectRoomName } from 'store/roomSlice';
 
 // 로딩 스피너 컴포넌트 추가
 const LoadingSpinner = () => (
@@ -12,14 +14,22 @@ const LoadingSpinner = () => (
 );
 
 const StudyBoard = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [notices, setNotices] = useState([]);
   const [newPost, setNewPost] = useState('');
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const { roomId } = useParams();
   const lastPostRef = useRef();
+  const { roomId } = useParams();
+  const roomName = useSelector(selectRoomName);
+
+  useEffect(() => {
+    if (!roomName) {
+      navigate(`/study/${roomId}`);
+    }
+  }, [roomName, navigate, roomId]);
 
   const getPosts = async (pageNum = 0) => {
     if (loading || (!hasMore && pageNum !== 0)) return;
@@ -97,7 +107,12 @@ const StudyBoard = () => {
   }, [roomId]);
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
+    <div className="study-board max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="p-2 w-10 h-10"></div>
+        <h1 className="text-xl font-bold">{roomName}</h1>
+        <div className="w-8"></div>
+      </div>
       {/* 새 게시글 작성 섹션 */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="flex flex-col space-y-4">

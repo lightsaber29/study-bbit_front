@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'api/axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectNickname } from 'store/memberSlice';
 import TemperatureModal from 'components/TemperatureModal';
+import { setRoomName } from 'store/roomSlice';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
@@ -28,6 +29,7 @@ const StudyHome = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
+  const dispatch = useDispatch();
 
   // ISO 8601 Duration 문자열을 분으로 변환하는 함수
   const parseDuration = (duration) => {
@@ -48,6 +50,7 @@ const StudyHome = () => {
     try {
       const response = await axios.get(`/api/room/${roomId}`);
       setRoomInfo(response.data);
+      dispatch(setRoomName(response.data.name));
       setIsValidRoom(true);
     } catch (error) {
       console.error('스터디룸 상세 정보 조회 실패: ', error);
@@ -58,7 +61,7 @@ const StudyHome = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [roomId, navigate]);
+  }, [roomId, navigate, dispatch]);
 
   const getMembers = useCallback(async () => {
     setIsUpdating(true);

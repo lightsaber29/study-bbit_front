@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectNickname } from 'store/memberSlice';
 import axios from 'api/axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Pagination  from 'components/Pagination';
-
+import { selectRoomName } from 'store/roomSlice';
 
 const StudyFiles = () => {
   const nickname = useSelector(selectNickname);
+  const roomName = useSelector(selectRoomName);
   const fileInputRef = React.useRef(null);
   const [files, setFiles] = useState([]);
   const { roomId } = useParams();
@@ -26,6 +27,14 @@ const StudyFiles = () => {
   const itemsPerPage = 5;
 
   const [isLoading, setIsLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!roomName) {
+      navigate(`/study/${roomId}`);
+    }
+  }, [roomName, navigate, roomId]);
 
   const handleClick = () => {
     fileInputRef.current.click();
@@ -320,6 +329,11 @@ const StudyFiles = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="p-2 w-10 h-10"></div>
+        <h1 className="text-xl font-bold">{roomName}</h1>
+        <div className="w-8"></div>
+      </div>
       {/* 검색바와 버튼들 */}
       <div className="flex gap-4 mb-6">
         <div className="flex-1">

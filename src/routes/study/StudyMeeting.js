@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import axios from 'api/axios';
 import Pagination  from 'components/Pagination'; //'../../components/Pagination'
 import MeetingTranscriptsList from 'components/MeetingTranscriptsList';
+import { useSelector } from 'react-redux';
+import { selectRoomName } from 'store/roomSlice';
 
 const StudyMeeting = () => {
+  const navigate = useNavigate();
   const { roomId } = useParams();
+  const roomName = useSelector(selectRoomName);
   const [transcripts, setTranscripts] = useState([]);
   const [openMeetingId, setOpenMeetingId] = useState(null);
   const [markdownContent, setMarkdownContent] = useState({});
@@ -19,6 +23,12 @@ const StudyMeeting = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!roomName) {
+      navigate(`/study/${roomId}`);
+    }
+  }, [roomName, navigate, roomId]);
 
   const handleDelete = async (deletedId) => {
     setIsLoading(true);
@@ -133,6 +143,11 @@ const StudyMeeting = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="p-2 w-10 h-10"></div>
+        <h1 className="text-xl font-bold">{roomName}</h1>
+        <div className="w-8"></div>
+      </div>
       <MeetingTranscriptsList
         transcripts={getCurrentPageTranscripts()}
         openMeetingId={openMeetingId}
