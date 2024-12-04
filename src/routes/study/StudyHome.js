@@ -20,7 +20,6 @@ const StudyHome = () => {
   const [isLeader, setIsLeader] = useState(false);
   const [isVideoMeeting, setIsVideoMeeting] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
-  const [refreshInterval, setRefreshInterval] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
   const [animatingIndex, setAnimatingIndex] = useState(-1);
@@ -64,6 +63,8 @@ const StudyHome = () => {
   }, [roomId, navigate, dispatch]);
 
   const getMembers = useCallback(async () => {
+    if (!roomId) return;
+
     setIsUpdating(true);
     try {
       const response = await axios.get(`/api/room/member/${roomId}`);
@@ -106,28 +107,17 @@ const StudyHome = () => {
       }
       setIsUpdating(false);
     }
-  }, [roomId, nickname]);
+  }, [roomId, nickname]); // 의존성을 최소화
 
   // 주기적 업데이트를 위한 useEffect
   useEffect(() => {
-    // 초기 데이터 로드
+    if (!roomId) return;
+
     getMembers();
+    const interval = setInterval(getMembers, 60000);
 
-    // 1분마다 데이터 갱신
-    const interval = setInterval(() => {
-      getMembers();
-    }, 60000); // 60초 = 1분
-    // }, 10000); // 10초
-
-    setRefreshInterval(interval);
-
-    // 컴포넌트 언마운트 시 인터벌 정리
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [getMembers]);
+    return () => clearInterval(interval);
+  }, [getMembers, roomId]);
 
   const checkVideoMeeting = useCallback(async () => {
     try {
