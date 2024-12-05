@@ -6,6 +6,7 @@ import { ChatCloseIcon } from "@livekit/components-react";
 import { ScheduleWidgetState, ScheduleAction } from '../../types/types';
 import { useParticipants } from '@livekit/components-react';
 import { useParams } from 'react-router-dom';
+import { formatDateTime } from 'utils/dateUtil';
 
 export interface CustomScheduleProps extends React.HTMLAttributes<HTMLDivElement> {
   scheduleState: ScheduleWidgetState;
@@ -17,14 +18,47 @@ interface RoomMember {
   nickname: string;
   joinTime: string;
   isLeader?: boolean;
-  status?: 'ON_TIME' | 'LATE' | 'ABSENCE' | null;
+  profileImageUrl: string;
+  status?: 'ON_TIME' | 'LATE' | 'ABSENCE' | 'NOTED' | null;
+  notedDetail?: string;
 }
+
+interface Schedule {
+  scheduleId: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface AttendanceData {
+  memberId: number;
+  memberNickname: string;
+  participateStatus: 'ON_TIME' | 'LATE' | 'ABSENCE' | 'NOTED';
+  notedDetail?: string;
+  flowTemperature?: number;
+}
+
+interface AttendanceSubmitData {
+  scheduleId: number;
+  members: {
+    memberId: number;
+    status: 'ON_TIME' | 'LATE' | 'ABSENCE' | 'NOTED';
+  }[];
+}
+
+const formatTime = (timeString: string) => {
+  const [hours, minutes] = timeString.split(':');
+  return `${parseInt(hours)}시 ${parseInt(minutes)}분`;
+};
 
 export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: CustomScheduleProps) {
   const { roomId } = useParams<{ roomId: string }>();
   const participants = useParticipants();
   const ulRef = React.useRef<HTMLUListElement>(null);
   const [roomMembers, setRoomMembers] = useState<RoomMember[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+  const [attendanceMembers, setAttendanceMembers] = useState<RoomMember[]>([]);
 
   const getRoomMembers = async () => {
     try {
@@ -38,18 +72,45 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
     }
   };
 
+  const getSchedules = async () => {
+    const today = formatDateTime(new Date(), 'YYYY-MM-DD');
+    try {
+      const response = await axios.get(`/api/schedule/${roomId}/daily?date=${today}`);
+      console.log('일정 목록 조회 성공', response.data);
+      setSchedules(response.data);
+    } catch (error) {
+      console.error('일정 목록 조회 실패');
+    }
+  };
+
+  const getAttendance = async (scheduleId: number) => {
+    try {
+      const response = await axios.get(`/api/schedule/member/${scheduleId}`);
+      console.log('출석 정보 조회 성공', response.data);
+      const attendanceData: AttendanceData[] = response.data?.content;
+      
+      // 기존 멤버 정보와 출석 정보를 합침
+      const updatedMembers = roomMembers.map(member => ({
+        ...member,
+        status: attendanceData.find((data) => data.memberId === member.memberId)?.participateStatus || null,
+        notedDetail: attendanceData.find((data) => data.memberId === member.memberId)?.notedDetail
+      }));
+      setRoomMembers(updatedMembers);
+    } catch (error) {
+      console.error('출석 정보 조회 실패');
+    }
+  };
+
   useEffect(() => {
     if (scheduleState.showSchedule) {
+      getSchedules();
       getRoomMembers();
-      const interval = setInterval(getRoomMembers, 30000);
-      return () => clearInterval(interval);
     }
   }, [scheduleState.showSchedule]);
 
-  const handleStatusChange = async (memberId: number, status: 'ON_TIME' | 'LATE' | 'ABSENCE') => {
+  const handleStatusChange = async (memberId: number, status: 'ON_TIME' | 'LATE' | 'ABSENCE' | 'NOTED') => {
     try {
-      console.log(`Member ${memberId} status changed to ${status}`);
-      
+      // API 호출 로직 추가 필요
       setRoomMembers(prevMembers => 
         prevMembers.map(member => 
           member.memberId === memberId 
@@ -60,6 +121,44 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
     } catch (error) {
       console.error('상태 변경 실패:', error);
     }
+  };
+
+  const handleSubmitAttendance = async () => {
+    if (!selectedScheduleId) {
+      alert('선택된 일정이 없습니다.');
+      return;
+    }
+
+    try {
+      const submitData: AttendanceSubmitData = {
+        scheduleId: selectedScheduleId,
+        members: roomMembers
+          .filter(member => member.status) // status가 있는 멤버만 필터링
+          .map(member => ({
+            memberId: member.memberId,
+            status: member.status!
+          }))
+      };
+
+      console.log('출석부 제출 데이터', submitData);
+
+      await axios.post('/api/schedule/member', submitData);
+      alert('출석부가 제출되었습니다.');
+    } catch (error: any) {
+      console.error('출석부 제출 실패:', error);
+      alert(error.response?.data?.message || '출석부 제출에 실패했습니다.');
+    }
+  };
+
+  const handleScheduleSelect = (schedule: Schedule) => {
+    setSelectedScheduleId(schedule.scheduleId);
+    // 모든 멤버의 status를 null로 초기화
+    // setAttendanceMembers(roomMembers.map(member => ({
+    //   ...member,
+    //   status: null
+    // })));
+    // 선택된 일정의 출석 정보 조회
+    getAttendance(schedule.scheduleId);
   };
 
   return (
@@ -85,11 +184,89 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
         </CustomScheduleToggle>
       </div>
       
+      {/* 일정 목록 섹션 */}
+      <div style={{
+        padding: '1rem',
+        borderBottom: '1px solid var(--lk-border-color)',
+        backgroundColor: '#1a1a1a'
+      }}>
+        <h4 style={{ 
+          margin: '0 0 1rem 0',
+          fontSize: '1.1rem',
+          fontWeight: 600,
+          color: '#ffffff'
+        }}>오늘의 일정</h4>
+        
+        <div style={{
+          maxHeight: '30vh',
+          overflowY: 'auto',
+        }}>
+          {schedules.length > 0 ? (
+            <ul style={{ 
+              listStyle: 'none', 
+              padding: 0, 
+              margin: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              {schedules.map((schedule) => (
+                <li
+                  key={schedule.scheduleId}
+                  className="schedule-item"
+                  onClick={() => handleScheduleSelect(schedule)}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    backgroundColor: selectedScheduleId === schedule.scheduleId ? '#2d3748' : '#262626',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                    transition: 'all 0.2s ease',
+                    border: '1px solid #404040',
+                  }}
+                >
+                  <div style={{
+                    fontWeight: 600,
+                    marginBottom: '0.5rem',
+                    color: '#ffffff'
+                  }}>{schedule.title}</div>
+                  <div style={{ 
+                    fontSize: '0.9em', 
+                    color: '#a0aec0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                    {formatTime(schedule.startTime)} ~ {formatTime(schedule.endTime)}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{
+              padding: '1rem',
+              textAlign: 'center',
+              color: '#a0aec0',
+              backgroundColor: '#262626',
+              borderRadius: '8px',
+              border: '1px dashed #404040'
+            }}>
+              오늘 예정된 일정이 없습니다
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 기존 스터디원 목록 */}
       <ul 
         className="lk-list lk-schedule-participants" 
         ref={ulRef}
         style={{
-          height: 'calc(100vh - 250px)',
+          height: 'calc(100vh - 310px)',
           overflowY: 'auto',
           scrollbarWidth: 'thin',
           scrollbarColor: '#CBD5E0 #EDF2F7',
@@ -107,8 +284,8 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
           fontWeight: 600,
           position: 'sticky',
           top: 0,
-          backgroundColor: 'black',
-          color: 'white',
+          backgroundColor: '#1a1a1a',
+          color: '#ffffff',
           zIndex: 1
         }}>
           <span>스터디원 목록</span>
@@ -126,29 +303,41 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
               padding: '0.75rem 1rem',
               borderBottom: '1px solid var(--lk-border-color)',
               alignItems: 'center',
-              backgroundColor: 'var(--lk-bg)',
+              backgroundColor: '#262626',
+              color: '#ffffff',
               transition: 'background-color 0.2s'
             }}
           >
             <span style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '0.5rem' 
+              gap: '0.5rem',
+              minWidth: 0
             }}>
               <img 
-                src={`${process.env.PUBLIC_URL}/images/default-profile.png`}
+                src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
                 alt="Profile"
                 style={{
                   width: '24px',
                   height: '24px',
-                  borderRadius: '50%'
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  flexShrink: 0
                 }}
               />
-              {member.nickname}
+              <span style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flex: 1
+              }}>
+                {member.nickname}
+              </span>
               {member.isLeader && (
                 <span style={{ 
-                  color: 'gold',
-                  marginLeft: '4px'
+                  color: 'gold', 
+                  marginLeft: '4px',
+                  flexShrink: 0
                 }}>👑</span>
               )}
             </span>
@@ -156,7 +345,6 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
               <input 
                 type="radio" 
                 name={`status-${member.memberId}`}
-                value="ON_TIME"
                 checked={member.status === 'ON_TIME'}
                 onChange={() => handleStatusChange(member.memberId, 'ON_TIME')}
                 style={{ width: '20px', height: '20px' }}
@@ -166,7 +354,6 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
               <input 
                 type="radio" 
                 name={`status-${member.memberId}`}
-                value="LATE"
                 checked={member.status === 'LATE'}
                 onChange={() => handleStatusChange(member.memberId, 'LATE')}
                 style={{ width: '20px', height: '20px' }}
@@ -176,8 +363,7 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
               <input 
                 type="radio" 
                 name={`status-${member.memberId}`}
-                value="ABSENCE"
-                checked={member.status === 'ABSENCE'}
+                checked={member.status === 'ABSENCE' || member.status === 'NOTED'}
                 onChange={() => handleStatusChange(member.memberId, 'ABSENCE')}
                 style={{ width: '20px', height: '20px' }}
               />
@@ -185,6 +371,31 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
           </li>
         ))}
       </ul>
+
+      {/* 제출 버튼 */}
+      <div style={{
+        padding: '1rem',
+        borderTop: '1px solid var(--lk-border-color)',
+        backgroundColor: '#262626',
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        <button
+          onClick={handleSubmitAttendance}
+          style={{
+            backgroundColor: '#3182ce',
+            color: 'white',
+            padding: '0.5rem 2rem',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: '600'
+          }}
+        >
+          출석부 제출
+        </button>
+      </div>
     </div>
   );
 } 
