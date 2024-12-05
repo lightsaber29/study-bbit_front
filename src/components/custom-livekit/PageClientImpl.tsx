@@ -170,8 +170,8 @@ export function PageClientImpl(props: {
           >
             <CustomVideoConference
               chatMessageFormatter={formatChatMessageLinks}
-              // SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
-              SettingsComponent={SettingsMenu}
+              SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
+              // SettingsComponent={SettingsMenu}
             />
             <DebugMode />
             <RecordingIndicator />
