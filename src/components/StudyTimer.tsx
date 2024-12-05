@@ -54,12 +54,12 @@ export const StudyTimer = () => {
       flexDirection: 'column', 
       alignItems: 'center',
       gap: '5px',
-      marginTop: '-30px'
+      // marginTop: '-30px'
     }}>
       <span style={{ 
         fontSize: '1rem', 
         fontWeight: '600',
-        color: '#333',
+        color: '#ffffff',
         marginBottom: '2px'
       }}>
         공부시간 측정
@@ -83,13 +83,13 @@ export const StudyTimer = () => {
           style={{
             padding: '6px 16px',
             borderRadius: '20px',
-            backgroundColor: isRunning ? '#FF9800' : '#4CAF50',
+            backgroundColor: isRunning ? '#FF9800' : '#3182ce',
             color: 'white',
             border: 'none',
             cursor: 'pointer',
             fontSize: '0.9rem',
             fontWeight: '500',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
           }}
         >
           {isRunning ? '중지' : '시작'}
@@ -97,7 +97,7 @@ export const StudyTimer = () => {
         <span style={{ 
           fontSize: '1.5rem',
           fontWeight: 'bold',
-          color: '#333',
+          color: '#ffffff',
           marginLeft: '20px'
         }}>
           {formatTime(time)}

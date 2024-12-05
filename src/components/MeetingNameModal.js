@@ -22,19 +22,19 @@ export const MeetingNameModal = ({ isOpen, onClose, onSave, meetingId, socketRef
   
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 shadow-lg w-96">
-          <h2 className="text-xl font-bold mb-4">회의록 설정</h2>
+        <div className="bg-[#262626] rounded-lg p-6 shadow-lg w-96">
+          <h2 className="text-xl font-bold mb-4 text-white">회의록 설정</h2>
           <input
             type="text"
             value={meetingName}
             onChange={(e) => setMeetingName(e.target.value)}
-            className="w-full p-2 border rounded mb-4"
+            className="w-full p-2 border border-[#404040] rounded mb-4 bg-[#1a1a1a] text-white placeholder-gray-400"
             placeholder="회의록 이름을 입력하세요"
           />
           <select
             value={meetingMode}
             onChange={(e) => setMeetingMode(e.target.value)}
-            className="w-full p-2 border rounded mb-4"
+            className="w-full p-2 border border-[#404040] rounded mb-4 bg-[#1a1a1a] text-white"
           >
             <option value="basic">기본 모드</option>
             <option value="interview">면접 모드</option>
@@ -43,13 +43,13 @@ export const MeetingNameModal = ({ isOpen, onClose, onSave, meetingId, socketRef
           <div className="flex justify-end space-x-2">
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              className="px-4 py-2 bg-[#404040] text-white rounded hover:bg-[#4a4a4a]"
             >
               취소
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-4 py-2 bg-[#3182ce] text-white rounded hover:bg-[#2c5282]"
             >
               저장
             </button>
