@@ -265,69 +265,69 @@ const MeetingTranscription = ({ meetingId, userId }) => {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-      
-        <MeetingHeader 
-          isRecording={isRecording}
-          isOnline={isOnline}
-          isHost={isHost}
-          isMikeOn={isMikeOn}
-          transcripts={transcripts}
-          onStartRecording={startRecording}
-          onStopRecording={stopRecording}
-          onEndMeeting={endMeeting}
-          onToggleMike={handleToggleMike}
-        />
-      
-
-        <StatusIndicator 
-          isOnline={isOnline}
-          isRecording={isRecording}
-          recognitionStatus={recognitionStatus}
-        />
-
-        <div ref={scrollRef} className="h-96 overflow-y-auto border rounded-lg p-4 bg-gray-50 space-y-1">
-          <TranscriptList
+      <div className="bg-[#262626] rounded-lg shadow-lg p-6">
+        <div className="bg-[#1a1a1a] rounded-lg p-4">
+          <MeetingHeader 
+            isRecording={isRecording}
+            isOnline={isOnline}
+            isHost={isHost}
+            isMikeOn={isMikeOn}
             transcripts={transcripts}
-            currentTranscript={currentTranscript}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+            onEndMeeting={endMeeting}
+            onToggleMike={handleToggleMike}
           />
+
+          <StatusIndicator 
+            isOnline={isOnline}
+            isRecording={isRecording}
+            recognitionStatus={recognitionStatus}
+          />
+
+          <div ref={scrollRef} className="h-96 overflow-y-auto border border-[#404040] rounded-lg p-4 bg-[#1a1a1a] space-y-1">
+            <TranscriptList
+              transcripts={transcripts}
+              currentTranscript={currentTranscript}
+            />
+          </div>
         </div>
+        
+        {isResettingTranscripts && <LoadingOverlay />}
+
+        {!isHost && isSaving && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-[#262626] rounded-lg p-6 shadow-lg text-white">
+              <div className="flex items-center space-x-3">
+                <svg className="animate-spin h-5 w-5 text-[#3182ce]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p className="text-lg">회의록을 저장하는 중입니다...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showStatusModal && !isSaving && statusMessage && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-[#262626] rounded-lg p-6 shadow-lg text-white">
+              <div className="flex items-center space-x-3">
+                {statusMessage.includes('저장되었습니다') ? (
+                  <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                )}
+                <p className="text-lg">{statusMessage}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      
-      {isResettingTranscripts && <LoadingOverlay />}
-
-      {!isHost && isSaving && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            <div className="flex items-center space-x-3">
-              <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <p className="text-lg">회의록을 저장하는 중입니다...</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showStatusModal && !isSaving && statusMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            <div className="flex items-center space-x-3">
-              {statusMessage.includes('저장되었습니다') ? (
-                <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
-                </svg>
-              ) : (
-                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              )}
-              <p className="text-lg">{statusMessage}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {isHost && showNameModal && (
         <MeetingNameModal 

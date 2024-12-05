@@ -143,8 +143,6 @@ export function PageClientImpl(props: {
 
   return (
     <main style={{ height: '100%' }} data-lk-theme="default">
-    {/* <main style={{ height: '100%' }} data-lk-theme="custom"> */}
-    {/* <main style={{ height: '100%' }}> */}
       {connectionDetails === undefined || preJoinChoices === undefined ? (
         <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
           <CustomPreJoin
@@ -156,7 +154,6 @@ export function PageClientImpl(props: {
       ) : (
         <div>
           <LiveKitRoom
-            // data-lk-theme="custom"
             connect={e2eeSetupComplete}
             room={room}
             token={connectionDetails.participantToken}
@@ -176,7 +173,7 @@ export function PageClientImpl(props: {
             <DebugMode />
             <RecordingIndicator />
           </LiveKitRoom>
-          <div style={{ margin: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ margin: '20px 40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
             {/* <span>공부시간 측정</span> */}
             <StudyTimer />
             <TimerSocket />

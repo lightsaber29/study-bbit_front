@@ -222,10 +222,11 @@ const TimerSocket = () => {
         >
           <div
             style={{
-              backgroundColor: 'white',
+              backgroundColor: '#262626',
               padding: '20px',
               borderRadius: '10px',
               textAlign: 'center',
+              color: '#ffffff'
             }}
           >
             {isTimeUp ? (
@@ -275,14 +276,15 @@ const TimerSocket = () => {
                             textAlign: 'center',
                             padding: '5px',
                             borderRadius: '4px',
-                            border: '1px solid #ddd',
+                            border: '1px solid #404040',
                             fontSize: '2rem',
-                            backgroundColor: '#f4f7fa',
+                            backgroundColor: '#1a1a1a',
+                            color: '#ffffff',
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#4CAF50')}
-                          onBlur={(e) => (e.target.style.borderColor = '#ddd')}
+                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>시</span>
                       </div>
@@ -319,14 +321,15 @@ const TimerSocket = () => {
                             textAlign: 'center',
                             padding: '5px',
                             borderRadius: '4px',
-                            border: '1px solid #ddd',
+                            border: '1px solid #404040',
                             fontSize: '2rem',
-                            backgroundColor: '#f4f7fa',
+                            backgroundColor: '#1a1a1a',
+                            color: '#ffffff',
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#4CAF50')}
-                          onBlur={(e) => (e.target.style.borderColor = '#ddd')}
+                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>분</span>
                       </div>
@@ -363,14 +366,15 @@ const TimerSocket = () => {
                             textAlign: 'center',
                             padding: '5px',
                             borderRadius: '4px',
-                            border: '1px solid #ddd',
+                            border: '1px solid #404040',
                             fontSize: '2rem',
-                            backgroundColor: '#f4f7fa',
+                            backgroundColor: '#1a1a1a',
+                            color: '#ffffff',
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#4CAF50')}
-                          onBlur={(e) => (e.target.style.borderColor = '#ddd')}
+                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>초</span>
                       </div>
@@ -423,13 +427,13 @@ const TimerSocket = () => {
                 style={{
                   padding: '8px 16px',
                   borderRadius: '20px',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: '#3182ce',
                   color: 'white',
                   border: 'none',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: '500',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
                 }}
               >
                 타이머 설정
@@ -527,9 +531,9 @@ const TimerSocket = () => {
                 maxValue={maxTime}
                 text={formatTime(time)}
                 styles={buildStyles({
-                  pathColor: timerOn ? '#4CAF50' : '#FF9800',
-                  textColor: '#000',
-                  trailColor: '#d6d6d6',
+                  pathColor: timerOn ? '#3182ce' : '#FF9800',
+                  textColor: '#ffffff',
+                  trailColor: '#404040',
                   rotation: 0,
                 })}
               />
