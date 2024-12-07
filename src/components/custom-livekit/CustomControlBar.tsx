@@ -13,8 +13,10 @@ import { mergeProps } from './custom-addon/utils.ts';
 import { StartMediaButton } from '@livekit/components-react';
 import { CustomSettingsMenuToggle } from './CustomSettingsMenuToggle.tsx'
 import { NotesIcon } from './icons/NotesIcon.tsx';
-import { CustomScheduleToggle } from './CustomScheduleToggle';
-import { ScheduleAction } from '../../types/types';
+import { CustomWidgetState } from '../../types/types';
+import { CustomScheduleToggle } from './CustomScheduleToggle.tsx';
+import { TabAction } from '../../hooks/useTabToggle';
+import { CustomChatToggle } from './CustomChatToggle';
 
 /** @public */
 export type CustomControlBarControls = {
@@ -39,11 +41,13 @@ export interface CustomControlBarProps extends React.HTMLAttributes<HTMLDivEleme
    * @alpha
    */
   saveUserChoices?: boolean;
-  onScheduleToggle?: React.Dispatch<ScheduleAction>;
+  scheduleState?: CustomWidgetState;
+  onScheduleToggle?: () => void;
+  onTabToggle?: (action: TabAction) => void;
 }
 
 /**
- * The `ControlBar` prefab gives the user the basic user interface to control their
+ * The `ControlBar prefab gives the user the basic user interface to control their
  * media devices (camera, microphone and screen share), open the `Chat` and leave the room.
  *
  * @remarks
@@ -63,17 +67,13 @@ export function CustomControlBar({
   controls,
   saveUserChoices = true,
   onDeviceError,
-  onScheduleToggle,
+  scheduleState,
+  onTabToggle,
   ...props
 }: CustomControlBarProps) {
-  const [isChatOpen, setIsChatOpen] = React.useState(false);
+  console.log('CustomControlBar render, scheduleState:', scheduleState);
   const layoutContext = useMaybeLayoutContext();
-  React.useEffect(() => {
-    if (layoutContext?.widget.state?.showChat !== undefined) {
-      setIsChatOpen(layoutContext?.widget.state?.showChat);
-    }
-  }, [layoutContext?.widget.state?.showChat]);
-  const isTooLittleSpace = useMediaQuery(`(max-width: ${isChatOpen ? 1000 : 760}px)`);
+  const isTooLittleSpace = useMediaQuery(`(max-width: ${scheduleState?.showChat ? 1000 : 760}px)`);
 
   const defaultVariation = isTooLittleSpace ? 'minimal' : 'verbose';
   variation ??= defaultVariation;
@@ -185,19 +185,25 @@ export function CustomControlBar({
         </TrackToggle>
       )}
       {visibleControls.chat && (
-        <ChatToggle>
+        <CustomChatToggle 
+          onChatToggle={() => onTabToggle?.({ type: 'TOGGLE_CHAT' })}
+          chatState={scheduleState}
+        >
           {showIcon && <ChatIcon />}
           {showText && '채팅'}
-        </ChatToggle>
+        </CustomChatToggle>
       )}
       {visibleControls.schedule && (
-        <CustomScheduleToggle onScheduleToggle={onScheduleToggle}>
+        <CustomScheduleToggle 
+          onScheduleToggle={() => onTabToggle?.({ type: 'TOGGLE_SCHEDULE' })}
+          scheduleState={scheduleState}
+        >
           {showIcon && <NotesIcon />}
           {showText && '출석부'}
         </CustomScheduleToggle>
       )}
       {visibleControls.settings && (
-        <CustomSettingsMenuToggle>
+        <CustomSettingsMenuToggle onToggle={() => onTabToggle?.({ type: 'TOGGLE_SETTINGS' })}>
           {showIcon && <GearIcon />}
           {showText && 'Settings'}
         </CustomSettingsMenuToggle>

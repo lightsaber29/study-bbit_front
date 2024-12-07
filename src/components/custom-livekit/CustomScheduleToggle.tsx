@@ -1,21 +1,27 @@
 import * as React from 'react';
-import { mergeProps } from './custom-addon/utils';
-import { ScheduleAction } from '../../types/types';
+import { CustomWidgetState } from '../../types/types';
+import { useTabToggle } from '../../hooks/useTabToggle';
 
-export interface CustomScheduleToggleProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children?: React.ReactNode;
-  onScheduleToggle?: React.Dispatch<ScheduleAction>;
+interface CustomScheduleToggleProps extends React.HTMLAttributes<HTMLButtonElement> {
+  onScheduleToggle?: () => void;
+  scheduleState?: CustomWidgetState;
 }
 
-export function CustomScheduleToggle({ children, onScheduleToggle, ...props }: CustomScheduleToggleProps) {
-  const buttonProps = React.useMemo(() => {
-    return mergeProps(props, {
-      className: 'lk-button',
-      onClick: () => {
-        onScheduleToggle?.({ type: 'TOGGLE_SCHEDULE' });
-      },
-    });
-  }, [onScheduleToggle, props]);
+export function CustomScheduleToggle({ 
+  onScheduleToggle,
+  scheduleState,
+  children 
+}: CustomScheduleToggleProps) {
+  const { mergedProps } = useTabToggle({
+    props: {},
+    onToggle: () => onScheduleToggle?.(),
+    isActive: scheduleState?.showSchedule ?? false,
+    tabType: 'schedule'
+  });
 
-  return <button {...buttonProps}>{children}</button>;
+  return (
+    <button {...mergedProps as React.ButtonHTMLAttributes<HTMLButtonElement>}>
+      {children}
+    </button>
+  );
 } 

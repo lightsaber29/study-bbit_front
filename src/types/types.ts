@@ -1,5 +1,6 @@
 import { LocalAudioTrack, LocalVideoTrack, videoCodecs } from 'livekit-client';
 import { VideoCodec } from 'livekit-client';
+import type { WidgetState as LiveKitWidgetState } from '@livekit/components-core';
 
 export interface SessionProps {
   roomName: string;
@@ -27,14 +28,20 @@ export type ConnectionDetails = {
   participantToken: string;
 };
 
-export type ScheduleWidgetState = {
+export type WidgetAction = 
+  // 토글 액션
+  | { msg: 'toggle_chat' }
+  | { msg: 'toggle_settings' }
+  | { msg: 'toggle_schedule' }
+  // 직접 상태 설정 액션
+  | { msg: 'set_chat'; show: boolean }
+  | { msg: 'set_settings'; show: boolean }
+  | { msg: 'set_schedule'; show: boolean }
+  // 기타 액션
+  | { msg: 'unread_msg'; count: number };
+export interface CustomWidgetState extends LiveKitWidgetState {
+  showChat: boolean;
+  unreadMessages: number;
+  showSettings: boolean;
   showSchedule: boolean;
-  showSettings?: boolean;
-};
-
-export type ScheduleAction = {
-  type: 'TOGGLE_SCHEDULE';
-} | {
-  type: 'SET_SCHEDULE';
-  show: boolean;
-};
+}

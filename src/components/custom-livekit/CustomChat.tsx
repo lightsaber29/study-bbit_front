@@ -11,6 +11,7 @@ import { ChatCloseIcon } from "@livekit/components-react";
 /** @public */
 export interface ChatProps extends React.HTMLAttributes<HTMLDivElement>, ChatOptions {
   messageFormatter?: MessageFormatter;
+  isOpen?: boolean;
 }
 
 /**
@@ -30,6 +31,7 @@ export function CustomChat({
   messageDecoder,
   messageEncoder,
   channelTopic,
+  isOpen,
   ...props
 }: ChatProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -86,11 +88,9 @@ export function CustomChat({
   }, [chatMessages, layoutContext?.widget]);
 
   return (
-    <div {...props} className="lk-chat" style={{ 
-      width: '30vw',
-      height: '100%',
-      display: layoutContext?.widget.state?.showChat ? 'flex' : 'none',
-      flexDirection: 'column'
+    <div {...props} className="lk-chat" style={{
+      ...props.style,
+      display: isOpen ? 'block' : 'none'
     }}>
       <div className="lk-chat-header">
         <ChatToggle className="lk-close-button">

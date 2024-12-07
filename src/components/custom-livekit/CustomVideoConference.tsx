@@ -20,12 +20,14 @@ import type {
   } from '@livekit/components-react';
   import { useCreateLayoutContext } from '@livekit/components-react';
   import { usePinnedTracks, useTracks } from '@livekit/components-react';
-  //import { Chat } from '@livekit/components-react';
   import { CustomChat } from './CustomChat.tsx';
   import { CustomControlBar } from './CustomControlBar.tsx';
-  //import { useWarnAboutMissingStyles } from '../hooks/useWarnAboutMissingStyles';
-  import { ScheduleAction, ScheduleWidgetState } from '../../types/types.ts';
-import { CustomSchedule } from './CustomSchedule.tsx';
+  import { CustomSchedule } from './CustomSchedule.tsx';
+  import { DefaultRightPanel } from './DefaultRightPanel.tsx';
+  import { CustomWidgetState } from '../../types/types';
+  import { WidgetAction } from '../../types/types.ts';
+  import { CustomLayoutContextProvider } from './CustomLayoutContextProvider';
+  import { TabAction } from '../../hooks/useTabToggle';
 
   /**
    * @public
@@ -63,15 +65,15 @@ import { CustomSchedule } from './CustomSchedule.tsx';
     SettingsComponent,
     ...props
   }: CustomVideoConferenceProps) {
-    const [widgetState, setWidgetState] = React.useState<WidgetState>({
+    const [widgetState, setWidgetState] = React.useState<CustomWidgetState>({
       showChat: false,
+      showSettings: false,
       unreadMessages: 0,
-      showSettings: false,
-    });
-    const [scheduleWidgetState, setScheduleWidgetState] = React.useState<ScheduleWidgetState>({
       showSchedule: false,
-      showSettings: false,
     });
+
+    const [activePanel, setActivePanel] = React.useState<'default' | 'chat' | 'schedule'>('default');
+  
     const lastAutoFocusedScreenShareTrack = React.useRef<TrackReferenceOrPlaceholder | null>(null);
   
     const tracks = useTracks(
@@ -82,18 +84,50 @@ import { CustomSchedule } from './CustomSchedule.tsx';
       { updateOnlyOn: [RoomEvent.ActiveSpeakersChanged], onlySubscribed: false },
     );
   
-    const widgetUpdate = (state: WidgetState) => {
-      log.debug('updating widget state', state);
-      setWidgetState(state);
+    const widgetUpdate = React.useCallback((action: CustomWidgetState | WidgetAction) => {
+      console.log('Widget Update called with:', action);
+      console.log('Widget Update - Current State:', widgetState);
+      console.log('Widget Update - Action:', action);
       
-      // 'toggle_schedule' 메시지 처리
-      if ('msg' in state && state.msg === 'toggle_schedule') {
-        setScheduleWidgetState(prevState => ({
-          ...prevState,
-          showSchedule: !prevState.showSchedule
-        }));
+      if ('msg' in action) {
+        switch (action.msg) {
+          case 'toggle_chat':
+            setWidgetState(prev => ({
+              ...prev,
+              showChat: !prev.showChat,
+              showSchedule: false,
+              unreadMessages: 0
+            }));
+            setActivePanel(prev => prev === 'chat' ? 'default' : 'chat');
+            break;
+
+          case 'toggle_schedule':
+            setWidgetState(prev => ({
+              ...prev,
+              showSchedule: !prev.showSchedule,
+              showChat: false
+            }));
+            setActivePanel(prev => prev === 'schedule' ? 'default' : 'schedule');
+            break;
+
+          case 'toggle_settings':
+            setWidgetState(prev => ({
+              ...prev,
+              showSettings: !prev.showSettings
+            }));
+            break;
+
+          case 'unread_msg':
+            setWidgetState(prev => ({
+              ...prev,
+              unreadMessages: action.count
+            }));
+            break;
+        }
+      } else {
+        setWidgetState(action);
       }
-    };
+    }, []);
   
     const layoutContext = useCreateLayoutContext();
   
@@ -143,60 +177,93 @@ import { CustomSchedule } from './CustomSchedule.tsx';
       tracks,
     ]);
   
-    //useWarnAboutMissingStyles();
   
-    const handleScheduleChange = React.useCallback((action: ScheduleAction) => {
-      if (action.type === 'TOGGLE_SCHEDULE') {
-        setScheduleWidgetState(prev => ({
-          ...prev,
-          showSchedule: !prev.showSchedule
-        }));
+    // activePanel 상태 변화 모니터링
+    React.useEffect(() => {
+      console.log('Active panel changed:', activePanel);
+    }, [activePanel]);
+  
+    const handleTabToggle = React.useCallback((action: TabAction) => {
+      console.log('Tab Toggle - Action:', action);
+      console.log('Tab Toggle - Current Widget State:', widgetState);
+      switch (action.type) {
+        case 'TOGGLE_CHAT':
+          widgetUpdate({ msg: 'toggle_chat' });
+          break;
+        case 'TOGGLE_SCHEDULE':
+          widgetUpdate({ msg: 'toggle_schedule' });
+          break;
+        case 'TOGGLE_SETTINGS':
+          widgetUpdate({ msg: 'toggle_settings' });
+          break;
       }
-    }, []);
+    }, [widgetUpdate]);
   
     return (
-      // <div data-theme="huddle" className="lk-video-conference" {...props}>
       <div className="lk-video-conference" {...props}>
         {isWeb() && (
-          <LayoutContextProvider
+          <CustomLayoutContextProvider
             value={layoutContext}
-            // onPinChange={handleFocusStateChange}
             onWidgetChange={widgetUpdate}
           >
-            <div className="lk-video-conference-inner">
-              {!focusTrack ? (
-                <div className="lk-grid-layout-wrapper">
-                  <GridLayout tracks={tracks}>
-                    <ParticipantTile />
-                  </GridLayout>
-                </div>
-              ) : (
-                <div className="lk-focus-layout-wrapper">
-                  <FocusLayoutContainer>
-                    <CarouselLayout tracks={carouselTracks}>
+            <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+              {/* 좌측 비디오 영역 */}
+              <div className="lk-video-conference-inner" style={{ flex: 1 }}>
+                {!focusTrack ? (
+                  <div className="lk-grid-layout-wrapper">
+                    <GridLayout tracks={tracks}>
                       <ParticipantTile />
-                    </CarouselLayout>
-                    {focusTrack && <FocusLayout trackRef={focusTrack} />}
-                  </FocusLayoutContainer>
-                </div>
-              )}
-              <CustomControlBar controls={{
-                chat: true,
-                settings: !!SettingsComponent,
-                schedule: true,
-              }} onScheduleToggle={handleScheduleChange} />
+                    </GridLayout>
+                  </div>
+                ) : (
+                  <div className="lk-focus-layout-wrapper">
+                    <FocusLayoutContainer>
+                      <CarouselLayout tracks={carouselTracks}>
+                        <ParticipantTile />
+                      </CarouselLayout>
+                      {focusTrack && <FocusLayout trackRef={focusTrack} />}
+                    </FocusLayoutContainer>
+                  </div>
+                )}
+                <CustomControlBar 
+                  controls={{
+                    chat: true,
+                    settings: !!SettingsComponent,
+                    schedule: true,
+                  }} 
+                  scheduleState={widgetState}
+                  onTabToggle={handleTabToggle}
+                />
+              </div>
+
+              {/* 우측 패널 영역 */}
+              <div style={{ width: '30vw', position: 'relative' }}>
+                <DefaultRightPanel 
+                  style={{ 
+                    display: activePanel === 'default' ? 'block' : 'none',
+                    height: '100%'
+                  }} 
+                />
+                <CustomChat
+                  style={{ 
+                    display: activePanel === 'chat' ? 'block' : 'none',
+                    height: '100%'
+                  }}
+                  messageFormatter={chatMessageFormatter}
+                  messageEncoder={chatMessageEncoder}
+                  messageDecoder={chatMessageDecoder}
+                  isOpen={activePanel === 'chat'}
+                />
+                <CustomSchedule 
+                  scheduleState={widgetState}
+                  style={{ 
+                    display: activePanel === 'schedule' ? 'block' : 'none',
+                    height: '100%'
+                  }}
+                />
+              </div>
             </div>
-            <CustomChat
-              style={{ display: widgetState.showChat ? 'grid' : 'none' }}
-              messageFormatter={chatMessageFormatter}
-              messageEncoder={chatMessageEncoder}
-              messageDecoder={chatMessageDecoder}
-            />
-            <CustomSchedule 
-              scheduleState={scheduleWidgetState}
-              onScheduleChange={handleScheduleChange}
-              style={{ display: scheduleWidgetState.showSchedule ? 'block' : 'none' }}
-            />
+
             {SettingsComponent && (
               <div
                 className="lk-settings-menu-modal"
@@ -205,7 +272,7 @@ import { CustomSchedule } from './CustomSchedule.tsx';
                 <SettingsComponent />
               </div>
             )}
-          </LayoutContextProvider>
+          </CustomLayoutContextProvider>
         )}
         <RoomAudioRenderer />
         <ConnectionStateToast />
