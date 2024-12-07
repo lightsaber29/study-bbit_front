@@ -16,6 +16,7 @@ import { CustomWidgetState } from '../../types/types';
 import { CustomScheduleToggle } from './CustomScheduleToggle.tsx';
 import { TabAction } from '../../hooks/useTabToggle';
 import { CustomChatToggle } from './CustomChatToggle';
+import { CustomMeetingMinutesToggle } from './CustomMeetingMinutesToggle.tsx';
 
 /** @public */
 export type CustomControlBarControls = {
@@ -26,6 +27,7 @@ export type CustomControlBarControls = {
   leave?: boolean;
   settings?: boolean;
   schedule?: boolean;
+  minutes?: boolean;
 };
 
 /** @public */
@@ -77,7 +79,7 @@ export function CustomControlBar({
   const defaultVariation = isTooLittleSpace ? 'minimal' : 'verbose';
   variation ??= defaultVariation;
 
-  const visibleControls = { leave: true, schedule: true, ...controls };
+  const visibleControls = { leave: true, schedule: true, minutes: true, ...controls };
 
   const localPermissions = useLocalParticipantPermissions();
 
@@ -200,6 +202,15 @@ export function CustomControlBar({
           {showIcon && <NotesIcon />}
           {showText && '출석부'}
         </CustomScheduleToggle>
+      )}
+      {visibleControls.minutes && (
+        <CustomMeetingMinutesToggle 
+          onMinutesToggle={() => onTabToggle?.({ type: 'TOGGLE_MINUTES' })}
+          scheduleState={scheduleState}
+        >
+          {showIcon && <NotesIcon />}
+          {showText && '회의록'}
+        </CustomMeetingMinutesToggle>
       )}
       {/* {visibleControls.settings && (
         <CustomSettingsMenuToggle onToggle={() => onTabToggle?.({ type: 'TOGGLE_SETTINGS' })}>

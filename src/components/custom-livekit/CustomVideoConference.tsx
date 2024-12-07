@@ -28,6 +28,7 @@ import type {
   import { WidgetAction } from '../../types/types.ts';
   import { CustomLayoutContextProvider } from './CustomLayoutContextProvider';
   import { TabAction } from '../../hooks/useTabToggle';
+  import { CustomMeetingMinutes } from './CustomMeetingMinutes.tsx';
 
   /**
    * @public
@@ -70,9 +71,10 @@ import type {
       showSettings: false,
       unreadMessages: 0,
       showSchedule: false,
+      showMeetingMinutes: false,
     });
 
-    const [activePanel, setActivePanel] = React.useState<'default' | 'chat' | 'schedule'>('default');
+    const [activePanel, setActivePanel] = React.useState<'default' | 'chat' | 'schedule' | 'minutes'>('default');
   
     const lastAutoFocusedScreenShareTrack = React.useRef<TrackReferenceOrPlaceholder | null>(null);
   
@@ -96,6 +98,7 @@ import type {
               ...prev,
               showChat: !prev.showChat,
               showSchedule: false,
+              showMeetingMinutes: false,
               unreadMessages: 0
             }));
             setActivePanel(prev => prev === 'chat' ? 'default' : 'chat');
@@ -105,7 +108,8 @@ import type {
             setWidgetState(prev => ({
               ...prev,
               showSchedule: !prev.showSchedule,
-              showChat: false
+              showChat: false,
+              showMeetingMinutes: false
             }));
             setActivePanel(prev => prev === 'schedule' ? 'default' : 'schedule');
             break;
@@ -113,7 +117,10 @@ import type {
           case 'toggle_settings':
             setWidgetState(prev => ({
               ...prev,
-              showSettings: !prev.showSettings
+              showSettings: !prev.showSettings,
+              showChat: false,
+              showSchedule: false,
+              showMeetingMinutes: false
             }));
             break;
 
@@ -122,6 +129,16 @@ import type {
               ...prev,
               unreadMessages: action.count
             }));
+            break;
+
+          case 'toggle_minutes':
+            setWidgetState(prev => ({
+              ...prev,
+              showMeetingMinutes: !prev.showMeetingMinutes,
+              showChat: false,
+              showSchedule: false
+            }));
+            setActivePanel(prev => prev === 'minutes' ? 'default' : 'minutes');
             break;
         }
       } else {
@@ -196,6 +213,9 @@ import type {
         case 'TOGGLE_SETTINGS':
           widgetUpdate({ msg: 'toggle_settings' });
           break;
+        case 'TOGGLE_MINUTES':
+          widgetUpdate({ msg: 'toggle_minutes' });
+          break;
       }
     }, [widgetUpdate]);
   
@@ -258,6 +278,13 @@ import type {
                   scheduleState={widgetState}
                   style={{ 
                     display: activePanel === 'schedule' ? 'block' : 'none',
+                    height: '100%'
+                  }}
+                />
+                <CustomMeetingMinutes 
+                  scheduleState={widgetState}
+                  style={{ 
+                    display: activePanel === 'minutes' ? 'block' : 'none',
                     height: '100%'
                   }}
                 />

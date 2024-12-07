@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 export type TabAction = {
-  type: 'TOGGLE_CHAT' | 'TOGGLE_SCHEDULE' | 'TOGGLE_SETTINGS';
+  type: 'TOGGLE_CHAT' | 'TOGGLE_SCHEDULE' | 'TOGGLE_SETTINGS' | 'TOGGLE_MINUTES';
 };
 
 export interface UseTabToggleProps {
   props: React.ButtonHTMLAttributes<HTMLButtonElement>;
   onToggle?: React.Dispatch<TabAction>;
   isActive?: boolean;
-  tabType: 'chat' | 'schedule' | 'settings';
+  tabType: 'chat' | 'schedule' | 'settings' | 'minutes';
 }
 
 export function useTabToggle({ props, onToggle, isActive, tabType }: UseTabToggleProps) {

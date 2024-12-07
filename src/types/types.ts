@@ -33,10 +33,12 @@ export type WidgetAction =
   | { msg: 'toggle_chat' }
   | { msg: 'toggle_settings' }
   | { msg: 'toggle_schedule' }
+  | { msg: 'toggle_minutes' }
   // 직접 상태 설정 액션
   | { msg: 'set_chat'; show: boolean }
   | { msg: 'set_settings'; show: boolean }
   | { msg: 'set_schedule'; show: boolean }
+  | { msg: 'set_minutes'; show: boolean }
   // 기타 액션
   | { msg: 'unread_msg'; count: number };
 export interface CustomWidgetState extends LiveKitWidgetState {
@@ -44,4 +46,5 @@ export interface CustomWidgetState extends LiveKitWidgetState {
   unreadMessages: number;
   showSettings: boolean;
   showSchedule: boolean;
+  showMeetingMinutes: boolean;
 }
