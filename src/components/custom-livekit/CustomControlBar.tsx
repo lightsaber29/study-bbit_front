@@ -136,6 +136,14 @@ export function CustomControlBar({
     [saveVideoInputEnabled],
   );
 
+  const handleDisconnect = React.useCallback(() => {
+    const shouldSave = window.confirm('순공시간을 저장하시겠습니까?');
+    if (shouldSave) {
+      console.log('순공시간 저장');
+    }
+    return true;
+  }, []);
+
   return (
     <div {...htmlProps}>
       {visibleControls.microphone && (
@@ -219,7 +227,7 @@ export function CustomControlBar({
         </CustomSettingsMenuToggle>
       )} */}
       {visibleControls.leave && (
-        <DisconnectButton>
+        <DisconnectButton onClick={handleDisconnect} stopTracks={true}>
           {showIcon && <LeaveIcon />}
           {showText && '나가기'}
         </DisconnectButton>
