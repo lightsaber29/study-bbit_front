@@ -8,8 +8,6 @@ import {
   formatChatMessageLinks,
   LiveKitRoom,
   LocalUserChoices,
-  PreJoin,
-  VideoConference,
 } from '@livekit/components-react';
 import axios from 'api/axios';
 
@@ -24,13 +22,11 @@ import {
   // DeviceUnsupportedError,
   RoomConnectOptions,
 } from 'livekit-client';
-import '@livekit/components-styles'
 import MeetingMinutes from '../../routes/study/MeetingMinutes.js';
 import { StudyTimer } from '../StudyTimer.tsx';
 import TimerSocket from '../TimerSocket.js';
 
-// const CONN_DETAILS_ENDPOINT = process.env.REACT_APP_CONN_DETAILS_ENDPOINT ?? '/api/express/connection-details';
-const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'true';
+const SHOW_SETTINGS_MENU = process.env.REACT_APP_SHOW_SETTINGS_MENU === 'false';
 
 export function PageClientImpl(props: {
   roomName: string;
@@ -38,6 +34,8 @@ export function PageClientImpl(props: {
   hq: boolean;
   codec: VideoCodec;
   nickname: string;
+  memberId: string;
+  profileImageUrl: string;
 }) {
   const [preJoinChoices, setPreJoinChoices] = useState<LocalUserChoices | undefined>(undefined);
   const preJoinDefaults = useMemo(() => {
@@ -51,28 +49,19 @@ export function PageClientImpl(props: {
 
   const handlePreJoinSubmit = useCallback(async (values: LocalUserChoices) => {
     setPreJoinChoices(values);
-    // @@로컬용
-    //const url = new URL(CONN_DETAILS_ENDPOINT, "http://localhost:6081");
-
-    // @@배포용
-    // const url = new URL(CONN_DETAILS_ENDPOINT, "https://node.studybbit.site");
-    
-    // url.searchParams.append('roomName', props.roomName);
-    // url.searchParams.append('participantName', values.username);
-    // if (props.region) {
-    //   url.searchParams.append('region', props.region);
-    // }
 
     const params = new URLSearchParams({
       roomName: props.roomName,
       participantName: values.username,
+      metadata: JSON.stringify({
+        memberId: props.memberId,
+        profileImageUrl: props.profileImageUrl,
+      })
     });
     if (props.region) {
       params.append('region', props.region);
     }
 
-    // const connectionDetailsResp = await fetch(url.toString());
-    // const connectionDetailsData = await connectionDetailsResp.json();
     const { data: connectionDetailsData } = await axios.get(
       `/api/express/connection-details?${params.toString()}`
     );
@@ -174,7 +163,6 @@ export function PageClientImpl(props: {
             <RecordingIndicator />
           </LiveKitRoom>
           <div style={{ margin: '20px 40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {/* <span>공부시간 측정</span> */}
             <StudyTimer />
             <TimerSocket />
           </div>

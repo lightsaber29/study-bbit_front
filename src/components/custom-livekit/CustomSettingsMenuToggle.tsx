@@ -2,7 +2,9 @@ import * as React from 'react';
 import { useSettingsToggle } from './custom-addon/useSettingsToggle.ts';
 
 /** @alpha */
-export interface CustomSettingsMenuToggleProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+export interface CustomSettingsMenuToggleProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  onToggle?: () => void;
+}
 
 /**
  * The `SettingsMenuToggle` component is a button that toggles the visibility of the `SettingsMenu` component.

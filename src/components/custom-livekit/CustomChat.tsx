@@ -11,6 +11,7 @@ import { ChatCloseIcon } from "@livekit/components-react";
 /** @public */
 export interface ChatProps extends React.HTMLAttributes<HTMLDivElement>, ChatOptions {
   messageFormatter?: MessageFormatter;
+  isOpen?: boolean;
 }
 
 /**
@@ -30,6 +31,7 @@ export function CustomChat({
   messageDecoder,
   messageEncoder,
   channelTopic,
+  isOpen,
   ...props
 }: ChatProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -86,67 +88,137 @@ export function CustomChat({
   }, [chatMessages, layoutContext?.widget]);
 
   return (
-    <div {...props} className="lk-chat" style={{ 
-      width: '30vw',
+    <div {...props} className="lk-chat" style={{
+      ...props.style,
+      display: isOpen ? 'block' : 'none',
       height: '100%',
-      display: layoutContext?.widget.state?.showChat ? 'flex' : 'none',
-      flexDirection: 'column'
+      overflow: 'hidden',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
     }}>
-      <div className="lk-chat-header">
-        <ChatToggle className="lk-close-button">
-          <ChatCloseIcon />
-        </ChatToggle>
-      </div>
+      <div style={{ 
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#1a1a1a',
+        borderLeft: '1px solid var(--lk-border-color)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          padding: '1rem',
+          borderBottom: '1px solid var(--lk-border-color)',
+          backgroundColor: '#1a1a1a',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h3 style={{ margin: 0, fontWeight: 600 }}>채팅</h3>
+        </div>
 
-      <ul 
-        className="lk-list lk-chat-messages" 
-        ref={ulRef}
-        style={{
-          height: 'calc(100vh - 250px)',
-          overflowY: 'auto',
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#CBD5E0 #EDF2F7',
+        <div style={{ 
+          flex: 1,
           width: '100%',
-        }}
-      >
-        {props.children
-          ? chatMessages.map((msg, idx) =>
-              cloneSingleChild(props.children, {
-                entry: msg,
-                key: msg.id ?? idx,
-                messageFormatter,
-              }),
-            )
-          : chatMessages.map((msg, idx, allMsg) => {
-              const hideName = idx >= 1 && allMsg[idx - 1].from === msg.from;
-              const hideTimestamp = idx >= 1 && msg.timestamp - allMsg[idx - 1].timestamp < 60_000;
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: 0,
+        }}>
+          <ul 
+            className="lk-list lk-chat-messages" 
+            ref={ulRef}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              width: '100%',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#CBD5E0 #EDF2F7',
+              padding: '1rem',
+              margin: 0,
+              listStyle: 'none',
+            }}
+          >
+            {props.children
+              ? chatMessages.map((msg, idx) =>
+                  cloneSingleChild(props.children, {
+                    entry: msg,
+                    key: msg.id ?? idx,
+                    messageFormatter,
+                  }),
+                )
+              : chatMessages.map((msg, idx, allMsg) => {
+                  const hideName = idx >= 1 && allMsg[idx - 1].from === msg.from;
+                  const hideTimestamp = idx >= 1 && msg.timestamp - allMsg[idx - 1].timestamp < 60_000;
 
-              return (
-                <ChatEntry
-                  key={msg.id ?? idx}
-                  hideName={hideName}
-                  hideTimestamp={hideName === false ? false : hideTimestamp}
-                  entry={msg}
-                  messageFormatter={messageFormatter}
-                />
-              );
-            })}
-      </ul>
-      <form className="lk-chat-form" onSubmit={handleSubmit}>
-        <input
-          className="lk-form-control lk-chat-form-input"
-          disabled={isSending}
-          ref={inputRef}
-          type="text"
-          placeholder="메시지 입력..."
-          onInput={(ev) => ev.stopPropagation()}
-          onKeyDown={(ev) => ev.stopPropagation()}
-          onKeyUp={(ev) => ev.stopPropagation()}
-        />
-        <button type="submit" className="lk-button lk-chat-form-button" disabled={isSending}>
-          보내기
-        </button>
-      </form>
+                  return (
+                    <ChatEntry
+                      key={msg.id ?? idx}
+                      hideName={hideName}
+                      hideTimestamp={hideName === false ? false : hideTimestamp}
+                      entry={msg}
+                      messageFormatter={messageFormatter}
+                    />
+                  );
+                })}
+          </ul>
+        </div>
+
+        <form 
+          className="lk-chat-form" 
+          onSubmit={handleSubmit}
+          style={{
+            padding: '1rem',
+            borderTop: '1px solid var(--lk-border-color)',
+            backgroundColor: '#262626',
+            display: 'flex',
+            gap: '0.5rem',
+            flexShrink: 0,
+          }}
+        >
+          <input
+            className="lk-form-control lk-chat-form-input"
+            disabled={isSending}
+            ref={inputRef}
+            type="text"
+            placeholder="메시지 입력..."
+            onInput={(ev) => ev.stopPropagation()}
+            onKeyDown={(ev) => ev.stopPropagation()}
+            onKeyUp={(ev) => ev.stopPropagation()}
+            style={{
+              flex: 1,
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid var(--lk-border-color)',
+              backgroundColor: '#1a1a1a',
+              color: 'white',
+            }}
+          />
+          <button 
+            type="submit" 
+            className="lk-button lk-chat-form-button" 
+            disabled={isSending}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              backgroundColor: '#3182ce',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            보내기
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

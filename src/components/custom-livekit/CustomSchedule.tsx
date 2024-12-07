@@ -1,16 +1,15 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'api/axios';
-import { CustomScheduleToggle } from './CustomScheduleToggle';
+import { CustomScheduleToggle } from './CustomScheduleToggle.tsx';
 import { ChatCloseIcon } from "@livekit/components-react";
-import { ScheduleWidgetState, ScheduleAction } from '../../types/types';
+import { CustomWidgetState } from '../../types/types';
 import { useParticipants } from '@livekit/components-react';
 import { useParams } from 'react-router-dom';
 import { formatDateTime } from 'utils/dateUtil';
 
 export interface CustomScheduleProps extends React.HTMLAttributes<HTMLDivElement> {
-  scheduleState: ScheduleWidgetState;
-  onScheduleChange: React.Dispatch<ScheduleAction>;
+  scheduleState: CustomWidgetState;
 }
 
 interface RoomMember {
@@ -51,13 +50,14 @@ const formatTime = (timeString: string) => {
   return `${parseInt(hours)}시 ${parseInt(minutes)}분`;
 };
 
-export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: CustomScheduleProps) {
+export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps) {
   const { roomId } = useParams<{ roomId: string }>();
   const participants = useParticipants();
   const ulRef = React.useRef<HTMLUListElement>(null);
   const [roomMembers, setRoomMembers] = useState<RoomMember[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+  const [showAttendance, setShowAttendance] = useState<boolean>(false);
 
   const getRoomMembers = async () => {
     try {
@@ -102,6 +102,7 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
 
   useEffect(() => {
     if (scheduleState.showSchedule) {
+      console.log('Schedule panel opened, fetching data...');
       getSchedules();
       getRoomMembers();
     }
@@ -150,262 +151,267 @@ export function CustomSchedule({ scheduleState, onScheduleChange, ...props }: Cu
   };
 
   const handleScheduleSelect = (schedule: Schedule) => {
-    setSelectedScheduleId(schedule.scheduleId);
-    // 모든 멤버의 status를 null로 초기화
-    // setAttendanceMembers(roomMembers.map(member => ({
-    //   ...member,
-    //   status: null
-    // })));
-    // 선택된 일정의 출석 정보 조회
-    getAttendance(schedule.scheduleId);
+    if (selectedScheduleId === schedule.scheduleId) {
+      // 같은 일정을 다시 클릭하면 출석부를 닫음
+      setSelectedScheduleId(null);
+      setShowAttendance(false);
+    } else {
+      // 새로운 일정을 선택하면 출석부를 열고 출석 정보를 가져옴
+      setSelectedScheduleId(schedule.scheduleId);
+      setShowAttendance(true);
+      getAttendance(schedule.scheduleId);
+    }
   };
 
   return (
-    <div {...props} className="lk-schedule" style={{ 
-      width: '30vw',
-      height: '100%',
-      display: scheduleState.showSchedule ? 'flex' : 'none',
-      flexDirection: 'column'
+    <div {...props} className="lk-schedule" style={{
+      ...props.style,  // 부모로부터 받은 스타일 (display 포함)
+      height: '100%',  // 기존 높이 유지
     }}>
-      <div className="lk-schedule-header" style={{
-        padding: '1rem',
-        borderBottom: '1px solid var(--lk-border-color)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h3 style={{ margin: 0, fontWeight: 600 }}>출석부</h3>
-        <CustomScheduleToggle 
-          className="lk-close-button"
-          onScheduleToggle={onScheduleChange}
-        >
-          <ChatCloseIcon />
-        </CustomScheduleToggle>
-      </div>
-      
       <div style={{ 
-        display: 'flex', 
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
-        height: '100%',  // 전체 높이를 채우도록
-        maxHeight: 'calc(100vh - 64px)'  // 헤더 높이만큼 제외
+        backgroundColor: '#1a1a1a',
+        borderLeft: '1px solid var(--lk-border-color)',
       }}>
-        {/* 일정 목록 섹션 */}
         <div style={{
           padding: '1rem',
           borderBottom: '1px solid var(--lk-border-color)',
           backgroundColor: '#1a1a1a',
-          height: '50%',  // 전체 높이의 30%만 사용
-          overflowY: 'auto'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          <h4 style={{ 
-            margin: '0 0 1rem 0',
-            fontSize: '1.1rem',
-            fontWeight: 600,
-            color: '#ffffff'
-          }}>오늘의 일정</h4>
-          
+          <h3 style={{ margin: 0, fontWeight: 600 }}>출석부</h3>
+        </div>
+        
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          height: '100%',  // 전체 높이를 채우도록
+          maxHeight: 'calc(100vh - 64px)'  // 헤더 높이만큼 제외
+        }}>
+          {/* 일정 목록 섹션 */}
           <div style={{
-            maxHeight: '30vh',
-            overflowY: 'auto',
+            padding: '1rem',
+            borderBottom: showAttendance ? '1px solid var(--lk-border-color)' : 'none',
+            backgroundColor: '#1a1a1a',
+            height: showAttendance ? '50%' : '100%',  // 출석부가 보일 때만 높이 조정
+            overflowY: 'auto'
           }}>
-            {schedules.length > 0 ? (
-              <ul style={{ 
-                listStyle: 'none', 
-                padding: 0, 
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem'
-              }}>
-                {schedules.map((schedule) => (
-                  <li
-                    key={schedule.scheduleId}
-                    className="schedule-item"
-                    onClick={() => handleScheduleSelect(schedule)}
+            <h4 style={{ 
+              margin: '0 0 1rem 0',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              color: '#ffffff'
+            }}>오늘의 일정</h4>
+            
+            <div style={{
+              maxHeight: '30vh',
+              overflowY: 'auto',
+            }}>
+              {schedules.length > 0 ? (
+                <ul style={{ 
+                  listStyle: 'none', 
+                  padding: 0, 
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  {schedules.map((schedule) => (
+                    <li
+                      key={schedule.scheduleId}
+                      className="schedule-item"
+                      onClick={() => handleScheduleSelect(schedule)}
+                      style={{
+                        padding: '0.75rem 1rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        backgroundColor: selectedScheduleId === schedule.scheduleId ? '#2d3748' : '#262626',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                        transition: 'all 0.2s ease',
+                        border: '1px solid #404040',
+                      }}
+                    >
+                      <div style={{
+                        fontWeight: 600,
+                        marginBottom: '0.5rem',
+                        color: '#ffffff'
+                      }}>{schedule.title}</div>
+                      <div style={{ 
+                        fontSize: '0.9em', 
+                        color: '#a0aec0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 6v6l4 2"/>
+                        </svg>
+                        {formatTime(schedule.startTime)} ~ {formatTime(schedule.endTime)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{
+                  padding: '1rem',
+                  textAlign: 'center',
+                  color: '#a0aec0',
+                  backgroundColor: '#262626',
+                  borderRadius: '8px',
+                  border: '1px dashed #404040'
+                }}>
+                  오늘 예정된 일정이 없습니다
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 스터디원 목록 - 조건부 렌더링 */}
+          {showAttendance && (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              <ul 
+                className="lk-list lk-schedule-participants" 
+                ref={ulRef}
+                style={{
+                  flex: 1,  // 버튼을 제외한 공간 채우기
+                  overflowY: 'auto',
+                  margin: 0,
+                  padding: 0,
+                  listStyle: 'none'
+                }}
+              >
+                <li className="lk-schedule-participant-header" style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr repeat(3, 1fr)',
+                  padding: '0.75rem 1rem',
+                  borderBottom: '1px solid var(--lk-border-color)',
+                  fontWeight: 600,
+                  position: 'sticky',
+                  top: 0,
+                  backgroundColor: '#1a1a1a',
+                  color: '#ffffff',
+                  zIndex: 1
+                }}>
+                  <span>스터디원 목록</span>
+                  <span style={{ textAlign: 'center' }}>출석</span>
+                  <span style={{ textAlign: 'center' }}>지각</span>
+                  <span style={{ textAlign: 'center' }}>결석</span>
+                </li>
+                {roomMembers.map((member) => (
+                  <li 
+                    key={member.memberId} 
+                    className="lk-schedule-participant-item"
                     style={{
+                      display: 'grid',
+                      gridTemplateColumns: '2fr 1fr 1fr 1fr',
                       padding: '0.75rem 1rem',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      backgroundColor: selectedScheduleId === schedule.scheduleId ? '#2d3748' : '#262626',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      transition: 'all 0.2s ease',
-                      border: '1px solid #404040',
+                      borderBottom: '1px solid var(--lk-border-color)',
+                      alignItems: 'center',
+                      backgroundColor: '#262626',
+                      color: '#ffffff',
+                      transition: 'background-color 0.2s'
                     }}
                   >
-                    <div style={{
-                      fontWeight: 600,
-                      marginBottom: '0.5rem',
-                      color: '#ffffff'
-                    }}>{schedule.title}</div>
-                    <div style={{ 
-                      fontSize: '0.9em', 
-                      color: '#a0aec0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem'
+                    <span style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      minWidth: 0
                     }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v6l4 2"/>
-                      </svg>
-                      {formatTime(schedule.startTime)} ~ {formatTime(schedule.endTime)}
-                    </div>
+                      <img 
+                        src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
+                        alt="Profile"
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        flex: 1
+                      }}>
+                        {member.nickname}
+                      </span>
+                      {member.isLeader && (
+                        <span style={{ 
+                          color: 'gold', 
+                          marginLeft: '4px',
+                          flexShrink: 0
+                        }}>👑</span>
+                      )}
+                    </span>
+                    <span style={{ textAlign: 'center' }}>
+                      <input 
+                        type="radio" 
+                        name={`status-${member.memberId}`}
+                        checked={member.status === 'ON_TIME'}
+                        onChange={() => handleStatusChange(member.memberId, 'ON_TIME')}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                    </span>
+                    <span style={{ textAlign: 'center' }}>
+                      <input 
+                        type="radio" 
+                        name={`status-${member.memberId}`}
+                        checked={member.status === 'LATE'}
+                        onChange={() => handleStatusChange(member.memberId, 'LATE')}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                    </span>
+                    <span style={{ textAlign: 'center' }}>
+                      <input 
+                        type="radio" 
+                        name={`status-${member.memberId}`}
+                        checked={member.status === 'ABSENCE' || member.status === 'NOTED'}
+                        onChange={() => handleStatusChange(member.memberId, 'ABSENCE')}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                    </span>
                   </li>
                 ))}
               </ul>
-            ) : (
+
+              {/* 제출 버튼 */}
               <div style={{
                 padding: '1rem',
-                textAlign: 'center',
-                color: '#a0aec0',
+                borderTop: '1px solid var(--lk-border-color)',
                 backgroundColor: '#262626',
-                borderRadius: '8px',
-                border: '1px dashed #404040'
+                display: 'flex',
+                justifyContent: 'center'
               }}>
-                오늘 예정된 일정이 없습니다
+                <button
+                  onClick={handleSubmitAttendance}
+                  style={{
+                    backgroundColor: '#3182ce',
+                    color: 'white',
+                    padding: '0.5rem 2rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  출석부 제출
+                </button>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* 스터디원 목록 */}
-        <div style={{
-          flex: 1,  // 남은 공간 채우기
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'  // 내부 스크롤을 위해 필요
-        }}>
-          <ul 
-            className="lk-list lk-schedule-participants" 
-            ref={ulRef}
-            style={{
-              flex: 1,  // 버튼을 제외한 공간 채우기
-              overflowY: 'auto',
-              margin: 0,
-              padding: 0,
-              listStyle: 'none'
-            }}
-          >
-            <li className="lk-schedule-participant-header" style={{
-              display: 'grid',
-              gridTemplateColumns: '2fr repeat(3, 1fr)',
-              padding: '0.75rem 1rem',
-              borderBottom: '1px solid var(--lk-border-color)',
-              fontWeight: 600,
-              position: 'sticky',
-              top: 0,
-              backgroundColor: '#1a1a1a',
-              color: '#ffffff',
-              zIndex: 1
-            }}>
-              <span>스터디원 목록</span>
-              <span style={{ textAlign: 'center' }}>출석</span>
-              <span style={{ textAlign: 'center' }}>지각</span>
-              <span style={{ textAlign: 'center' }}>결석</span>
-            </li>
-            {roomMembers.map((member) => (
-              <li 
-                key={member.memberId} 
-                className="lk-schedule-participant-item"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                  padding: '0.75rem 1rem',
-                  borderBottom: '1px solid var(--lk-border-color)',
-                  alignItems: 'center',
-                  backgroundColor: '#262626',
-                  color: '#ffffff',
-                  transition: 'background-color 0.2s'
-                }}
-              >
-                <span style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem',
-                  minWidth: 0
-                }}>
-                  <img 
-                    src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
-                    alt="Profile"
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      backgroundColor: 'white',
-                      flexShrink: 0
-                    }}
-                  />
-                  <span style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    flex: 1
-                  }}>
-                    {member.nickname}
-                  </span>
-                  {member.isLeader && (
-                    <span style={{ 
-                      color: 'gold', 
-                      marginLeft: '4px',
-                      flexShrink: 0
-                    }}>👑</span>
-                  )}
-                </span>
-                <span style={{ textAlign: 'center' }}>
-                  <input 
-                    type="radio" 
-                    name={`status-${member.memberId}`}
-                    checked={member.status === 'ON_TIME'}
-                    onChange={() => handleStatusChange(member.memberId, 'ON_TIME')}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                </span>
-                <span style={{ textAlign: 'center' }}>
-                  <input 
-                    type="radio" 
-                    name={`status-${member.memberId}`}
-                    checked={member.status === 'LATE'}
-                    onChange={() => handleStatusChange(member.memberId, 'LATE')}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                </span>
-                <span style={{ textAlign: 'center' }}>
-                  <input 
-                    type="radio" 
-                    name={`status-${member.memberId}`}
-                    checked={member.status === 'ABSENCE' || member.status === 'NOTED'}
-                    onChange={() => handleStatusChange(member.memberId, 'ABSENCE')}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                </span>
-              </li>
-            ))}
-          </ul>
-
-          {/* 제출 버튼 */}
-          <div style={{
-            padding: '1rem',
-            borderTop: '1px solid var(--lk-border-color)',
-            backgroundColor: '#262626',
-            display: 'flex',
-            justifyContent: 'center'
-          }}>
-            <button
-              onClick={handleSubmitAttendance}
-              style={{
-                backgroundColor: '#3182ce',
-                color: 'white',
-                padding: '0.5rem 2rem',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '600'
-              }}
-            >
-              출석부 제출
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
