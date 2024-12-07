@@ -34,6 +34,8 @@ export function PageClientImpl(props: {
   hq: boolean;
   codec: VideoCodec;
   nickname: string;
+  memberId: string;
+  profileImageUrl: string;
 }) {
   const [preJoinChoices, setPreJoinChoices] = useState<LocalUserChoices | undefined>(undefined);
   const preJoinDefaults = useMemo(() => {
@@ -51,6 +53,10 @@ export function PageClientImpl(props: {
     const params = new URLSearchParams({
       roomName: props.roomName,
       participantName: values.username,
+      metadata: JSON.stringify({
+        memberId: props.memberId,
+        profileImageUrl: props.profileImageUrl,
+      })
     });
     if (props.region) {
       params.append('region', props.region);

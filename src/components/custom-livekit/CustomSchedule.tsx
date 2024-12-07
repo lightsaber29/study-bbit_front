@@ -172,7 +172,7 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
         backgroundColor: '#1a1a1a',
         borderLeft: '1px solid var(--lk-border-color)',
       }}>
-        <div className="lk-schedule-header" style={{
+        <div style={{
           padding: '1rem',
           borderBottom: '1px solid var(--lk-border-color)',
           backgroundColor: '#1a1a1a',
@@ -181,11 +181,6 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
           alignItems: 'center'
         }}>
           <h3 style={{ margin: 0, fontWeight: 600 }}>출석부</h3>
-          <CustomScheduleToggle 
-            className="lk-close-button"
-          >
-            <ChatCloseIcon />
-          </CustomScheduleToggle>
         </div>
         
         <div style={{ 

@@ -110,17 +110,15 @@ export function CustomChat({
         position: 'relative',
         overflow: 'hidden',
       }}>
-        <div className="lk-chat-header" style={{
+        <div style={{
           padding: '1rem',
           borderBottom: '1px solid var(--lk-border-color)',
           backgroundColor: '#1a1a1a',
           display: 'flex',
-          justifyContent: 'flex-end',
-          flexShrink: 0,
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          <ChatToggle className="lk-close-button">
-            <ChatCloseIcon />
-          </ChatToggle>
+          <h3 style={{ margin: 0, fontWeight: 600 }}>채팅</h3>
         </div>
 
         <div style={{ 

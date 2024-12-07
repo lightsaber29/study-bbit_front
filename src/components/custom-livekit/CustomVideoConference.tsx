@@ -237,7 +237,7 @@ import type {
               </div>
 
               {/* 우측 패널 영역 */}
-              <div style={{ width: '30vw', position: 'relative' }}>
+              <div className="right-panel-container" style={{ width: '30vw', position: 'relative' }} key="right-panel">
                 <DefaultRightPanel 
                   style={{ 
                     display: activePanel === 'default' ? 'block' : 'none',
