@@ -148,16 +148,31 @@ const MeetingTranscriptsList = ({
     }
   };
 
-  const handleDownload = (content, filename) => {
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}.md`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+  const handleDownload = async (url, filename) => {
+    const pdfUrl = url.replace('/markdown/', '/pdf/').replace('.md', '.pdf');
+    console.log('PDF URL:', pdfUrl);
+    try {
+      // summary URL을 PDF URL로 변환
+       // 디버깅용
+      
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error('PDF 다운로드에 실패했습니다.');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('다운로드 실패:', error);
+      alert('PDF 다운로드에 실패했습니다.');
+    }
   };
 
   const MeetingSkeletonLoader = () => (
@@ -242,7 +257,7 @@ const MeetingTranscriptsList = ({
                   원문 보기
                 </button>
                 <button
-                  onClick={() => handleDownload(markdownContent[index], getFileName(transcript.mm_summary_url))}
+                  onClick={() => handleDownload(transcript.mm_summary_url, getFileName(transcript.mm_summary_url))}
                   className="text-green-600 hover:text-green-800 flex items-center gap-1"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
