@@ -6,6 +6,7 @@ import { setMember } from 'store/memberSlice';
 import routes from './routes';
 import Loading from './components/Loading';
 import { setNotifications } from 'store/notificationSlice';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   const dispatch = useDispatch();
@@ -36,6 +37,7 @@ function App() {
 
   return (
     <Suspense fallback={<Loading />}>
+      <ScrollToTop />
       <Routes>
         {routes.map((route) => (
           <Route
