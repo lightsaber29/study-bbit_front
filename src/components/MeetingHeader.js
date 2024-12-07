@@ -13,8 +13,8 @@ export const MeetingHeader = ({
   onToggleMike 
 }) => {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-2xl font-bold">음성 회의록</h2>
+    <div className="flex items-center justify-between p-4">
+      {/* <h3>음성 회의록</h3> */}
       <div className="flex gap-2">
         {isRecording && (
           <button
@@ -54,7 +54,7 @@ export const MeetingHeader = ({
           <>
             <button
               onClick={isRecording ? onStopRecording : onStartRecording}
-              className={`px-4 py-2 rounded-md ${
+              className={`px-2 py-0 rounded-md ${
                 isRecording ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
               } text-white`}
               disabled={!isOnline}

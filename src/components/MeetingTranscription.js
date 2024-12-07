@@ -239,7 +239,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   // }, [isRecording, recognitionStatus, startRecognitionSession]);
 
   const handleModalClose = () => {
-    // 취소 시 녹� 재개
+    // 취소 시 녹음 재개
     if (isRecording) {
       socketRef.current.emit('startRecord', {meetingId});
       startRecognitionSession();
@@ -259,9 +259,25 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4">
-      <div className="bg-[#262626] rounded-lg shadow-lg p-6">
-        <div className="bg-[#1a1a1a] rounded-lg p-4">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
+          <div 
+            ref={scrollRef} 
+            className="flex-1 overflow-y-auto p-4 bg-[#1a1a1a] space-y-1"
+          >
+            <TranscriptList
+              transcripts={transcripts}
+              currentTranscript={currentTranscript}
+            />
+          </div>
+
+          <StatusIndicator 
+            isOnline={isOnline}
+            isRecording={isRecording}
+            recognitionStatus={recognitionStatus}
+          />
+
           <MeetingHeader 
             isRecording={isRecording}
             isOnline={isOnline}
@@ -274,19 +290,6 @@ const MeetingTranscription = ({ meetingId, userId }) => {
             onEndMeeting={endMeeting}
             onToggleMike={handleToggleMike}
           />
-
-          <StatusIndicator 
-            isOnline={isOnline}
-            isRecording={isRecording}
-            recognitionStatus={recognitionStatus}
-          />
-
-          <div ref={scrollRef} className="h-96 overflow-y-auto border border-[#404040] rounded-lg p-4 bg-[#1a1a1a] space-y-1">
-            <TranscriptList
-              transcripts={transcripts}
-              currentTranscript={currentTranscript}
-            />
-          </div>
         </div>
         
         {isResettingTranscripts && <LoadingOverlay />}
