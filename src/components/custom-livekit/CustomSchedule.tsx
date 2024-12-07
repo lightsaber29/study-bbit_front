@@ -57,6 +57,7 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
   const [roomMembers, setRoomMembers] = useState<RoomMember[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+  const [showAttendance, setShowAttendance] = useState<boolean>(false);
 
   const getRoomMembers = async () => {
     try {
@@ -150,14 +151,16 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
   };
 
   const handleScheduleSelect = (schedule: Schedule) => {
-    setSelectedScheduleId(schedule.scheduleId);
-    // 모든 멤버의 status를 null로 초기화
-    // setAttendanceMembers(roomMembers.map(member => ({
-    //   ...member,
-    //   status: null
-    // })));
-    // 선택된 일정의 출석 정보 조회
-    getAttendance(schedule.scheduleId);
+    if (selectedScheduleId === schedule.scheduleId) {
+      // 같은 일정을 다시 클릭하면 출석부를 닫음
+      setSelectedScheduleId(null);
+      setShowAttendance(false);
+    } else {
+      // 새로운 일정을 선택하면 출석부를 열고 출석 정보를 가져옴
+      setSelectedScheduleId(schedule.scheduleId);
+      setShowAttendance(true);
+      getAttendance(schedule.scheduleId);
+    }
   };
 
   return (
@@ -192,9 +195,9 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
           {/* 일정 목록 섹션 */}
           <div style={{
             padding: '1rem',
-            borderBottom: '1px solid var(--lk-border-color)',
+            borderBottom: showAttendance ? '1px solid var(--lk-border-color)' : 'none',
             backgroundColor: '#1a1a1a',
-            height: '50%',  // 전체 높이의 30%만 사용
+            height: showAttendance ? '50%' : '100%',  // 출석부가 보일 때만 높이 조정
             overflowY: 'auto'
           }}>
             <h4 style={{ 
@@ -268,145 +271,147 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
             </div>
           </div>
 
-          {/* 스터디원 목록 */}
-          <div style={{
-            flex: 1,  // 남은 공간 채우기
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden'  // 내부 스크롤을 위해 필요
-          }}>
-            <ul 
-              className="lk-list lk-schedule-participants" 
-              ref={ulRef}
-              style={{
-                flex: 1,  // 버튼을 제외한 공간 채우기
-                overflowY: 'auto',
-                margin: 0,
-                padding: 0,
-                listStyle: 'none'
-              }}
-            >
-              <li className="lk-schedule-participant-header" style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr repeat(3, 1fr)',
-                padding: '0.75rem 1rem',
-                borderBottom: '1px solid var(--lk-border-color)',
-                fontWeight: 600,
-                position: 'sticky',
-                top: 0,
-                backgroundColor: '#1a1a1a',
-                color: '#ffffff',
-                zIndex: 1
-              }}>
-                <span>스터디원 목록</span>
-                <span style={{ textAlign: 'center' }}>출석</span>
-                <span style={{ textAlign: 'center' }}>지각</span>
-                <span style={{ textAlign: 'center' }}>결석</span>
-              </li>
-              {roomMembers.map((member) => (
-                <li 
-                  key={member.memberId} 
-                  className="lk-schedule-participant-item"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                    padding: '0.75rem 1rem',
-                    borderBottom: '1px solid var(--lk-border-color)',
-                    alignItems: 'center',
-                    backgroundColor: '#262626',
-                    color: '#ffffff',
-                    transition: 'background-color 0.2s'
-                  }}
-                >
-                  <span style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    minWidth: 0
-                  }}>
-                    <img 
-                      src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
-                      alt="Profile"
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        backgroundColor: 'white',
-                        flexShrink: 0
-                      }}
-                    />
-                    <span style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      flex: 1
-                    }}>
-                      {member.nickname}
-                    </span>
-                    {member.isLeader && (
-                      <span style={{ 
-                        color: 'gold', 
-                        marginLeft: '4px',
-                        flexShrink: 0
-                      }}>👑</span>
-                    )}
-                  </span>
-                  <span style={{ textAlign: 'center' }}>
-                    <input 
-                      type="radio" 
-                      name={`status-${member.memberId}`}
-                      checked={member.status === 'ON_TIME'}
-                      onChange={() => handleStatusChange(member.memberId, 'ON_TIME')}
-                      style={{ width: '20px', height: '20px' }}
-                    />
-                  </span>
-                  <span style={{ textAlign: 'center' }}>
-                    <input 
-                      type="radio" 
-                      name={`status-${member.memberId}`}
-                      checked={member.status === 'LATE'}
-                      onChange={() => handleStatusChange(member.memberId, 'LATE')}
-                      style={{ width: '20px', height: '20px' }}
-                    />
-                  </span>
-                  <span style={{ textAlign: 'center' }}>
-                    <input 
-                      type="radio" 
-                      name={`status-${member.memberId}`}
-                      checked={member.status === 'ABSENCE' || member.status === 'NOTED'}
-                      onChange={() => handleStatusChange(member.memberId, 'ABSENCE')}
-                      style={{ width: '20px', height: '20px' }}
-                    />
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            {/* 제출 버튼 */}
+          {/* 스터디원 목록 - 조건부 렌더링 */}
+          {showAttendance && (
             <div style={{
-              padding: '1rem',
-              borderTop: '1px solid var(--lk-border-color)',
-              backgroundColor: '#262626',
+              flex: 1,
               display: 'flex',
-              justifyContent: 'center'
+              flexDirection: 'column',
+              overflow: 'hidden'
             }}>
-              <button
-                onClick={handleSubmitAttendance}
+              <ul 
+                className="lk-list lk-schedule-participants" 
+                ref={ulRef}
                 style={{
-                  backgroundColor: '#3182ce',
-                  color: 'white',
-                  padding: '0.5rem 2rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  fontWeight: '600'
+                  flex: 1,  // 버튼을 제외한 공간 채우기
+                  overflowY: 'auto',
+                  margin: 0,
+                  padding: 0,
+                  listStyle: 'none'
                 }}
               >
-                출석부 제출
-              </button>
+                <li className="lk-schedule-participant-header" style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr repeat(3, 1fr)',
+                  padding: '0.75rem 1rem',
+                  borderBottom: '1px solid var(--lk-border-color)',
+                  fontWeight: 600,
+                  position: 'sticky',
+                  top: 0,
+                  backgroundColor: '#1a1a1a',
+                  color: '#ffffff',
+                  zIndex: 1
+                }}>
+                  <span>스터디원 목록</span>
+                  <span style={{ textAlign: 'center' }}>출석</span>
+                  <span style={{ textAlign: 'center' }}>지각</span>
+                  <span style={{ textAlign: 'center' }}>결석</span>
+                </li>
+                {roomMembers.map((member) => (
+                  <li 
+                    key={member.memberId} 
+                    className="lk-schedule-participant-item"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                      padding: '0.75rem 1rem',
+                      borderBottom: '1px solid var(--lk-border-color)',
+                      alignItems: 'center',
+                      backgroundColor: '#262626',
+                      color: '#ffffff',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    <span style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      minWidth: 0
+                    }}>
+                      <img 
+                        src={member.profileImageUrl || `${process.env.PUBLIC_URL}/images/default-profile.png`}
+                        alt="Profile"
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        flex: 1
+                      }}>
+                        {member.nickname}
+                      </span>
+                      {member.isLeader && (
+                        <span style={{ 
+                          color: 'gold', 
+                          marginLeft: '4px',
+                          flexShrink: 0
+                        }}>👑</span>
+                      )}
+                    </span>
+                    <span style={{ textAlign: 'center' }}>
+                      <input 
+                        type="radio" 
+                        name={`status-${member.memberId}`}
+                        checked={member.status === 'ON_TIME'}
+                        onChange={() => handleStatusChange(member.memberId, 'ON_TIME')}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                    </span>
+                    <span style={{ textAlign: 'center' }}>
+                      <input 
+                        type="radio" 
+                        name={`status-${member.memberId}`}
+                        checked={member.status === 'LATE'}
+                        onChange={() => handleStatusChange(member.memberId, 'LATE')}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                    </span>
+                    <span style={{ textAlign: 'center' }}>
+                      <input 
+                        type="radio" 
+                        name={`status-${member.memberId}`}
+                        checked={member.status === 'ABSENCE' || member.status === 'NOTED'}
+                        onChange={() => handleStatusChange(member.memberId, 'ABSENCE')}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* 제출 버튼 */}
+              <div style={{
+                padding: '1rem',
+                borderTop: '1px solid var(--lk-border-color)',
+                backgroundColor: '#262626',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={handleSubmitAttendance}
+                  style={{
+                    backgroundColor: '#3182ce',
+                    color: 'white',
+                    padding: '0.5rem 2rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  출석부 제출
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
