@@ -7,21 +7,20 @@ export const MeetingHeader = ({
   isMikeOn,
   transcripts, 
   onStartRecording, 
-  onStopRecording, 
+  onStopRecording,
+  onSaveMeeting, 
   onEndMeeting,
   onToggleMike 
 }) => {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-2xl font-bold">회의록 작성</h2>
+      <h2 className="text-2xl font-bold">음성 회의록</h2>
       <div className="flex gap-2">
         {isRecording && (
           <button
             onClick={onToggleMike}
             className={`px-4 py-2 rounded-md flex items-center ${
-              isMikeOn 
-                ? 'bg-blue-500 hover:bg-blue-600' 
-                : 'bg-gray-500 hover:bg-gray-600'
+              isMikeOn ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
             } text-white`}
             disabled={!isOnline}
           >
@@ -51,23 +50,33 @@ export const MeetingHeader = ({
           </button>
         )}
 
-        {isHost ? (
-          <button
-            onClick={isRecording ? onStopRecording : onStartRecording}
-            className={`px-4 py-2 rounded-md ${
-              isRecording 
-                ? 'bg-red-500 hover:bg-red-600' 
-                : 'bg-green-500 hover:bg-green-600'
-            } text-white`}
-            disabled={!isOnline}
-          >
-            {isRecording ? '회의록 작성 중지' : '회의록 작성 시작'}
-          </button>
-        ) : (
+        {isHost && (
+          <>
+            <button
+              onClick={isRecording ? onStopRecording : onStartRecording}
+              className={`px-4 py-2 rounded-md ${
+                isRecording ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+              } text-white`}
+              disabled={!isOnline}
+            >
+              {isRecording ? '회의록 중지' : '회의록 작성 시작'}
+            </button>
+            
+            {transcripts.length > 0 && (
+              <button
+                onClick={onSaveMeeting}
+                className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
+                disabled={!isOnline}
+              >
+                회의록 저장
+              </button>
+            )}
+          </>
+        )}
+
+        {!isHost && (
           <div className={`px-4 py-2 rounded-md ${
-            isRecording 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-gray-100 text-gray-800'
+            isRecording ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
           } flex items-center`}>
             <svg 
               className={`w-5 h-5 mr-2 ${isRecording ? 'text-blue-500' : 'text-gray-500'}`}

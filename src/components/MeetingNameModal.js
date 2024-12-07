@@ -6,6 +6,11 @@ export const MeetingNameModal = ({ isOpen, onClose, onSave, meetingId, socketRef
   
     const handleClose = () => {
       socketRef.current.emit('saveCanceled', { meetingId });
+      setMeetingName('');
+      onClose();
+    };
+  
+    const handleNoSave = () => {
       socketRef.current.emit('stopRecordMinute', { meetingId });
       setMeetingName('');
       onClose();
@@ -46,6 +51,12 @@ export const MeetingNameModal = ({ isOpen, onClose, onSave, meetingId, socketRef
               className="px-4 py-2 bg-[#404040] text-white rounded hover:bg-[#4a4a4a]"
             >
               취소
+            </button>
+            <button
+              onClick={handleNoSave}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              저장 안함
             </button>
             <button
               onClick={handleSave}
