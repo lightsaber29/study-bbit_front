@@ -19,7 +19,7 @@ export const MeetingHeader = ({
         {isRecording && (
           <button
             onClick={onToggleMike}
-            className={`px-4 py-2 rounded-md flex items-center ${
+            className={`px-2 py-0.5 rounded-md flex items-center ${
               isMikeOn ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
             } text-white`}
             disabled={!isOnline}
@@ -54,7 +54,7 @@ export const MeetingHeader = ({
           <>
             <button
               onClick={isRecording ? onStopRecording : onStartRecording}
-              className={`px-2 py-0 rounded-md ${
+              className={`px-2 py-0.5 rounded-md ${
                 isRecording ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
               } text-white`}
               disabled={!isOnline}
@@ -65,7 +65,7 @@ export const MeetingHeader = ({
             {transcripts.length > 0 && (
               <button
                 onClick={onSaveMeeting}
-                className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
+                className="px-2 py-0.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
                 disabled={!isOnline}
               >
                 회의록 저장
@@ -75,7 +75,7 @@ export const MeetingHeader = ({
         )}
 
         {!isHost && (
-          <div className={`px-4 py-2 rounded-md ${
+          <div className={`px-2 py-0.5 rounded-md ${
             isRecording ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
           } flex items-center`}>
             <svg 
