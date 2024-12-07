@@ -11,6 +11,7 @@ export const MeetingNameModal = ({ isOpen, onClose, onSave, meetingId, socketRef
     };
   
     const handleNoSave = () => {
+      socketRef.current.emit('saveCanceled', { meetingId });
       socketRef.current.emit('stopRecordMinute', { meetingId });
       setMeetingName('');
       onClose();
