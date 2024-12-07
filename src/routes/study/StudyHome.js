@@ -142,14 +142,13 @@ const StudyHome = () => {
         return;
       }
 
-      // 화상채팅 페이지 열기
       const videoUrl = `/study/${roomId}/video?hideLayout=true`;
       const screenWidth = window.screen.width;
       const screenHeight = window.screen.height;
-      const windowWidth = Math.floor(screenWidth * 0.8); // 화면 너비의 80%
-      const windowHeight = Math.floor(screenHeight * 0.8); // 화면 높이의 80%
-      const left = Math.floor((screenWidth - windowWidth) / 2); // 중앙 정렬
-      const top = Math.floor((screenHeight - windowHeight) / 2); // 중앙 정렬
+      const windowWidth = Math.floor(screenWidth * 0.8);
+      const windowHeight = Math.floor(screenHeight * 0.8);
+      const left = Math.floor((screenWidth - windowWidth) / 2);
+      const top = Math.floor((screenHeight - windowHeight) / 2);
 
       const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`;
       window.open(videoUrl, '_blank', windowFeatures);

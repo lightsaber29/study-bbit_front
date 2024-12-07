@@ -4,7 +4,6 @@ import { MediaDeviceMenu } from '@livekit/components-react';
 import { DisconnectButton } from '@livekit/components-react';
 import { TrackToggle } from '@livekit/components-react';
 import { ChatIcon, GearIcon, LeaveIcon } from '@livekit/components-react';
-import { ChatToggle } from '@livekit/components-react';
 import { useLocalParticipantPermissions, usePersistentUserChoices } from '@livekit/components-react';
 import { useMediaQuery } from './custom-addon/useMediaQuery.ts'; 
 import { useMaybeLayoutContext } from '@livekit/components-react';
@@ -202,12 +201,12 @@ export function CustomControlBar({
           {showText && '출석부'}
         </CustomScheduleToggle>
       )}
-      {visibleControls.settings && (
+      {/* {visibleControls.settings && (
         <CustomSettingsMenuToggle onToggle={() => onTabToggle?.({ type: 'TOGGLE_SETTINGS' })}>
           {showIcon && <GearIcon />}
           {showText && 'Settings'}
         </CustomSettingsMenuToggle>
-      )}
+      )} */}
       {visibleControls.leave && (
         <DisconnectButton>
           {showIcon && <LeaveIcon />}

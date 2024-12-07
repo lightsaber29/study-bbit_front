@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useParticipants } from '@livekit/components-react';
+import { selectRoomName } from 'store/roomSlice.js';
 import TemperatureModal from '../TemperatureModal';
+import { useSelector } from 'react-redux';
 
 export interface DefaultRightPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -30,6 +32,7 @@ const StyledTemperatureModal = ({
 
 export function DefaultRightPanel(props: DefaultRightPanelProps) {
   const participants = useParticipants();
+  const roomName = useSelector(selectRoomName);
   const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
@@ -49,7 +52,7 @@ export function DefaultRightPanel(props: DefaultRightPanelProps) {
         flexDirection: 'column',
         color: '#a0aec0'
       }}>
-        <h3 style={{ marginBottom: '1rem', color: '#ffffff', textAlign: 'center' }}>스터디룸 정보</h3>
+        <h3 style={{ marginBottom: '1rem', color: '#ffffff', textAlign: 'center' }}>{roomName}</h3>
         
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ color: '#ffffff', marginBottom: '0.5rem' }}>참가자 목록 ({participants.length})</h4>
