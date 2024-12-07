@@ -97,7 +97,10 @@ const MeetingTranscription = ({ meetingId, userId }) => {
       setIsResettingTranscripts(false);
       setIsRecording(false);
     },
-    onStopRecord: () => setIsRecording(false),
+    onStopRecord: () => {
+      setIsRecording(false);
+      console.log(transcripts);
+    },
     onResumeRecord: () => setIsRecording(true),
     onStartRecord: () => {
       setIsRecording(true);
@@ -184,48 +187,24 @@ const MeetingTranscription = ({ meetingId, userId }) => {
     socketRef.current.emit('startRecord', {meetingId});
     // startRecognitionSession();
     addTranscript("회의를 시작하겠습니다.");
-  }, [startRecognitionSession, addTranscript]);
+  }, [addTranscript]);
 
   const stopRecording = useCallback(() => {
     socketRef.current.emit('stopRecord', {meetingId});
-    const continueRecording = !window.confirm('회의록 작성을 멈추시겠습니까?');
-    if (continueRecording) {
-      socketRef.current.emit('resumeRecord', {meetingId});
-      return;
-    }
-    console.log('녹음 중지');
     stopRecognition();
-
-    const confirmed = window.confirm('회의록을 저장하시겠습니까?');
-    if (confirmed) {
-      // 저장 시작을 알리는 이벤트 발생
-      socketRef.current.emit('savingStarted', { meetingId });
-      setShowNameModal(true);
-    } else {
-      // 저장 취소를 알리는 이벤트 발생
-      socketRef.current.emit('saveCanceled', { meetingId });
-      socketRef.current.emit('stopRecordMinute', { meetingId });
-      // 방장에게 취소 메시지 표시
-      setStatusMessage('회의록 저장이 취소되었습니다.');
-      setShowStatusModal(true);
-      setTimeout(() => {
-        setShowStatusModal(false);
-        setStatusMessage(null);
-      }, 2000);
-    }
   }, [meetingId, stopRecognition]);
 
-  const handleSaveMeeting = (meetingName, mode) => {
-    console.log('회의록 저장 요청');
-    socketRef.current.emit('saveMeeting', { 
-      meetingId,
-      meetingName,
-      mode
-    });
-    setShowNameModal(false);
-    setStatusMessage('회의록을 저장하는 중입니다...');
-    setShowStatusModal(true);
-  };
+  const handleSaveMeeting = useCallback(() => {
+    // 저장 시작 시 녹음 중지
+    if (isRecording) {
+      socketRef.current.emit('stopRecord', {meetingId});
+      stopRecognition();
+    }
+    
+    // 저장 시작을 알리는 이벤트 발생
+    socketRef.current.emit('savingStarted', { meetingId });
+    setShowNameModal(true);
+  }, [meetingId, stopRecognition, isRecording]);
 
   const endMeeting = () => {
     if (!isHost) {
@@ -260,6 +239,22 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   // }, [isRecording, recognitionStatus, startRecognitionSession]);
 
   const handleModalClose = () => {
+    // 취소 시 녹� 재개
+    if (isRecording) {
+      socketRef.current.emit('startRecord', {meetingId});
+      startRecognitionSession();
+    }
+    setShowNameModal(false);
+  };
+
+  const handleSaveConfirm = (meetingName, meetingMode) => {
+    // 실제 저장 처리
+    socketRef.current.emit('saveMeeting', { 
+      meetingId, 
+      meetingName, 
+      transcripts,
+      mode: meetingMode 
+    });
     setShowNameModal(false);
   };
 
@@ -275,6 +270,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
             transcripts={transcripts}
             onStartRecording={startRecording}
             onStopRecording={stopRecording}
+            onSaveMeeting={handleSaveMeeting}
             onEndMeeting={endMeeting}
             onToggleMike={handleToggleMike}
           />
@@ -333,7 +329,7 @@ const MeetingTranscription = ({ meetingId, userId }) => {
         <MeetingNameModal 
           isOpen={showNameModal}
           onClose={handleModalClose}
-          onSave={handleSaveMeeting}
+          onSave={handleSaveConfirm}
           meetingId={meetingId}
           socketRef={socketRef}
         />
