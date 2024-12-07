@@ -39,8 +39,8 @@ export const TranscriptList = ({ transcripts, currentTranscript, scrollRef }) =>
           className="flex flex-wrap items-start text-sm"
         >
           <div className="flex flex-none items-center">
-            <span className="text-gray-500 w-24">{transcript.timestamp}</span>
-            <span className="text-gray-700 w-20">{transcript.user}: </span>
+            <span className="w-24">{transcript.timestamp}</span>
+            <span className="text-emerald-500">{transcript.user}</span><span className="w-2">: </span>
           </div>
           <span className="flex-1">{transcript.text}</span>
         </div>
