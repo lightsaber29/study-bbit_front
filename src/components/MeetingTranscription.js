@@ -12,7 +12,7 @@ import { useSelector } from 'react-redux';
 import axios from 'api/axios';
 
 // const MeetingTranscription = ({ meetingId, userId, isHost = false }) => {
-const MeetingTranscription = ({ meetingId, userId }) => {
+const MeetingTranscription = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcripts, setTranscripts] = useState([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
@@ -29,8 +29,8 @@ const MeetingTranscription = ({ meetingId, userId }) => {
   const [statusMessage, setStatusMessage] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
-  meetingId = roomId;
-  userId = member.nickname;
+  const meetingId = roomId;
+  const userId = member.nickname;
   console.log(userId);
 
   const getRoomInfo = async () => {

@@ -67,7 +67,7 @@ export function CustomMeetingMinutes({ scheduleState, ...props }: CustomMeetingM
             overflowY: 'auto'
         }}> */}
           {/* <div style={{ marginBottom: '2rem' }}> */}
-            <MeetingTranscription onEnd={onMeetingEnd} />
+            <MeetingTranscription />
           {/* </div> */}
 
           {/* <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
