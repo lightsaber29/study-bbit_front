@@ -297,8 +297,8 @@ const Header = () => {
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col border-b shadow-sm bg-white">
       <div className="h-14 flex items-center p-4">
         <Link to='' className="text-2xl font-bold text-gray-700 flex items-center">
-          <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="Study-bbit Logo" className="w-14 h-14" />
-          <span className="font-['SokchoBadaDotum']">study-bbit</span>
+          <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="StudyBBit Logo" className="w-14 h-14" />
+          <span className="font-['SokchoBadaDotum']">StudyBBit</span>
         </Link>
         
         <div className="flex-1 mx-5 relative">

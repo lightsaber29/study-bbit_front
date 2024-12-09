@@ -8,7 +8,7 @@ const Footer = () => {
         {/* 회사 정보 */}
         <div className="border-gray-600">
           <p className="text-sm text-gray-400">
-            <strong className="text-white">Study-bbit 스터디-빗</strong>  주소: 대전광역시 대전 유성구 문지로 193
+            <strong className="text-white">StudyBBit 스터디빗</strong>  주소: 대전광역시 대전 유성구 문지로 193
           </p>
           <p className="text-sm text-gray-400 mt-2">
             Copyrights 2024. Studybbit All Rights Reserved

@@ -1,1 +1,1 @@
-# study-bbit 🐰 front
+# StudyBBit 🐰 front

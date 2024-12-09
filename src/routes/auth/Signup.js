@@ -135,7 +135,7 @@ const Signup = () => {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">회원가입</h2>
           <p className="text-sm text-gray-600">
-            Study-bit과 함께 성장하는 여정을 시작하세요
+            StudyBBit과 함께 성장하는 여정을 시작하세요
           </p>
         </div>
 
