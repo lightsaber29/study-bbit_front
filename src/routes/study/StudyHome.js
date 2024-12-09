@@ -6,6 +6,7 @@ import { selectNickname } from 'store/memberSlice';
 import TemperatureModal from 'components/TemperatureModal';
 import { setRoomName } from 'store/roomSlice';
 import PostDetailModal from 'components/PostDetailModal';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
@@ -136,6 +137,10 @@ const StudyHome = () => {
   }, [roomId]);
 
   const handleVideoMeeting = async () => {
+    if (isMobile || isTablet) {
+      alert('모바일 기기에서는 화상 회의를 이용할 수 없습니다. PC로 접속 해 주세요.');
+      return;
+    }
     try {
       // 참가자 목록 조회
       const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
