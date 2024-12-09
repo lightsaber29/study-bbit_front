@@ -269,6 +269,7 @@ const MeetingTranscription = () => {
             <TranscriptList
               transcripts={transcripts}
               currentTranscript={currentTranscript}
+              scrollRef={scrollRef}
             />
           </div>
 
