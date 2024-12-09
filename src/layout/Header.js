@@ -322,7 +322,7 @@ const Header = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="스터디, 페이지, 게시글 검색"
+                placeholder="스터디를 검색하세요"
                 className="w-full px-2 py-2 bg-transparent outline-none"
                 ref={searchInputRef}
               />
