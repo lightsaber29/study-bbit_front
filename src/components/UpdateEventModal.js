@@ -3,6 +3,7 @@ import axios from 'api/axios';
 import useFormInput from 'hooks/useFormInput';
 
 const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) => {
+  console.log("event", event);
   const { values, handleChange, setValues } = useFormInput({
     title: event.title,
     detail: event.detail || '',
@@ -15,6 +16,8 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
     selectedDays: editType === 'single' ? [] : (event.daysOfWeek ? event.daysOfWeek.split(',') : []),
     endDate: editType === 'single' ? '' : (event.repeatEndDate || ''),
   });
+
+  console.log("values", values);
 
   const titleRef = useRef(null);
   const dateRef = useRef(null);
@@ -231,7 +234,6 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
                     value={values.startHour}
                     onChange={handleChange}
                   >
-                    <option value="">시</option>
                     {Array.from({length: 24}, (_, i) => (
                       <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
                     ))}
@@ -242,9 +244,8 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
                     value={values.startMinute}
                     onChange={handleChange}
                   >
-                    <option value="">분</option>
                     {Array.from({length: 60}, (_, i) => (
-                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                      <option key={i} value={i.toString().padStart(2, '0')}>{i.toString().padStart(2, '0')}</option>
                     ))}
                   </select>
                 </div>
@@ -260,7 +261,6 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
                     value={values.endHour}
                     onChange={handleChange}
                   >
-                    <option value="">시</option>
                     {Array.from({length: 24}, (_, i) => (
                       <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
                     ))}
@@ -271,9 +271,8 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
                     value={values.endMinute}
                     onChange={handleChange}
                   >
-                    <option value="">분</option>
                     {Array.from({length: 60}, (_, i) => (
-                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                      <option key={i} value={i.toString().padStart(2, '0')}>{i.toString().padStart(2, '0')}</option>
                     ))}
                   </select>
                 </div>
