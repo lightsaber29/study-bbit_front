@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 // export const TranscriptList = ({ transcripts, currentTranscript, scrollRef }) => {
 //     if (transcripts.length === 0 && !currentTranscript) {
 //       return (
@@ -23,6 +24,12 @@
 //     );
 //   };
 export const TranscriptList = ({ transcripts, currentTranscript, scrollRef }) => {
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [transcripts]);  // transcripts가 변경될 때마다 실행
+  
   if (transcripts.length === 0 && !currentTranscript) {
     return (
       <div className="text-center text-gray-500 mt-4">
@@ -32,7 +39,7 @@ export const TranscriptList = ({ transcripts, currentTranscript, scrollRef }) =>
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 max-h-[500px] overflow-y-auto" ref={scrollRef}>
       {transcripts.map((transcript, index) => (
         <div 
           key={`${transcript.timestamp}-${index}`} 
