@@ -53,8 +53,7 @@ export const StudyTimer = () => {
       display: 'flex', 
       flexDirection: 'column', 
       alignItems: 'center',
-      gap: '5px',
-      // marginTop: '-30px'
+      gap: '1px',
     }}>
       <span style={{ 
         fontSize: '1rem', 
@@ -67,7 +66,7 @@ export const StudyTimer = () => {
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '20px'
+        gap: '10px'
       }}>
         <button 
           onClick={() => {
@@ -98,7 +97,6 @@ export const StudyTimer = () => {
           fontSize: '1.5rem',
           fontWeight: 'bold',
           color: '#ffffff',
-          marginLeft: '20px'
         }}>
           {formatTime(time)}
         </span>
