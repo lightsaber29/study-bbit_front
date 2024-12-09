@@ -46,6 +46,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const reconnectTimeoutRef = useRef(null);
+  const MAX_RETRY_COUNT = 5; // 최대 재시도 횟수 상수 추가
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -151,12 +152,18 @@ const Header = () => {
     let retryCount = 0;
     
     const connectToSSE = async () => {
+      // 최대 재시도 횟수 체크
+      if (retryCount >= MAX_RETRY_COUNT) {
+        // console.log('최대 재시도 횟수에 도달했습니다.');
+        return;
+      }
+
       try {
         const eventSource = new EventSource("/api/noti/subscribe");
 
         eventSource.onopen = () => {
           setConnectionStatus('connected');
-          retryCount = 0;
+          retryCount = 0; // 연결 성공시 재시도 횟수 초기화
         };
 
         eventSource.addEventListener('sendDm', (event) => {
@@ -172,14 +179,12 @@ const Header = () => {
         });
 
         eventSource.onerror = (error) => {
-          // console.error('SSE 연결 에러:', error);
           eventSource.close();
           setConnectionStatus('disconnected');
           
-          if (isSubscribed) {
+          if (isSubscribed && retryCount < MAX_RETRY_COUNT) {
             retryCount++;
             reconnectTimeoutRef.current = setTimeout(() => {
-              // console.log('재연결 시도 시작');
               connectToSSE();
             }, 1000);
           }
@@ -190,7 +195,7 @@ const Header = () => {
         };
       } catch (error) {
         console.error('SSE 초기 연결 에러:', error);
-        if (isSubscribed) {
+        if (isSubscribed && retryCount < MAX_RETRY_COUNT) {
           setConnectionStatus('disconnected');
           reconnectTimeoutRef.current = setTimeout(() => {
             connectToSSE();
