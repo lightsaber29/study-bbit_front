@@ -248,28 +248,6 @@ const StudyHome = () => {
     setIsTemperatureModalOpen(true);
   };
 
-  const handlePostComment = async () => {
-    if (!commentContent.trim()) {
-      alert('댓글 내용을 입력해주세요.');
-      return;
-    }
-
-    try {
-      await axios.post('/api/room-board-comment', {
-        roomBoardId: dashboardData.notice.roomBoardId,
-        content: commentContent
-      });
-      
-      setCommentContent('');
-      // 공지사항 새로고침
-      getDashboardData();
-    } catch (error) {
-      console.error('댓글 게시 실패:', error);
-      const errorMessage = error.response?.data?.message || '댓글 게시 중 오류가 발생했습니다.';
-      alert(errorMessage);
-    }
-  };
-
   // 공지사항 상세 조회 함수 추가
   const getNoticeDetail = async () => {
     if (!dashboardData?.notice?.roomBoardId) return;
