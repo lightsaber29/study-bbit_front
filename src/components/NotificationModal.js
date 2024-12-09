@@ -13,11 +13,9 @@ const NotificationModal = ({ isOpen, onClose, onShowDM }) => {
   if (!isOpen) return null;
 
   const handleNotificationClick = async (notification) => {
-    console.log('notification: ', notification);
     await axios.post(`/api/noti/${notification.id}`);
     dispatch(markAsRead(notification.id));
     if (notification.url === '/dm') {
-      console.log('dm');
       onShowDM(true);
     } else {
       navigate(notification.url);

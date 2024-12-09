@@ -16,6 +16,8 @@ import { IoNotificationsOutline, IoClose } from 'react-icons/io5';
 import { selectNotifications } from '../store/notificationSlice';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { markAsRead } from 'store/notificationSlice';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -228,15 +230,15 @@ const Header = () => {
   // 알림 권한 요청 및 확인을 위한 useEffect 추가
   useEffect(() => {
     if (isLogin && 'Notification' in window) {
-      console.log("Current notification permission:", Notification.permission);
+      // console.log("Current notification permission:", Notification.permission);
       Notification.requestPermission().then(permission => {
-        console.log("Updated notification permission:", permission);
+        // console.log("Updated notification permission:", permission);
       });
     }
   }, [isLogin]);
 
   const handleEvent = (event) => {
-    console.log("Handling event:", event);
+    // console.log("Handling event:", event);
     
     if (['sendDm', 'sendMm'].includes(event.type)) {
       const notification = {
@@ -251,7 +253,18 @@ const Header = () => {
 
       // 토스트 알림
       toast(
-        <div>
+        <div
+          onClick={async () => {
+            await axios.post(`/api/noti/${event.data.notificationId}`);
+            dispatch(markAsRead(event.data.notificationId));
+            
+            if (event.data.url === '/dm') {
+              setShowDMModal(true);
+            } else {
+              navigate(event.data.url);
+            }
+          }}
+        >
           <strong>새로운 알림</strong>
           <p className="text-sm">{event.data.content}</p>
         </div>,
@@ -266,7 +279,8 @@ const Header = () => {
             background: '#ffffff',
             color: '#333333',
             border: '1px solid #e5e7eb',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            cursor: 'pointer'
           },
           progressStyle: {
             background: '#10b981'
@@ -292,9 +306,9 @@ const Header = () => {
         };
       }
     } else if (event.type === 'connect') {
-      console.log("Connected to SSE");
+      // console.log("Connected to SSE");
     } else {
-      console.log("Unhandled event type:", event.type);
+      // console.log("Unhandled event type:", event.type);
     }
   };
 
