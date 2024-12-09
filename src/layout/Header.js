@@ -264,9 +264,17 @@ const Header = () => {
               navigate(event.data.url);
             }
           }}
+          className="flex items-center gap-3"
         >
-          <strong>새로운 알림</strong>
-          <p className="text-sm">{event.data.content}</p>
+          <img 
+            src={`${process.env.PUBLIC_URL}/images/logo.png`} 
+            alt="StudyBBit Logo" 
+            className="w-16 h-16"
+          />
+          <div>
+            <strong>새로운 알림</strong>
+            <p className="text-sm">{event.data.content}</p>
+          </div>
         </div>,
         {
           position: "bottom-right",
@@ -280,7 +288,8 @@ const Header = () => {
             color: '#333333',
             border: '1px solid #e5e7eb',
             boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            padding: '12px'
           },
           progressStyle: {
             background: '#10b981'
