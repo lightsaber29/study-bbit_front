@@ -162,11 +162,6 @@ export function PageClientImpl(props: {
             <DebugMode />
             <RecordingIndicator />
           </LiveKitRoom>
-          <div style={{ margin: '20px 40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <StudyTimer />
-            <TimerSocket />
-          </div>
-          {/* <MeetingMinutes /> */}
         </div>
       )}
     </main>

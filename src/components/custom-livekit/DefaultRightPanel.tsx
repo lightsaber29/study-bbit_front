@@ -4,6 +4,8 @@ import { useParticipants } from '@livekit/components-react';
 import { selectRoomName } from 'store/roomSlice.js';
 import TemperatureModal from '../TemperatureModal';
 import { useSelector } from 'react-redux';
+import { StudyTimer } from '../StudyTimer';
+import TimerSocket from '../TimerSocket';
 
 export interface DefaultRightPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -50,11 +52,12 @@ export function DefaultRightPanel(props: DefaultRightPanelProps) {
         borderLeft: '1px solid var(--lk-border-color)',
         display: 'flex',
         flexDirection: 'column',
-        color: '#a0aec0'
+        color: '#a0aec0',
+        position: 'relative'
       }}>
         <h3 style={{ marginBottom: '1rem', color: '#ffffff', textAlign: 'center' }}>{roomName}</h3>
-        
-        <div style={{ marginBottom: '1rem' }}>
+
+        <div style={{ marginBottom: '1rem', flex: 1 }}>
           <h4 style={{ color: '#ffffff', marginBottom: '0.5rem' }}>참가자 목록 ({participants.length})</h4>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {participants.map((participant) => {
@@ -97,6 +100,34 @@ export function DefaultRightPanel(props: DefaultRightPanelProps) {
               );
             })}
           </ul>
+        </div>
+
+        <div style={{ 
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          gap: '2rem',
+          padding: '1rem',
+          backgroundColor: '#1a1a1a'
+        }}>
+          <div style={{ 
+            flex: '1 1 0%', 
+            maxWidth: '50%', 
+            alignSelf: 'flex-end',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <TimerSocket />
+          </div>
+          <div style={{ flex: '1 1 0%', maxWidth: '50%' }}>
+            <StudyTimer />
+          </div>
         </div>
       </div>
 
