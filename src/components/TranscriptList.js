@@ -33,7 +33,9 @@ export const TranscriptList = ({ transcripts, currentTranscript, scrollRef }) =>
   if (transcripts.length === 0 && !currentTranscript) {
     return (
       <div className="text-center text-gray-500 mt-4">
-        회의록이 여기에 표시됩니다
+        회의록 작성 시작을 눌러보세요.<br/>
+        말씀하신 내용을 토토가 받아 적고,<br/>
+        요약본까지 만들어 드릴게요.
       </div>
     );
   }
