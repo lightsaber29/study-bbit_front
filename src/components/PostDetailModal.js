@@ -112,7 +112,7 @@ const PostDetailModal = ({
   };
 
   return (
-    <div className={`fixed inset-0 ${isOpen ? 'block' : 'hidden'}`}>
+    <div className={`fixed inset-0 ${isOpen ? 'block' : 'hidden'} z-[100]`}>
       <div 
         className={`fixed inset-0 bg-black transition-opacity duration-300 ${
           isOpen ? 'bg-opacity-50' : 'bg-opacity-0'
@@ -121,7 +121,7 @@ const PostDetailModal = ({
       >
         <div className="flex items-center justify-center min-h-screen p-4">
           <div 
-            className="bg-white p-6 rounded-lg w-full max-w-2xl mx-auto max-h-[50vh] flex flex-col"
+            className="bg-white p-6 rounded-lg w-full max-w-2xl mx-auto max-h-[50vh] flex flex-col relative"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">

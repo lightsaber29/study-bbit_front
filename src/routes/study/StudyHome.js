@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectNickname } from 'store/memberSlice';
 import TemperatureModal from 'components/TemperatureModal';
 import { setRoomName } from 'store/roomSlice';
+import PostDetailModal from 'components/PostDetailModal';
 
 const StudyHome = () => {
   const [roomInfo, setRoomInfo] = useState(null);
@@ -29,6 +30,10 @@ const StudyHome = () => {
   const [isTemperatureModalOpen, setIsTemperatureModalOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
   const dispatch = useDispatch();
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
+  const [commentContent, setCommentContent] = useState('');
+  const [postDetail, setPostDetail] = useState(null);
+  const [comments, setComments] = useState([]);
 
   // ISO 8601 Duration 문자열을 분으로 변환하는 함수
   const parseDuration = (duration) => {
@@ -185,6 +190,7 @@ const StudyHome = () => {
       alert('초대되었습니다.');
       setIsInviteModalOpen(false);
       setInviteEmail('');
+      getMembers(); // 멤버 목록 새로고침
     } catch (error) {
       console.error('초대 실패:', error);
       const errorMessage = error.response?.data?.message || '초대 처리 중 오류가 발생했습니다.';
@@ -195,6 +201,7 @@ const StudyHome = () => {
   const getDashboardData = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/dashboard/${roomId}`);
+      console.log("dashboardData", response.data);
       setDashboardData(response.data);
     } catch (error) {
       console.error('대시보드 데이터 조회 실패:', error);
@@ -240,6 +247,49 @@ const StudyHome = () => {
     setSelectedMemberId(memberId);
     setIsTemperatureModalOpen(true);
   };
+
+  const handlePostComment = async () => {
+    if (!commentContent.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      await axios.post('/api/room-board-comment', {
+        roomBoardId: dashboardData.notice.roomBoardId,
+        content: commentContent
+      });
+      
+      setCommentContent('');
+      // 공지사항 새로고침
+      getDashboardData();
+    } catch (error) {
+      console.error('댓글 게시 실패:', error);
+      const errorMessage = error.response?.data?.message || '댓글 게시 중 오류가 발생했습니다.';
+      alert(errorMessage);
+    }
+  };
+
+  // 공지사항 상세 조회 함수 추가
+  const getNoticeDetail = async () => {
+    if (!dashboardData?.notice?.roomBoardId) return;
+    
+    try {
+      const response = await axios.get(`/api/room-board/detail/${dashboardData.notice.roomBoardId}?size=100`);
+      setPostDetail(response.data);
+      setComments(response.data?.comments?.content || []);
+    } catch (error) {
+      console.error('공지사항 상세 조회 실패:', error);
+      alert('공지사항을 불러오는데 실패했습니다.');
+    }
+  };
+
+  // 공지사항 모달이 열릴 때 상세 정보 조회
+  useEffect(() => {
+    if (showNoticeModal && dashboardData?.notice?.roomBoardId) {
+      getNoticeDetail();
+    }
+  }, [showNoticeModal, dashboardData?.notice?.roomBoardId]);
 
   return (
     <div className="study-home max-w-3xl mx-auto p-4 pb-16 min-h-[calc(100vh-4rem)] pt-16">
@@ -439,7 +489,10 @@ const StudyHome = () => {
           </div>
 
           {/* 공지사항 섹션 */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-100 transition-shadow">
+          <div 
+            className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow"
+            onClick={() => dashboardData?.notice && setShowNoticeModal(true)}
+          >
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -451,8 +504,8 @@ const StudyHome = () => {
                   <h3 className="font-bold text-lg text-gray-900">공지사항</h3>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  {dashboardData?.noticeContent ? (
-                    <p className="text-gray-700 whitespace-pre-line">{dashboardData.noticeContent}</p>
+                  {dashboardData?.notice?.content ? (
+                    <p className="text-gray-700 whitespace-pre-line">{dashboardData.notice.content}</p>
                   ) : (
                     <p className="text-gray-500 italic">등록된 공지사항이 없습니다.</p>
                   )}
@@ -460,6 +513,20 @@ const StudyHome = () => {
               </div>
             </div>
           </div>
+
+          {/* PostDetailModal for Notice */}
+          {dashboardData?.notice && (
+            <PostDetailModal 
+              post={dashboardData.notice}
+              postDetail={postDetail}
+              comments={comments}
+              isOpen={showNoticeModal}
+              onClose={() => setShowNoticeModal(false)}
+              getPosts={getDashboardData}
+              getPostDetail={getNoticeDetail}
+            />
+          )}
+
           <div className="flex justify-center w-full">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
               {/* 기존 회의 버튼 섹션 */}
