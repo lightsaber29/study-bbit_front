@@ -6,7 +6,7 @@ import CreateEventModal from '../../components/CreateEventModal';
 import '../../styles/StudySchedule.css';
 import axios from 'api/axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { formatDateTime } from 'utils/dateUtil';
+import { formatDateTime, formatTime } from 'utils/dateUtil';
 import { useSelector } from 'react-redux';
 import { selectRoomName } from 'store/roomSlice';
 
@@ -207,10 +207,7 @@ const StudySchedule = () => {
                         {event.title}
                       </div>
                       <div className="text-gray-500">
-                        {new Date(event.startDate).toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {formatTime(event.startTime)} - {formatTime(event.endTime)}
                       </div>
                       <div className="mt-2 flex items-center text-gray-500">
                         <span className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>

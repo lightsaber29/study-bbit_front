@@ -16,6 +16,8 @@ import { IoNotificationsOutline, IoClose } from 'react-icons/io5';
 import { selectNotifications } from '../store/notificationSlice';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { markAsRead } from 'store/notificationSlice';
 
 // 네비게이션 항목 정의
 const NAV_ITEMS = [
@@ -46,6 +48,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const reconnectTimeoutRef = useRef(null);
+  const MAX_RETRY_COUNT = 5; // 최대 재시도 횟수 상수 추가
 
   // URL에서 roomId 추출 (study/2 형식일 때)
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -151,12 +154,18 @@ const Header = () => {
     let retryCount = 0;
     
     const connectToSSE = async () => {
+      // 최대 재시도 횟수 체크
+      if (retryCount >= MAX_RETRY_COUNT) {
+        // console.log('최대 재시도 횟수에 도달했습니다.');
+        return;
+      }
+
       try {
         const eventSource = new EventSource("/api/noti/subscribe");
 
         eventSource.onopen = () => {
           setConnectionStatus('connected');
-          retryCount = 0;
+          retryCount = 0; // 연결 성공시 재시도 횟수 초기화
         };
 
         eventSource.addEventListener('sendDm', (event) => {
@@ -172,14 +181,12 @@ const Header = () => {
         });
 
         eventSource.onerror = (error) => {
-          // console.error('SSE 연결 에러:', error);
           eventSource.close();
           setConnectionStatus('disconnected');
           
-          if (isSubscribed) {
+          if (isSubscribed && retryCount < MAX_RETRY_COUNT) {
             retryCount++;
             reconnectTimeoutRef.current = setTimeout(() => {
-              // console.log('재연결 시도 시작');
               connectToSSE();
             }, 1000);
           }
@@ -190,7 +197,7 @@ const Header = () => {
         };
       } catch (error) {
         console.error('SSE 초기 연결 에러:', error);
-        if (isSubscribed) {
+        if (isSubscribed && retryCount < MAX_RETRY_COUNT) {
           setConnectionStatus('disconnected');
           reconnectTimeoutRef.current = setTimeout(() => {
             connectToSSE();
@@ -223,15 +230,15 @@ const Header = () => {
   // 알림 권한 요청 및 확인을 위한 useEffect 추가
   useEffect(() => {
     if (isLogin && 'Notification' in window) {
-      console.log("Current notification permission:", Notification.permission);
+      // console.log("Current notification permission:", Notification.permission);
       Notification.requestPermission().then(permission => {
-        console.log("Updated notification permission:", permission);
+        // console.log("Updated notification permission:", permission);
       });
     }
   }, [isLogin]);
 
   const handleEvent = (event) => {
-    console.log("Handling event:", event);
+    // console.log("Handling event:", event);
     
     if (['sendDm', 'sendMm'].includes(event.type)) {
       const notification = {
@@ -246,9 +253,28 @@ const Header = () => {
 
       // 토스트 알림
       toast(
-        <div>
-          <strong>새로운 알림</strong>
-          <p className="text-sm">{event.data.content}</p>
+        <div
+          onClick={async () => {
+            await axios.post(`/api/noti/${event.data.notificationId}`);
+            dispatch(markAsRead(event.data.notificationId));
+            
+            if (event.data.url === '/dm') {
+              setShowDMModal(true);
+            } else {
+              navigate(event.data.url);
+            }
+          }}
+          className="flex items-center gap-3"
+        >
+          <img 
+            src={`${process.env.PUBLIC_URL}/images/logo.png`} 
+            alt="StudyBBit Logo" 
+            className="w-16 h-16"
+          />
+          <div>
+            <strong>새로운 알림</strong>
+            <p className="text-sm">{event.data.content}</p>
+          </div>
         </div>,
         {
           position: "bottom-right",
@@ -261,7 +287,9 @@ const Header = () => {
             background: '#ffffff',
             color: '#333333',
             border: '1px solid #e5e7eb',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            cursor: 'pointer',
+            padding: '12px'
           },
           progressStyle: {
             background: '#10b981'
@@ -287,9 +315,9 @@ const Header = () => {
         };
       }
     } else if (event.type === 'connect') {
-      console.log("Connected to SSE");
+      // console.log("Connected to SSE");
     } else {
-      console.log("Unhandled event type:", event.type);
+      // console.log("Unhandled event type:", event.type);
     }
   };
 
@@ -297,8 +325,8 @@ const Header = () => {
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col border-b shadow-sm bg-white">
       <div className="h-14 flex items-center p-4">
         <Link to='' className="text-2xl font-bold text-gray-700 flex items-center">
-          <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="Study-bbit Logo" className="w-14 h-14" />
-          <span className="font-['SokchoBadaDotum']">study-bbit</span>
+          <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="StudyBBit Logo" className="w-14 h-14" />
+          <span className="font-['SokchoBadaDotum']">StudyBBit</span>
         </Link>
         
         <div className="flex-1 mx-5 relative">
@@ -317,7 +345,7 @@ const Header = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="스터디, 페이지, 게시글 검색"
+                placeholder="스터디를 검색하세요"
                 className="w-full px-2 py-2 bg-transparent outline-none"
                 ref={searchInputRef}
               />

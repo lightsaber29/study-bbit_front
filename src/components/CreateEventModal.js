@@ -140,6 +140,27 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
     });
   };
 
+  // 시간 선택 전용 핸들러 추가
+  const handleTimeChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'startHour' && value !== '') {
+      setValues({
+        ...values,
+        startHour: value,
+        startMinute: values.startMinute || '0'
+      });
+    } else if (name === 'endHour' && value !== '') {
+      setValues({
+        ...values,
+        endHour: value,
+        endMinute: values.endMinute || '0'
+      });
+    } else {
+      handleChange(e);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-lg mx-4">
@@ -206,7 +227,7 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
                     name="startHour"
                     className="flex-1 p-2 border rounded-lg"
                     value={values.startHour}
-                    onChange={handleChange}
+                    onChange={handleTimeChange}
                   >
                     <option value="">시</option>
                     {Array.from({length: 24}, (_, i) => (
@@ -235,7 +256,7 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
                     name="endHour"
                     className="flex-1 p-2 border rounded-lg"
                     value={values.endHour}
-                    onChange={handleChange}
+                    onChange={handleTimeChange}
                   >
                     <option value="">시</option>
                     {Array.from({length: 24}, (_, i) => (
