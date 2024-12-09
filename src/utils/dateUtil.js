@@ -40,3 +40,16 @@ export const formatDate = (dateString) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 };
+
+
+export const formatTime = (timeString) => {
+    const time = timeString.split(':');
+    const hour = parseInt(time[0]);
+    const minute = parseInt(time[1]);
+    const ampm = hour < 12 ? '오전' : '오후';
+    const displayHour = hour <= 12 ? hour : hour - 12;
+    
+    return minute === 0 
+        ? `${ampm} ${displayHour}시`
+        : `${ampm} ${displayHour}시 ${minute}분`;
+};
