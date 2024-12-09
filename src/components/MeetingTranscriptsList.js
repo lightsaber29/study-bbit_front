@@ -256,7 +256,7 @@ const MeetingTranscriptsList = ({
                   </svg>
                   원문 보기
                 </button>
-                <button
+                {/* <button
                   onClick={() => handleDownload(transcript.mm_summary_url, getFileName(transcript.mm_summary_url))}
                   className="text-green-600 hover:text-green-800 flex items-center gap-1"
                 >
@@ -265,16 +265,16 @@ const MeetingTranscriptsList = ({
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                   </svg>
                   요약본 다운로드
-                </button>
+                </button> */}
               </div>
               <div className="prose max-w-none whitespace-pre-line">
                 <ReactMarkdown 
                   rehypePlugins={[rehypeRaw]}
-                  components={{
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-8 space-y-1" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-8 space-y-1" {...props} />,
-                    li: ({node, ...props}) => <li className="pl-1" {...props} />
-                  }}
+                  // components={{
+                  //   ol: ({node, ...props}) => <ol className="list-decimal pl-8 space-y-1" {...props} />,
+                  //   ul: ({node, ...props}) => <ul className="list-disc pl-8 space-y-1" {...props} />,
+                  //   li: ({node, ...props}) => <li className="pl-1" {...props} />
+                  // }}
                 >
                   {markdownContent[index] || '로딩 중...'}
                 </ReactMarkdown>
