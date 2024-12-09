@@ -166,7 +166,7 @@ export function PageClientImpl(props: {
             <StudyTimer />
             <TimerSocket />
           </div>
-          <MeetingMinutes />
+          {/* <MeetingMinutes /> */}
         </div>
       )}
     </main>
