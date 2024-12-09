@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TemperatureModal from './TemperatureModal';
 import axios from 'api/axios';
+import { formatDate } from 'utils/dateUtil';
 
 const PostDetailModal = ({ 
   post, 
@@ -42,11 +43,6 @@ const PostDetailModal = ({
   }, []);
 
   if (!isOpen || !postDetail) return null;
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
-  };
 
   const handlePostComment = async () => {
     if (!commentContent.trim()) {

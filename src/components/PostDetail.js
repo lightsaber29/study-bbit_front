@@ -4,6 +4,7 @@ import axios from 'api/axios';
 import { useParams } from 'react-router-dom';
 import TemperatureModal from './TemperatureModal.js';
 import PostDetailModal from './PostDetailModal.js';
+import { formatDate } from 'utils/dateUtil';
 
 const PostDetail = ({ post, getPosts }) => {
   const { roomId } = useParams();
@@ -26,11 +27,6 @@ const PostDetail = ({ post, getPosts }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
-  };
 
   const handleDelete = async () => {
     if (!window.confirm('게시글을 삭제하시겠습니까?')) {

@@ -30,3 +30,13 @@ export const formatDateTime = (date = getDateTime(), format = 'YYYY-MM-DD HH:mm:
         .replace('mm', minutes)
         .replace('ss', seconds);
 };
+
+/**
+ * 날짜 문자열을 한국어 형식으로 포맷팅하는 함수
+ * @param {string} dateString - 포맷팅할 날짜 문자열
+ * @returns {string} '년 월 일 시:분:초' 형식의 포맷팅된 문자열
+ */
+export const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+};

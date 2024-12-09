@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import UpdateEventModal from './UpdateEventModal';
 import axios from 'api/axios';
 import TemperatureModal from './TemperatureModal';
+import { formatDate } from 'utils/dateUtil';
 
 const EventDetailModal = ({ event, onClose, onSuccess }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -151,11 +152,6 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
       console.error('댓글 등록 실패:', error);
       alert('댓글 등록에 실패했습니다.');
     }
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
   };
 
   const handleEditComment = async () => {
