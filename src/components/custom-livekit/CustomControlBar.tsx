@@ -137,7 +137,7 @@ export function CustomControlBar({
   );
 
   const handleDisconnect = React.useCallback(() => {
-    const shouldSave = window.confirm('순공시간을 저장하시겠습니까?');
+    const shouldSave = window.confirm('화상회의를 종료할까요?');
     if (shouldSave) {
       console.log('순공시간 저장');
     }
