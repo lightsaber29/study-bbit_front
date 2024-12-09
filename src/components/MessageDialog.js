@@ -21,6 +21,7 @@ const MessageDialog = ({ message, onClose, showReplyInput = true, onDelete }) =>
       setReplyContent('');
       alert('답장이 성공적으로 전송되었습니다.');
       onClose();
+      onDelete();
     } catch (error) {
       console.error('Failed to send message:', error);
       const errorMessage = error.response?.data?.message || '메시지 전송에 실패했습니다.';
