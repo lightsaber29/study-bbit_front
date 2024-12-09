@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'api/axios';
 import TemperatureModal from './TemperatureModal';
 
-const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
+const MessageDialog = ({ message, onClose, showReplyInput = true, onDelete }) => {
   const [replyContent, setReplyContent] = useState('');
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -35,8 +35,15 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
     
     setDeleting(true);
     try {
-      await axios.delete(`/api/dm/${message.id}`);
+      const endpoint = showReplyInput
+        ? `/api/dm/received/${message.id}`
+        : `/api/dm/sent/${message.id}`;
+
+      await axios.delete(endpoint);
       alert('메시지가 삭제되었습니다.');
+      if (typeof onDelete === 'function') {
+        onDelete();
+      }
       onClose();
     } catch (error) {
       console.error('Failed to delete message:', error);
@@ -85,10 +92,10 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
           <p className="text-gray-800 whitespace-pre-wrap">{message.content}</p>
         </div>
 
-        {showReplyInput && (
-          <div className="mt-4">
-            {/* 답장 폼 */}
-            <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200">
+        {/* 답장 폼 또는 삭제 버튼 */}
+        <div className="p-4 border-t border-gray-200">
+          {showReplyInput ? (
+            <form onSubmit={handleSubmit}>
               <textarea
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
@@ -114,8 +121,19 @@ const MessageDialog = ({ message, onClose, showReplyInput = true }) => {
                 </button>
               </div>
             </form>
-          </div>
-        )}
+          ) : (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? '삭제 중...' : '삭제하기'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Add TemperatureModal */}

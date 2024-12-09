@@ -21,24 +21,23 @@ const DMModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [deletingIds, setDeletingIds] = useState(new Set());
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      setLoading(true);
-      setMessages([]);
-      try {
-        const endpoint = activeTab === 'received' ? '/api/dm/received' : '/api/dm/sent';
-        const response = await axios.get(endpoint);
-        console.log("fetchMessages response :: ", response);
-        setMessages(response.data?.content);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to fetch messages';
-        alert(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchMessages = async () => {
+    setLoading(true);
+    setMessages([]);
+    try {
+      const endpoint = activeTab === 'received' ? '/api/dm/received' : '/api/dm/sent';
+      const response = await axios.get(endpoint);
+      setMessages(response.data?.content);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to fetch messages';
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (isOpen) {
       fetchMessages();
     }
@@ -58,7 +57,11 @@ const DMModal = ({ isOpen, onClose }) => {
       
       // 애니메이션을 위한 지연
       setTimeout(async () => {
-        await axios.delete(`/api/dm/${messageId}`);
+        const endpoint = activeTab === 'sent' 
+          ? `/api/dm/sent/${messageId}`
+          : `/api/dm/received/${messageId}`;
+        
+        await axios.delete(endpoint);
         setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== messageId));
         setDeletingIds(prev => {
           const newSet = new Set(prev);
@@ -87,7 +90,11 @@ const DMModal = ({ isOpen, onClose }) => {
       setDeletingIds(new Set(messageIds));
       
       setTimeout(async () => {
-        await axios.delete('/api/dm');
+        const endpoint = activeTab === 'sent' 
+          ? '/api/dm/sent'
+          : '/api/dm/received';
+        
+        await axios.delete(endpoint);
         setMessages([]);
         setDeletingIds(new Set());
       }, 300);
@@ -105,22 +112,20 @@ const DMModal = ({ isOpen, onClose }) => {
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg">메시지</h3>
-            {activeTab === 'received' && (
-              <div className="relative group">
-                <button
-                  onClick={handleDeleteAll}
-                  className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-                <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap z-[60]">
-                  전체 삭제
-                  <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
-                </div>
+            <div className="relative group">
+              <button
+                onClick={handleDeleteAll}
+                className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+              <div className="absolute hidden group-hover:block w-16 text-center text-xs bg-gray-800 text-white px-1.5 py-1 rounded-md -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap z-[60]">
+                전체 삭제
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
               </div>
-            )}
+            </div>
           </div>
         </div>
         
@@ -237,6 +242,7 @@ const DMModal = ({ isOpen, onClose }) => {
           message={selectedMessage}
           onClose={() => setSelectedMessage(null)}
           showReplyInput={activeTab === 'received'}
+          onDelete={fetchMessages}
         />
       )}
     </>
