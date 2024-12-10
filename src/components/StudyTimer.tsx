@@ -87,7 +87,7 @@ export const StudyTimer = () => {
           style={{
             padding: '6px 16px',
             borderRadius: '20px',
-            backgroundColor: isRunning ? '#FF9800' : '#3182ce',
+            backgroundColor: isRunning ? '#FF9800' : '#10B981',
             color: 'white',
             border: 'none',
             cursor: 'pointer',

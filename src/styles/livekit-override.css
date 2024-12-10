@@ -1,0 +1,31 @@
+/* livekit-override.css */
+[data-lk-theme="default"] .lk-button {
+  --lk-button-background: #10B981 !important;
+  --lk-button-background-hover: #059669 !important;
+  --lk-button-color: #FFFFFF !important;
+  --lk-accent-bg: #10B981 !important;
+  --lk-accent-bg-hover: #059669 !important;
+  --lk-accent-color: #FFFFFF !important;
+  --lk-accent-color-hover: #FFFFFF !important;
+  --lk-accent-border: #10B981 !important;
+  --lk-accent-border-hover: #059669 !important;
+  --lk-accent2: #059669 !important;
+  --lk-accent3: #10B981 !important;
+  --lk-accent4: #059669 !important;
+}
+
+.lk-message-body {
+  background-color: #10B981 !important;
+}
+
+/* 내가 보낸 메시지 */
+[data-lk-message-origin="local"] .lk-message-body {
+  background-color: #10B981 !important;
+  color: #FFFFFF !important;
+}
+
+/* 다른 사람이 보낸 메시지 */
+[data-lk-message-origin="remote"] .lk-message-body {
+  background-color: #374151 !important;
+  color: #FFFFFF !important;
+}

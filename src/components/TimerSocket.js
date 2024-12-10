@@ -283,7 +283,7 @@ const TimerSocket = () => {
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onFocus={(e) => (e.target.style.borderColor = '#10B981')}
                           onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>시</span>
@@ -328,7 +328,7 @@ const TimerSocket = () => {
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onFocus={(e) => (e.target.style.borderColor = '#10B981')}
                           onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>분</span>
@@ -373,7 +373,7 @@ const TimerSocket = () => {
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onFocus={(e) => (e.target.style.borderColor = '#10B981')}
                           onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>초</span>
@@ -388,7 +388,7 @@ const TimerSocket = () => {
                       style={{
                         padding: '5px 10px',
                         borderRadius: '8px',
-                        backgroundColor: '#4CAF50',
+                        backgroundColor: '#10B981',
                         color: 'white',
                         border: 'none',
                         cursor: 'pointer',
@@ -430,7 +430,7 @@ const TimerSocket = () => {
               style={{
                 padding: '8px 16px',
                 borderRadius: '20px',
-                backgroundColor: '#3182ce',
+                backgroundColor: '#10B981',
                 color: 'white',
                 border: 'none',
                 cursor: 'pointer',
@@ -451,9 +451,9 @@ const TimerSocket = () => {
                 <button
                   onClick={handleStartTimer}
                   style={{
-                    padding: '8px 16px',
+                    padding: '4px 16px',
                     borderRadius: '20px',
-                    backgroundColor: '#4CAF50',
+                    backgroundColor: '#10B981',
                     color: 'white',
                     border: 'none',
                     cursor: 'pointer',
@@ -471,7 +471,7 @@ const TimerSocket = () => {
                 <button
                   onClick={handlePauseTimer}
                   style={{
-                    padding: '8px 16px',
+                    padding: '4px 16px',
                     borderRadius: '20px',
                     backgroundColor: '#FF9800',
                     color: 'white',
@@ -490,9 +490,9 @@ const TimerSocket = () => {
               <button
                 onClick={handleResetTimer}
                 style={{
-                  padding: '8px 16px',
+                  padding: '4px 16px',
                   borderRadius: '20px',
-                  backgroundColor: '#2196F3',
+                  backgroundColor: '#10B981',
                   color: 'white',
                   border: 'none',
                   cursor: 'pointer',
@@ -508,9 +508,9 @@ const TimerSocket = () => {
               <button
                 onClick={handleEndTimer}
                 style={{
-                  padding: '8px 16px',
+                  padding: '4px 16px',
                   borderRadius: '20px',
-                  backgroundColor: '#9E9E9E',
+                  backgroundColor: '#2b2b2b',
                   color: 'white',
                   border: 'none',
                   cursor: 'pointer',
@@ -519,7 +519,7 @@ const TimerSocket = () => {
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
               >
-                종료
+                닫기
               </button>
             </>
           )}
@@ -533,7 +533,7 @@ const TimerSocket = () => {
                 maxValue={maxTime}
                 text={formatTime(time)}
                 styles={buildStyles({
-                  pathColor: timerOn ? '#3182ce' : '#FF9800',
+                  pathColor: timerOn ? '#10B981' : '#FF9800',
                   textColor: '#ffffff',
                   trailColor: '#404040',
                   rotation: 0,

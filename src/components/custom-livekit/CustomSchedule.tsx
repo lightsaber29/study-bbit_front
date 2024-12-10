@@ -229,7 +229,7 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
                         padding: '0.75rem 1rem',
                         borderRadius: '8px',
                         cursor: 'pointer',
-                        backgroundColor: selectedScheduleId === schedule.scheduleId ? '#2d3748' : '#262626',
+                        backgroundColor: selectedScheduleId === schedule.scheduleId ? 'rgb(2 44 34)' : '#262626',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                         transition: 'all 0.2s ease',
                         border: '1px solid #404040',
@@ -361,7 +361,11 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
                         name={`status-${member.memberId}`}
                         checked={member.status === 'ON_TIME'}
                         onChange={() => handleStatusChange(member.memberId, 'ON_TIME')}
-                        style={{ width: '20px', height: '20px' }}
+                        style={{ 
+                          width: '20px', 
+                          height: '20px',
+                          accentColor: '#10B981'
+                        }}
                       />
                     </span>
                     <span style={{ textAlign: 'center' }}>
@@ -370,7 +374,11 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
                         name={`status-${member.memberId}`}
                         checked={member.status === 'LATE'}
                         onChange={() => handleStatusChange(member.memberId, 'LATE')}
-                        style={{ width: '20px', height: '20px' }}
+                        style={{ 
+                          width: '20px', 
+                          height: '20px',
+                          accentColor: '#10B981'
+                        }}
                       />
                     </span>
                     <span style={{ textAlign: 'center' }}>
@@ -379,7 +387,11 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
                         name={`status-${member.memberId}`}
                         checked={member.status === 'ABSENCE' || member.status === 'NOTED'}
                         onChange={() => handleStatusChange(member.memberId, 'ABSENCE')}
-                        style={{ width: '20px', height: '20px' }}
+                        style={{ 
+                          width: '20px', 
+                          height: '20px',
+                          accentColor: '#10B981'
+                        }}
                       />
                     </span>
                   </li>
@@ -397,7 +409,7 @@ export function CustomSchedule({ scheduleState, ...props }: CustomScheduleProps)
                 <button
                   onClick={handleSubmitAttendance}
                   style={{
-                    backgroundColor: '#3182ce',
+                    backgroundColor: '#10B981',
                     color: 'white',
                     padding: '0.5rem 2rem',
                     borderRadius: '6px',

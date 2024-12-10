@@ -214,7 +214,7 @@ import type {
     onSubmit,
     onError,
     debug,
-    joinLabel = '방 참여',
+    joinLabel = '화상채팅 참여',
     micLabel = '마이크',
     camLabel = '카메라',
     userLabel = 'Username',
@@ -416,10 +416,15 @@ import type {
             autoComplete="off"
           /> */}
           <button
-            className="lk-button lk-join-button"
+            className={`lk-button lk-join-button ${isValid ? 'valid' : 'invalid'}`}
             type="submit"
             onClick={handleSubmit}
             disabled={!isValid}
+            // style={{
+            //   backgroundColor: isValid ? '#10B981' : '#E5E7EB',
+            //   color: isValid ? '#FFFFFF' : '#6B7280',
+            //   transition: 'background-color 0.2s ease',
+            // }}
           >
             {joinLabel}
           </button>

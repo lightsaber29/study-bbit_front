@@ -20,7 +20,7 @@ export const MeetingHeader = ({
           <button
             onClick={onToggleMike}
             className={`px-2 py-0.5 rounded-md flex items-center ${
-              isMikeOn ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
+              isMikeOn ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-gray-500 hover:bg-gray-600'
             } text-white`}
             disabled={!isOnline}
           >
@@ -55,7 +55,9 @@ export const MeetingHeader = ({
             <button
               onClick={isRecording ? onStopRecording : onStartRecording}
               className={`px-2 py-0.5 rounded-md ${
-                isRecording ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+                isRecording 
+                  ? 'bg-rose-600 hover:bg-rose-700'
+                  : 'bg-emerald-500 hover:bg-emerald-600'
               } text-white`}
               disabled={!isOnline}
             >
@@ -65,7 +67,7 @@ export const MeetingHeader = ({
             {transcripts.length > 0 && (
               <button
                 onClick={onSaveMeeting}
-                className="px-2 py-0.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white"
+                className="px-2 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white"
                 disabled={!isOnline}
               >
                 회의록 저장
@@ -76,10 +78,10 @@ export const MeetingHeader = ({
 
         {!isHost && (
           <div className={`px-2 py-0.5 rounded-md ${
-            isRecording ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+            isRecording ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'
           } flex items-center`}>
             <svg 
-              className={`w-5 h-5 mr-2 ${isRecording ? 'text-blue-500' : 'text-gray-500'}`}
+              className={`w-5 h-5 mr-2 ${isRecording ? 'text-emerald-500' : 'text-gray-500'}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"

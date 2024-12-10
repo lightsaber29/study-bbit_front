@@ -209,7 +209,7 @@ export function CustomChat({
             style={{
               padding: '0.5rem 1rem',
               borderRadius: '4px',
-              backgroundColor: '#3182ce',
+              backgroundColor: '#10B981',
               color: 'white',
               border: 'none',
               cursor: 'pointer',
