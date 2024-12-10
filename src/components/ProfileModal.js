@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearMember, selectMember } from 'store/memberSlice';
@@ -9,6 +9,12 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const member = useSelector(selectMember);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.videoWindows = window.videoWindows || [];
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -25,6 +31,14 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const handleLogout = async () => {
     try {
       await axios.post('/api/member/logout');
+      if (window.videoWindows) {
+        window.videoWindows.forEach(window => {
+          if (!window.closed) {
+            window.close();
+          }
+        });
+        window.videoWindows = [];
+      }
       dispatch(clearMember());
       dispatch(clearNotifications());
       onClose();

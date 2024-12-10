@@ -35,6 +35,7 @@ const StudyHome = () => {
   const [commentContent, setCommentContent] = useState('');
   const [postDetail, setPostDetail] = useState(null);
   const [comments, setComments] = useState([]);
+  const [videoWindow, setVideoWindow] = useState(null);
 
   // ISO 8601 Duration 문자열을 분으로 변환하는 함수
   const parseDuration = (duration) => {
@@ -142,10 +143,8 @@ const StudyHome = () => {
       return;
     }
     try {
-      // 참가자 목록 조회
       const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
       
-      // 현재 사용자의 중복 접속 확인
       const isAlreadyConnected = participants.some(participant => participant.name === nickname);
       if (isAlreadyConnected) {
         alert('이미 다른 기기에서 접속중인 사용자입니다. 중복 접속은 불가능합니다.');
@@ -161,12 +160,30 @@ const StudyHome = () => {
       const top = Math.floor((screenHeight - windowHeight) / 2);
 
       const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`;
-      window.open(videoUrl, '_blank', windowFeatures);
+      const newWindow = window.open(videoUrl, '_blank', windowFeatures);
+      
+      // window.videoWindows 배열이 없으면 초기화
+      if (!window.videoWindows) {
+        window.videoWindows = [];
+      }
+      
+      // 새 창 참조를 배열에 직접 추가
+      window.videoWindows.push(newWindow);
+
     } catch (error) {
       console.error('화상 회의 접속 중 오류:', error);
       alert('화상 회의 접속 중 문제가 발생했습니다. 새로고침 후 다시 시도해 주세요.');
     }
   };
+
+  // 컴포넌트가 언마운트되거나 로그아웃될 때 창 닫기
+  useEffect(() => {
+    return () => {
+      if (videoWindow) {
+        videoWindow.close();
+      }
+    };
+  }, [videoWindow]);
 
   // 스터디룸 나가기 핸들러 추가
   const handleLeaveRoom = async () => {
