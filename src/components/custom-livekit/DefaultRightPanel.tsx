@@ -121,11 +121,18 @@ export function DefaultRightPanel(props: DefaultRightPanelProps) {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '10px'
+            gap: '10px',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content'
           }}>
             <TimerSocket />
           </div>
-          <div style={{ flex: '1 1 0%', maxWidth: '50%' }}>
+          <div style={{ 
+            flex: '1 1 0%', 
+            maxWidth: '50%',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content'
+          }}>
             <StudyTimer />
           </div>
         </div>
