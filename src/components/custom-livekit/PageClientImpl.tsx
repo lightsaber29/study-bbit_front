@@ -141,7 +141,7 @@ export function PageClientImpl(props: {
           />
         </div>
       ) : (
-        <div>
+        <div style={{ height: '100%' }}>
           <LiveKitRoom
             connect={e2eeSetupComplete}
             room={room}

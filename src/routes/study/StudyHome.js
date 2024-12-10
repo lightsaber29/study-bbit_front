@@ -155,7 +155,7 @@ const StudyHome = () => {
       const screenWidth = window.screen.width;
       const screenHeight = window.screen.height;
       const windowWidth = Math.floor(screenWidth * 0.8);
-      const windowHeight = Math.floor(screenHeight * 0.8);
+      const windowHeight = Math.floor(screenHeight * 0.6);
       const left = Math.floor((screenWidth - windowWidth) / 2);
       const top = Math.floor((screenHeight - windowHeight) / 2);
 
