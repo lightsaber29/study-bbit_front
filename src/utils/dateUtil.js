@@ -53,3 +53,24 @@ export const formatTime = (timeString) => {
         ? `${ampm} ${displayHour}시`
         : `${ampm} ${displayHour}시 ${minute}분`;
 };
+
+/**
+ * ISO 8601 기간 형식(PT#H#M#S)을 시간과 분으로 파싱하는 함수
+ * @param {string} duration - ISO 8601 기간 형식의 문자열 (예: 'PT2H30M')
+ * @returns {{hours: number, minutes: number}} 시간과 분을 포함하는 객체
+ */
+export const parseDuration = (duration) => {
+    if (!duration) {
+        return { hours: 0, minutes: 0 };
+    }
+    
+    const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!matches) {
+        return { hours: 0, minutes: 0 };
+    }
+    
+    const hours = matches[1] ? parseInt(matches[1]) : 0;
+    const minutes = matches[2] ? parseInt(matches[2]) : 0;
+    
+    return { hours, minutes };
+};
