@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'api/axios';
+import { setIsTimerRunning } from 'store/videoSlice';
+import { useDispatch } from 'react-redux';
 
 export const StudyTimer = () => {
   const [isRunning, setIsRunning] = useState(false); // 타이머 동작 여부
   const [time, setTime] = useState(0); // 경과 시간 (초)
   const [startTime, setStartTime] = useState<Date | null>(null); // 공부 시작 시간
   const [endTime, setEndTime] = useState<Date | null>(null); // 공부 종료 시간
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -31,10 +34,11 @@ export const StudyTimer = () => {
         start: startPost, // ISO 포맷으로 변환
         end: endPost,
       };
-      console.log(body);
-      const response = await axios.post(`/api/daily-study`, body);
-      
-      console.log('Study time saved:', response.data);
+      // console.log(body);
+      await axios.post(`/api/daily-study`, body);
+
+      // const response = await axios.post(`/api/daily-study`, body);
+      // console.log('Study time saved:', response.data);
     } catch (error) {
       console.error('Failed to save study time:', error);
     }
@@ -77,6 +81,7 @@ export const StudyTimer = () => {
             } else {
               setStartTime(new Date());
             }
+            dispatch(setIsTimerRunning(!isRunning));
             setIsRunning(!isRunning);
           }}
           style={{
