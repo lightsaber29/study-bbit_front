@@ -540,8 +540,8 @@ const StudyHome = () => {
               {/* 순공시간 랭킹 섹션 */}
               <div className="bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold truncate">순공시간 랭킹</h3>
-                  <div className="flex items-center text-sm text-gray-500 ml-2">
+                  <h3 className="text-lg font-semibold flex-shrink-0">순공시간 랭킹</h3>
+                  <div className="flex items-center text-sm text-gray-500 ml-2 min-w-0">
                     <span className={`inline-flex items-center truncate ${isUpdating ? 'text-emerald-500' : ''}`}>
                       <svg 
                         className={`w-4 h-4 mr-1 flex-shrink-0 ${isUpdating ? 'animate-spin' : ''}`} 
