@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'api/axios';
 import TemperatureModal from './TemperatureModal';
+import { formatDate } from 'utils/dateUtil';
 
 const MessageDialog = ({ message, onClose, showReplyInput = true, onDelete }) => {
+  console.log(message);
   const [replyContent, setReplyContent] = useState('');
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -87,7 +89,7 @@ const MessageDialog = ({ message, onClose, showReplyInput = true, onDelete }) =>
               >
                 {message.isSent ? message.receiverNickname : message.senderNickname}
               </p>
-              <p className="text-sm text-gray-500">{message.timestamp}</p>
+              <p className="text-sm text-gray-500">{formatDate(message.createdAt)}</p>
             </div>
           </div>
           <p className="text-gray-800 whitespace-pre-wrap">{message.content}</p>
