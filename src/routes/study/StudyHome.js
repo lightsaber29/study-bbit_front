@@ -189,7 +189,23 @@ const StudyHome = () => {
   const handleLeaveRoom = async () => {
     if (window.confirm('정말로 스터디룸을 나가시겠습니까?')) {
       try {
+        // 1. 화상회의 참가자 목록 확인
+        const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
+        
+        // 2. 현재 사용자가 화상회의에 참여 중인지 확인
+        const isInMeeting = participants.some(participant => participant.name === nickname);
+        
+        // 3. 스터디룸 나가기
         await axios.delete(`/api/room/member/leave/${roomId}`);
+
+        // 4. 화상회의에 참여 중이었다면 화상회의에서도 나가기
+        if (isInMeeting) {
+          await axios.post("/api/express/kick-participant", {
+            roomName: roomId,
+            userName: nickname
+          });
+        }
+
         alert('스터디룸을 나갔습니다.');
         navigate('/');
       } catch (error) {
@@ -246,12 +262,27 @@ const StudyHome = () => {
   // 실제 강퇴 처리를 하는 새로운 함수
   const processKickMember = async () => {
     try {
-      console.log("banMemberId", selectedMember.id, "roomId", roomId, "kickReason", kickReason);
+      // 1. 화상회의 참가자 목록 확인
+      const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
+      
+      // 2. 강퇴할 멤버가 화상회의에 참여 중인지 확인
+      const isInMeeting = participants.some(participant => participant.name === selectedMember.nickname);
+      
+      // 3. 스터디룸에서 강퇴
       await axios.post("/api/room/member/ban", {
         banMemberId: selectedMember.id,
         roomId: roomId,
         detail: kickReason || '사유 없음'
       });
+
+      // 4. 화상회의에서도 강퇴
+      if (isInMeeting) {
+        await axios.post("/api/express/kick-participant", {
+          roomName: roomId,
+          userName: selectedMember.nickname
+        });
+      }
+
       alert('멤버가 강퇴되었습니다.');
       setIsKickModalOpen(false);
       setKickReason('');
