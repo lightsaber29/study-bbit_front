@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'api/axios';
 import SendDMModal from './SendDMModal';
+import { getDateTime, formatDateTime, parseDuration } from 'utils/dateUtil';
 
 const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
   const [memberInfo, setMemberInfo] = useState(null);
   const [error, setError] = useState(null);
   const [showSendDM, setShowSendDM] = useState(false);
+  const [weeklyStudyStats, setWeeklyStudyStats] = useState(null);
 
   const getMemberInfo = async () => {
     try {
@@ -19,9 +21,29 @@ const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
     }
   };
 
+  const getWeeklyStudyStats = async () => {
+    try {
+      const today = getDateTime();
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      const endDate = formatDateTime(today, 'YYYY-MM-DD');
+      const startDate = formatDateTime(weekAgo, 'YYYY-MM-DD');
+      
+      const response = await axios.get(`/api/daily-study/period/${leaderId}/${startDate}/${endDate}`);
+      console.log('getWeeklyStudyStats :: 주간 평균 공부시간: ', parseDuration(response.data.studyTimeByPeriod));
+      setWeeklyStudyStats(parseDuration(response.data.studyTimeByPeriod));
+    } catch (error) {
+      console.error('주간 학습 통계 조회 실패: ', error);
+      const errorMessage = error.response?.data?.message || '주간 학습 통계 조회 중 오류가 발생했습니다.';
+      setError(errorMessage);
+    }
+  };
+
   useEffect(() => {
     if (isOpen && leaderId) {
       getMemberInfo();
+      getWeeklyStudyStats();
     } else {
       setMemberInfo(null);
     }
@@ -113,6 +135,43 @@ const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
                     transition: 'width 1s ease-in-out'
                   }}
                 />
+              </div>
+
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-600 font-medium">주간 공부시간</span>
+                    <div className="group relative">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 24 24" 
+                        fill="currentColor" 
+                        className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors cursor-help"
+                      >
+                        <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+                      </svg>
+                      <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 p-2 bg-gray-900/95 text-white text-xs rounded-lg z-10 shadow-xl backdrop-blur-sm w-[160px]">
+                        <p className="text-center leading-5">
+                          최근 7일 동안의<br />
+                          총 공부시간입니다.
+                        </p>
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-2">
+                          <div className="border-[6px] border-transparent border-t-gray-900/95"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center min-w-[4rem] justify-end">
+                    <span className="text-xl font-bold text-gray-800">
+                      {weeklyStudyStats?.hours || 0}
+                    </span>
+                    <span className="text-gray-500 ml-1">시간</span>
+                    <span className="text-xl font-bold text-gray-800 ml-2">
+                      {weeklyStudyStats?.minutes || 0}
+                    </span>
+                    <span className="text-gray-500 ml-1">분</span>
+                  </div>
+                </div>
               </div>
             </div>
 
