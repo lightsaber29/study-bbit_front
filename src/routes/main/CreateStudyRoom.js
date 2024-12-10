@@ -142,7 +142,10 @@ const CreateStudyRoom = () => {
         {/* 방 이름 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            방 이름 *
+            방 이름 * 
+            <span className="ml-2 text-xs text-gray-500 font-normal">
+              (생성 후 변경 불가)
+            </span>
           </label>
           <input
             type="text"
@@ -243,7 +246,10 @@ const CreateStudyRoom = () => {
         {/* 최대 인원 설정 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            최대 인원 *
+            최대 인원
+            <span className="ml-2 text-xs text-gray-500 font-normal">
+              (생성 후 변경 불가)
+            </span>
           </label>
           <select
             name="maxParticipants"
