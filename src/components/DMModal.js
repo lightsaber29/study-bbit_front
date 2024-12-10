@@ -25,7 +25,9 @@ const DMModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setMessages([]);
     try {
-      const endpoint = activeTab === 'received' ? '/api/dm/received' : '/api/dm/sent';
+      const endpoint = activeTab === 'received'
+        ? '/api/dm/received?size=100'
+        : '/api/dm/sent?size=100';
       const response = await axios.get(endpoint);
       setMessages(response.data?.content);
     } catch (error) {
@@ -91,8 +93,8 @@ const DMModal = ({ isOpen, onClose }) => {
       
       setTimeout(async () => {
         const endpoint = activeTab === 'sent' 
-          ? '/api/dm/sent'
-          : '/api/dm/received';
+          ? '/api/dm/sent?size=100'
+          : '/api/dm/received?size=100';
         
         await axios.delete(endpoint);
         setMessages([]);
