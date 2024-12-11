@@ -40,7 +40,7 @@ const CreateStudyRoom = () => {
 
   const validateForm = () => {
     if (!name) {
-      alert('방 이름��� 입력해주세요.');
+      alert('스터디룸 이름을 입력해주세요.');
       nameRef.current.focus();
       return false;
     }
@@ -48,7 +48,7 @@ const CreateStudyRoom = () => {
     // 비공개방일 때만 비밀번호 검증
     if (isPrivate) {
       if (!password) {
-        alert('비공개방은 비밀번호를 필수로 입력해야 합니다.');
+        alert('비공개 스터디룸은 비밀번호를 필수로 입력해야 합니다.');
         passwordRef.current.focus();
         return false;
       }
@@ -60,7 +60,7 @@ const CreateStudyRoom = () => {
     }
 
     if (!detail) {
-      alert('방 상세 설명을 입력해주세요.');
+      alert('스터디룸 상세 설명을 입력해주세요.');
       detailRef.current.focus();
       return false;
     }
@@ -139,10 +139,13 @@ const CreateStudyRoom = () => {
           />
         </div>
 
-        {/* 방 이름 */}
+        {/* 스터디룸 이름 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            방 이름 *
+            스터디룸 이름 * 
+            <span className="ml-2 text-xs text-gray-500 font-normal">
+              (생성 후 변경 불가)
+            </span>
           </label>
           <input
             type="text"
@@ -156,10 +159,10 @@ const CreateStudyRoom = () => {
           />
         </div>
 
-        {/* 방 공개 설정 및 비밀번호 */}
+        {/* 스터디룸 공개 설정 및 비밀번호 */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            방 공개 설정
+            스터디룸 공개 설정
           </label>
           <div className="flex space-x-4">
             <label className="relative flex items-center cursor-pointer group">
@@ -187,7 +190,7 @@ const CreateStudyRoom = () => {
                 )}
               </div>
               <span className={`text-sm ${!isPrivate ? 'text-emerald-500 font-medium' : 'text-gray-700'}`}>
-                공개방
+                공개
               </span>
             </label>
 
@@ -215,16 +218,16 @@ const CreateStudyRoom = () => {
                 )}
               </div>
               <span className={`text-sm ${isPrivate ? 'text-emerald-500 font-medium' : 'text-gray-700'}`}>
-                비공개방
+                비공개
               </span>
             </label>
           </div>
 
-          {/* 비공개방 선택시에만 비밀번호 입력창 표시 */}
+          {/* 비공개 선택시에만 비밀번호 입력창 표시 */}
           {isPrivate && (
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                방 비밀번호
+                스터디룸 비밀번호
               </label>
               <input
                 type="password"
@@ -243,7 +246,10 @@ const CreateStudyRoom = () => {
         {/* 최대 인원 설정 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            최대 인원 *
+            최대 인원
+            <span className="ml-2 text-xs text-gray-500 font-normal">
+              (생성 후 변경 불가)
+            </span>
           </label>
           <select
             name="maxParticipants"
@@ -260,10 +266,10 @@ const CreateStudyRoom = () => {
           </select>
         </div>
 
-        {/* 방 상세 설명 */}
+        {/* 스터디룸 상세 설명 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            방 상세 설명 *
+            스터디룸 상세 설명 *
           </label>
           <textarea
             name="detail"

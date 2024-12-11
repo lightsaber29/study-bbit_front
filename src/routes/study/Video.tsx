@@ -5,6 +5,7 @@ import '@livekit/components-styles'
 import { useParams } from 'react-router-dom';
 import { selectMemberId, selectNickname, selectProfileImageUrl } from 'store/memberSlice.js';
 import { useSelector } from 'react-redux';
+import '../../styles/livekit-override.css';
 
 function VideoTest() {
   const { roomId = '' } = useParams();

@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { selectIsLogin, selectProfileImageUrl, selectNickname, selectMemberCreatedAt } from 'store/memberSlice';
 import axios from 'api/axios';
 import { useNavigate } from 'react-router-dom';
+import { parseDuration } from '../../utils/dateUtil';
 
 const Home = () => {
   const [studyList, setStudyList] = useState([]);
@@ -31,21 +32,6 @@ const Home = () => {
   const nickname = useSelector(selectNickname);
   const memberCreatedAt = useSelector(selectMemberCreatedAt);
   const navigate = useNavigate();
-
-  const parseDuration = (duration) => {
-    if (!duration) {
-      return { hours: 0, minutes: 0 };
-    }
-    
-    const matches = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-    if (!matches) {
-      return { hours: 0, minutes: 0 };
-    }
-    const hours = matches[1] ? parseInt(matches[1]) : 0;
-    const minutes = matches[2] ? parseInt(matches[2]) : 0;
-    
-    return { hours, minutes };
-  };
 
   const getStudyList = async (page) => {
     try {

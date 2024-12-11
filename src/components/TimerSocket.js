@@ -283,7 +283,7 @@ const TimerSocket = () => {
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onFocus={(e) => (e.target.style.borderColor = '#10B981')}
                           onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>시</span>
@@ -328,7 +328,7 @@ const TimerSocket = () => {
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onFocus={(e) => (e.target.style.borderColor = '#10B981')}
                           onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>분</span>
@@ -373,7 +373,7 @@ const TimerSocket = () => {
                             transition: 'border-color 0.3s',
                             outline: 'none',
                           }}
-                          onFocus={(e) => (e.target.style.borderColor = '#3182ce')}
+                          onFocus={(e) => (e.target.style.borderColor = '#10B981')}
                           onBlur={(e) => (e.target.style.borderColor = '#404040')}
                         />
                         <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>초</span>
@@ -388,7 +388,7 @@ const TimerSocket = () => {
                       style={{
                         padding: '5px 10px',
                         borderRadius: '8px',
-                        backgroundColor: '#4CAF50',
+                        backgroundColor: '#10B981',
                         color: 'white',
                         border: 'none',
                         cursor: 'pointer',
@@ -409,119 +409,121 @@ const TimerSocket = () => {
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {isHost && (
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            gap: '10px',
-            marginLeft: '15px' 
-          }}>
-            {/* 타이머 설정 버튼: 타이머가 설정되지 않은 상태일 때만 표시 */}
-            {!isSetTimer && (
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          gap: '10px',
+          marginLeft: '15px' 
+        }}>
+          {/* 타이머 설정 버튼: 타이머가 설정되지 않은 상태일 때만 표시 */}
+          {!isSetTimer && (
+            <button
+              onClick={() => {
+                if (!isHost) {
+                  alert('방장만 타이머를 설정할 수 있습니다.');
+                  return;
+                }
+                handleSetTimer();
+                modalControl();
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                backgroundColor: '#10B981',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              }}
+            >
+              타이머 설정
+            </button>
+          )}
+
+          {/* 타이머가 설정된 경우의 버튼들 - 방장에게만 표시 */}
+          {isSetTimer && isHost && (
+            <>
+              {/* 시작 버튼: 타이머가 실행중이지 않고, 일시정지 상태이거나 리셋된 상태일 때 */}
+              {!timerOn && time > 0 && (
+                <button
+                  onClick={handleStartTimer}
+                  style={{
+                    padding: '4px 16px',
+                    borderRadius: '20px',
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  시작
+                </button>
+              )}
+              
+              {/* 중지 버튼: 타이머 실행 중일 때만 */}
+              {timerOn && (
+                <button
+                  onClick={handlePauseTimer}
+                  style={{
+                    padding: '4px 16px',
+                    borderRadius: '20px',
+                    backgroundColor: '#FF9800',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  중지
+                </button>
+              )}
+              
+              {/* 리셋 버튼: 타이머가 설정된 상태에서 항상 */}
               <button
-                onClick={() => {
-                  handleSetTimer();
-                  modalControl();
-                }}
+                onClick={handleResetTimer}
                 style={{
-                  padding: '8px 16px',
+                  padding: '4px 16px',
                   borderRadius: '20px',
-                  backgroundColor: '#3182ce',
+                  backgroundColor: '#10B981',
                   color: 'white',
                   border: 'none',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: '500',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
               >
-                타이머 설정
+                리셋
               </button>
-            )}
 
-            {/* 타이머가 설정된 경우의 버튼들 */}
-            {isSetTimer && (
-              <>
-                {/* 시작 버튼: 타이머가 실행중이지 않고, 일시정지 상태이거나 리셋된 상태일 때 */}
-                {!timerOn && time > 0 && (
-                  <button
-                    onClick={handleStartTimer}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      backgroundColor: '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    시작
-                  </button>
-                )}
-                
-                {/* 중지 버튼: 타이머 실행 중일 때만 */}
-                {timerOn && (
-                  <button
-                    onClick={handlePauseTimer}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      backgroundColor: '#FF9800',
-                      color: 'white',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    중지
-                  </button>
-                )}
-                
-                {/* 리셋 버튼: 타이머가 설정된 상태에서 항상 */}
-                <button
-                  onClick={handleResetTimer}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    backgroundColor: '#2196F3',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    fontWeight: '500',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  리셋
-                </button>
-
-                {/* 종료 버튼: 타이머가 설정된 상태에서 항상 */}
-                <button
-                  onClick={handleEndTimer}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    backgroundColor: '#9E9E9E',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    fontWeight: '500',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  종료
-                </button>
-              </>
-            )}
-          </div>
-        )}
+              {/* 종료 버튼: 타이머가 설정된 상태에서 항상 */}
+              <button
+                onClick={handleEndTimer}
+                style={{
+                  padding: '4px 16px',
+                  borderRadius: '20px',
+                  backgroundColor: '#2b2b2b',
+                  color: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+              >
+                닫기
+              </button>
+            </>
+          )}
+        </div>
         
         {isSetTimer && (
           <>
@@ -531,7 +533,7 @@ const TimerSocket = () => {
                 maxValue={maxTime}
                 text={formatTime(time)}
                 styles={buildStyles({
-                  pathColor: timerOn ? '#3182ce' : '#FF9800',
+                  pathColor: timerOn ? '#10B981' : '#FF9800',
                   textColor: '#ffffff',
                   trailColor: '#404040',
                   rotation: 0,

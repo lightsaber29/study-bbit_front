@@ -49,19 +49,19 @@ export const MeetingNameModal = ({ isOpen, onClose, onSave, meetingId, socketRef
           <div className="flex justify-end space-x-2">
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-[#404040] text-white rounded hover:bg-[#4a4a4a]"
+              className="px-2 py-0.5 bg-[#404040] text-white rounded hover:bg-[#4a4a4a]"
             >
               취소
             </button>
             <button
               onClick={handleNoSave}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              className="px-2 py-0.5 bg-red-500 text-white rounded hover:bg-red-600"
             >
               저장 안함
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-[#3182ce] text-white rounded hover:bg-[#2c5282]"
+              className="px-2 py-0.5 bg-[#10B981] text-white rounded hover:bg-[#059669]"
             >
               저장
             </button>

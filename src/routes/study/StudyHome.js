@@ -35,6 +35,7 @@ const StudyHome = () => {
   const [commentContent, setCommentContent] = useState('');
   const [postDetail, setPostDetail] = useState(null);
   const [comments, setComments] = useState([]);
+  const [videoWindow, setVideoWindow] = useState(null);
 
   // ISO 8601 Duration 문자열을 분으로 변환하는 함수
   const parseDuration = (duration) => {
@@ -142,10 +143,8 @@ const StudyHome = () => {
       return;
     }
     try {
-      // 참가자 목록 조회
       const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
       
-      // 현재 사용자의 중복 접속 확인
       const isAlreadyConnected = participants.some(participant => participant.name === nickname);
       if (isAlreadyConnected) {
         alert('이미 다른 기기에서 접속중인 사용자입니다. 중복 접속은 불가능합니다.');
@@ -156,23 +155,57 @@ const StudyHome = () => {
       const screenWidth = window.screen.width;
       const screenHeight = window.screen.height;
       const windowWidth = Math.floor(screenWidth * 0.8);
-      const windowHeight = Math.floor(screenHeight * 0.8);
+      const windowHeight = Math.floor(screenHeight * 0.6);
       const left = Math.floor((screenWidth - windowWidth) / 2);
       const top = Math.floor((screenHeight - windowHeight) / 2);
 
       const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`;
-      window.open(videoUrl, '_blank', windowFeatures);
+      const newWindow = window.open(videoUrl, '_blank', windowFeatures);
+      
+      // window.videoWindows 배열이 없으면 초기화
+      if (!window.videoWindows) {
+        window.videoWindows = [];
+      }
+      
+      // 새 창 참조를 배열에 직접 추가
+      window.videoWindows.push(newWindow);
+
     } catch (error) {
       console.error('화상 회의 접속 중 오류:', error);
       alert('화상 회의 접속 중 문제가 발생했습니다. 새로고침 후 다시 시도해 주세요.');
     }
   };
 
+  // 컴포넌트가 언마운트되거나 로그아웃될 때 창 닫기
+  useEffect(() => {
+    return () => {
+      if (videoWindow) {
+        videoWindow.close();
+      }
+    };
+  }, [videoWindow]);
+
   // 스터디룸 나가기 핸들러 추가
   const handleLeaveRoom = async () => {
     if (window.confirm('정말로 스터디룸을 나가시겠습니까?')) {
       try {
+        // 1. 화상회의 참가자 목록 확인
+        const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
+        
+        // 2. 현재 사용자가 화상회의에 참여 중인지 확인
+        const isInMeeting = participants.some(participant => participant.name === nickname);
+        
+        // 3. 스터디룸 나가기
         await axios.delete(`/api/room/member/leave/${roomId}`);
+
+        // 4. 화상회의에 참여 중이었다면 화상회의에서도 나가기
+        if (isInMeeting) {
+          await axios.post("/api/express/kick-participant", {
+            roomName: roomId,
+            userName: nickname
+          });
+        }
+
         alert('스터디룸을 나갔습니다.');
         navigate('/');
       } catch (error) {
@@ -229,12 +262,27 @@ const StudyHome = () => {
   // 실제 강퇴 처리를 하는 새로운 함수
   const processKickMember = async () => {
     try {
-      console.log("banMemberId", selectedMember.id, "roomId", roomId, "kickReason", kickReason);
+      // 1. 화상회의 참가자 목록 확인
+      const { data: { participants = [] } } = await axios.get(`/api/express/list-participants/${roomId}`);
+      
+      // 2. 강퇴할 멤버가 화상회의에 참여 중인지 확인
+      const isInMeeting = participants.some(participant => participant.name === selectedMember.nickname);
+      
+      // 3. 스터디룸에서 강퇴
       await axios.post("/api/room/member/ban", {
         banMemberId: selectedMember.id,
         roomId: roomId,
         detail: kickReason || '사유 없음'
       });
+
+      // 4. 화상회의에서도 강퇴
+      if (isInMeeting) {
+        await axios.post("/api/express/kick-participant", {
+          roomName: roomId,
+          userName: selectedMember.nickname
+        });
+      }
+
       alert('멤버가 강퇴되었습니다.');
       setIsKickModalOpen(false);
       setKickReason('');
@@ -540,8 +588,8 @@ const StudyHome = () => {
               {/* 순공시간 랭킹 섹션 */}
               <div className="bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold truncate">순공시간 랭킹</h3>
-                  <div className="flex items-center text-sm text-gray-500 ml-2">
+                  <h3 className="text-lg font-semibold flex-shrink-0">순공시간 랭킹</h3>
+                  <div className="flex items-center text-sm text-gray-500 ml-2 min-w-0">
                     <span className={`inline-flex items-center truncate ${isUpdating ? 'text-emerald-500' : ''}`}>
                       <svg 
                         className={`w-4 h-4 mr-1 flex-shrink-0 ${isUpdating ? 'animate-spin' : ''}`} 

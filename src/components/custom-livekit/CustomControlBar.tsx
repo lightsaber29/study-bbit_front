@@ -12,6 +12,7 @@ import { mergeProps } from './custom-addon/utils.ts';
 import { StartMediaButton } from '@livekit/components-react';
 import { CustomSettingsMenuToggle } from './CustomSettingsMenuToggle.tsx'
 import { NotesIcon } from './icons/NotesIcon.tsx';
+import { MinutesIcon } from './icons/MinutesIcon.tsx';
 import { CustomWidgetState } from '../../types/types';
 import { CustomScheduleToggle } from './CustomScheduleToggle.tsx';
 import { TabAction } from '../../hooks/useTabToggle';
@@ -216,7 +217,7 @@ export function CustomControlBar({
           onMinutesToggle={() => onTabToggle?.({ type: 'TOGGLE_MINUTES' })}
           scheduleState={scheduleState}
         >
-          {showIcon && <NotesIcon />}
+          {showIcon && <MinutesIcon />}
           {showText && '회의록'}
         </CustomMeetingMinutesToggle>
       )}

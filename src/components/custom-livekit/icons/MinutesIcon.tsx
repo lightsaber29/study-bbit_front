@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export function NotesIcon() {
+export function MinutesIcon() {
   return (
     <svg
       width="16"
@@ -11,7 +11,13 @@ export function NotesIcon() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M8 2v4h8V2M3 6v14a2 2 0 002 2h14a2 2 0 002-2V6M8 13h8M8 17h5"
+        d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
