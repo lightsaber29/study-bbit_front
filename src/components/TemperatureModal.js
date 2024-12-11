@@ -140,7 +140,7 @@ const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
               <div className="pt-4 mt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-1">
-                    <span className="text-gray-600 font-medium">주간 공부시간</span>
+                    <span className="text-gray-600 font-medium">주간 평균 공부시간</span>
                     <div className="group relative">
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -153,7 +153,7 @@ const TemperatureModal = ({ isOpen, onClose, leaderId }) => {
                       <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 p-2 bg-gray-900/95 text-white text-xs rounded-lg z-10 shadow-xl backdrop-blur-sm w-[160px]">
                         <p className="text-center leading-5">
                           최근 7일 동안의<br />
-                          총 공부시간입니다.
+                          평균 공부시간입니다.
                         </p>
                         <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-2">
                           <div className="border-[6px] border-transparent border-t-gray-900/95"></div>
