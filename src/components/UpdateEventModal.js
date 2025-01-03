@@ -3,6 +3,7 @@ import axios from 'api/axios';
 import useFormInput from 'hooks/useFormInput';
 
 const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) => {
+  console.log("event", event, 'event.startTime.substring(0, 2): ', event.startTime.substring(0, 2));
   const { values, handleChange, setValues } = useFormInput({
     title: event.title,
     detail: event.detail || '',
@@ -231,7 +232,7 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
                     onChange={handleChange}
                   >
                     {Array.from({length: 24}, (_, i) => (
-                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                      <option key={i} value={i.toString().padStart(2, '0')}>{i.toString().padStart(2, '0')}</option>
                     ))}
                   </select>
                   <select 
@@ -258,7 +259,7 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
                     onChange={handleChange}
                   >
                     {Array.from({length: 24}, (_, i) => (
-                      <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
+                      <option key={i} value={i.toString().padStart(2, '0')}>{i.toString().padStart(2, '0')}</option>
                     ))}
                   </select>
                   <select 
