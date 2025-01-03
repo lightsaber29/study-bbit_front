@@ -21,8 +21,6 @@ const StudySchedule = () => {
   const [activeStartDate, setActiveStartDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateEvents, setSelectedDateEvents] = useState([]);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingEvent, setEditingEvent] = useState(null);
 
   useEffect(() => {
     if (!roomName) {
@@ -114,12 +112,6 @@ const StudySchedule = () => {
              scheduleDate.getFullYear() === date.getFullYear();
     });
     setSelectedDateEvents(dayEvents);
-  };
-
-  // 수정 모달 닫기 핸들러
-  const handleEditModalClose = () => {
-    setShowEditModal(false);
-    setEditingEvent(null);
   };
 
   return (
@@ -228,7 +220,7 @@ const StudySchedule = () => {
           <EventDetailModal 
             event={selectedEvent}
             onClose={handleCloseModal}
-            onSuccess={getSchedules}
+            onSuccess={(date) => getSchedules(date)}
           />
         )}
       </div>
@@ -238,29 +230,7 @@ const StudySchedule = () => {
         <CreateEventModal 
           roomId={roomId}
           onClose={() => setShowCreateModal(false)}
-          onSuccess={getSchedules}
-        />
-      )}
-
-      {/* 일정 수정 모달 추가 */}
-      {showEditModal && (
-        <CreateEventModal 
-          roomId={roomId}
-          onClose={handleEditModalClose}
-          onSuccess={getSchedules}
-          initialData={{
-            id: editingEvent.scheduleId,
-            title: editingEvent.title,
-            detail: editingEvent.detail,
-            date: editingEvent.startDate.split('T')[0],
-            startHour: editingEvent.startTime.split(':')[0],
-            startMinute: editingEvent.startTime.split(':')[1],
-            endHour: editingEvent.endTime.split(':')[0],
-            endMinute: editingEvent.endTime.split(':')[1],
-            repeatType: editingEvent.repeatFlag ? 'weekly' : 'once',
-            selectedDays: editingEvent.daysOfWeek ? editingEvent.daysOfWeek.split(',') : [],
-            endDate: editingEvent.repeatEndDate || '',
-          }}
+          onSuccess={(date) => getSchedules(date)}
         />
       )}
     </div>

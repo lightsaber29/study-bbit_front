@@ -3,7 +3,6 @@ import axios from 'api/axios';
 import useFormInput from 'hooks/useFormInput';
 
 const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) => {
-  console.log("event", event);
   const { values, handleChange, setValues } = useFormInput({
     title: event.title,
     detail: event.detail || '',
@@ -16,8 +15,6 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
     selectedDays: editType === 'single' ? [] : (event.daysOfWeek ? event.daysOfWeek.split(',') : []),
     endDate: editType === 'single' ? '' : (event.repeatEndDate || ''),
   });
-
-  console.log("values", values);
 
   const titleRef = useRef(null);
   const dateRef = useRef(null);
@@ -113,10 +110,9 @@ const UpdateEventModal = ({ event, editType = 'single', onClose, onSuccess }) =>
           endpoint = `/api/schedule/single/${event.scheduleId}`;
       }
 
-      const response = await axios.post(endpoint, scheduleData);
-      console.log("response :: ", response);
+      await axios.post(endpoint, scheduleData);
       
-      onSuccess?.();
+      onSuccess?.(new Date(values.date));
       onClose();
       alert('일정이 성공적으로 수정되었습니다.');
     } catch (error) {

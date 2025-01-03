@@ -100,13 +100,10 @@ const CreateEventModal = ({ roomId, onClose, onSuccess }) => {
         daysOfWeek: values.repeatType === 'weekly' ? values.selectedDays.join(',') : null,
         repeatEndDate: values.repeatType === 'weekly' ? values.endDate : null,
       };
-      console.log("before submit :: scheduleData: ", scheduleData);
 
-      const response = await axios.post('/api/schedule', scheduleData);
+      await axios.post('/api/schedule', scheduleData);
 
-      console.log("response :: ", response);
-      
-      onSuccess?.();
+      onSuccess?.(new Date(values.date));
       onClose();
       alert('일정이 성공적으로 생성되었습니다.');
     } catch (error) {

@@ -58,7 +58,6 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
     try {
       setIsLoading(true);
       const response = await axios.get(`/api/schedule/detail/${event.scheduleId}`);
-      console.log("comments :: ", response.data?.comments?.content);
       setComments(response.data?.comments?.content || []);
     } catch (error) {
       console.error('댓글 불러오기 실패:', error);
@@ -77,10 +76,10 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
     }
   };
 
-  const handleEditSuccess = () => {
+  const handleEditSuccess = (date) => {
     setShowEditModal(false);
     setShowEditOptionModal(false);
-    onSuccess?.();
+    onSuccess?.(date);
     onClose();
   };
 
@@ -125,7 +124,7 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
 
       await axios.delete(endpoint);
       
-      onSuccess?.();
+      onSuccess?.(new Date(event.startDate));
       onClose();
       alert('일정이 성공적으로 삭제되었습니다.');
     } catch (error) {
@@ -432,7 +431,7 @@ const EventDetailModal = ({ event, onClose, onSuccess }) => {
           event={event}
           editType={editType}
           onClose={() => setShowEditModal(false)}
-          onSuccess={handleEditSuccess}
+          onSuccess={(date) => handleEditSuccess(date)}
         />
       )}
 

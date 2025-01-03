@@ -239,7 +239,6 @@ const StudyHome = () => {
   const getDashboardData = useCallback(async () => {
     try {
       const response = await axios.get(`/api/room/dashboard/${roomId}`);
-      console.log("dashboardData", response.data);
       setDashboardData(response.data);
     } catch (error) {
       console.error('대시보드 데이터 조회 실패:', error);
